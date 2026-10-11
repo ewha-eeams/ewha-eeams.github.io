@@ -15,7 +15,27 @@ let preservedScroll = null;
 let lastAttempt = 0;
 const civilNow = () => new Date(Date.now() + 9 * 3600000);
 function calendarHeight() {
-  return mobile.matches && period === 'day' ? Math.max(320, Math.min(560, innerHeight * .68)) : !mobile.matches && period === 'month' ? 600 : 'auto';
+  if (mobile.matches && period === 'day') {
+    const header = document.querySelector('.site-header')?.getBoundingClientRect().height || 64;
+    const toolbar = document.querySelector('.studio-toolbar')?.getBoundingClientRect().height || 90;
+    const available = (window.visualViewport?.height || innerHeight) - header - toolbar - 40;
+    return Math.max(200, Math.min(560, Math.floor(available)));
+  }
+  return !mobile.matches && period === 'month' ? 600 : 'auto';
+}
+function updateViewport() {
+  const header = document.querySelector('.site-header')?.getBoundingClientRect().height || 64;
+  document.querySelector('.studio-toolbar')?.style.setProperty('scroll-margin-top', `${header + 12}px`);
+  if (!calendar) return;
+  const height = calendarHeight();
+  if (calendar.getOption('height') === height) return;
+  const scroller = get('calendar').querySelector('.fc-scroller-liquid-absolute');
+  const scroll = scroller?.scrollTop;
+  calendar.setOption('height', height);
+  if (scroll !== undefined) requestAnimationFrame(() => {
+    const current = get('calendar').querySelector('.fc-scroller-liquid-absolute');
+    if (current) current.scrollTop = scroll;
+  });
 }
 function alignCurrentTime() {
   if (!calendar || period !== 'day') return;
@@ -215,7 +235,8 @@ async function load(options = {}) {
     updateClock();
     get('summary-status').textContent = days.some(day => day.count === null) ? '— 표시 날짜는 조회되지 않았습니다.' : '';
     if (qrEntry && !selectedDate) requestAnimationFrame(() => {
-      get('calendar').scrollIntoView({ block: 'start', behavior: 'instant' });
+      updateViewport();
+      document.querySelector('.studio-toolbar').scrollIntoView({ block: 'start', behavior: 'instant' });
     });
   } catch {
     if (silent && calendar) {
@@ -283,6 +304,19 @@ get('reload').onclick = load;
 get('retry').onclick = load;
 get('dialog-close').onclick = () => get('dialog').close();
 mobile.addEventListener('change', changeView);
+let viewportTimer;
+function scheduleViewport() {
+  clearTimeout(viewportTimer);
+  viewportTimer = setTimeout(updateViewport, 120);
+}
+window.addEventListener('resize', scheduleViewport);
+window.visualViewport?.addEventListener('resize', scheduleViewport);
+const layoutObserver = new ResizeObserver(scheduleViewport);
+for (const selector of ['.site-header', '.studio-toolbar']) {
+  const node = document.querySelector(selector);
+  if (node) layoutObserver.observe(node);
+}
+updateViewport();
 setInterval(updateClock, 60000);
 function refreshVisible() {
   if (document.hidden || Date.now() - lastAttempt < 60000 || get('dialog').open) return;
