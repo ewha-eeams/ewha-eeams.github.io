@@ -66,7 +66,7 @@ async function load() {
       now: civilNow(), nowIndicator: true,
       headerToolbar: false, height: !mobile.matches && period === 'month' ? 600 : 'auto',
       validRange: display.range, events: display.events,
-      eventColor: '#52758a', slotMinTime: '08:00:00', slotMaxTime: '22:00:00',
+      eventColor: '#3278c2', slotMinTime: '08:00:00', slotMaxTime: '22:00:00',
       slotDuration: '01:00:00', allDaySlot: false, slotEventOverlap: false, dayMaxEvents: 3,
       noEventsContent: '조회 범위 내 테스트 일정이 없습니다.',
       eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
@@ -79,6 +79,26 @@ async function load() {
         get('next').disabled = info.endStr.slice(0, 10) >= display.range.end.slice(0, 10);
       },
       eventClick(info) { showTime(info.event); },
+      dayCellDidMount(info) {
+        if (info.view.type !== 'dayGridMonth' || info.isDisabled) return;
+        const date = info.date.toISOString().slice(0, 10);
+        const next = new Date(info.date.getTime() + 86400000).toISOString().slice(0, 10);
+        const count = display.events.filter(event => event.start < `${next}T00:00:00.000` && event.end > `${date}T00:00:00.000`).length;
+        if (!count) return;
+        const badge = document.createElement('button');
+        badge.type = 'button';
+        badge.className = 'studio-month-count';
+        badge.textContent = `${count}건`;
+        badge.setAttribute('aria-label', `${date} 예약 ${count}건, 상세 일정 보기`);
+        badge.addEventListener('click', event => {
+          event.stopPropagation();
+          selectedDate = date;
+          period = 'day';
+          changeView();
+          calendar.gotoDate(date);
+        });
+        info.el.querySelector('.fc-daygrid-day-frame').append(badge);
+      },
       dateClick(info) {
         if (period !== 'month') return;
         selectedDate = info.dateStr.slice(0, 10);

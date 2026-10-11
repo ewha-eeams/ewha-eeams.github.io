@@ -673,7 +673,7 @@ function renderPeople(rows) {
               ? `<ul class="person-list detail-person-list">
                   ${group.people
                     .map((person) => {
-                      const meta = [person.date || person.period || person.year, person.project].filter(Boolean).join(" · ");
+                      const meta = person.project || "";
                       return `
                         <li>
                           <div>
