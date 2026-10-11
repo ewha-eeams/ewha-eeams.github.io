@@ -1,5 +1,6 @@
 import { busyCalendarData, busyWeekSummary, mondayOfWeek } from './studio-readonly.mjs?v=5';
 import { seoulDate } from './studio-model.mjs';
+import { swipeDirection } from './studio-swipe.mjs';
 
 // Public, test-only read endpoint. No credentials or personal Calendar ID.
 const endpoint = 'https://script.google.com/macros/s/AKfycbxg4htE_XDuE-XHl1l4QykqGWKjFvqNFbK_7E_5aIaOpPt4dkJT5CNbTHWpHQq-1Ogl/exec';
@@ -10,13 +11,21 @@ const qrEntry = new URLSearchParams(location.search).get('studio') === 'today';
 let period = mobile.matches || qrEntry ? 'day' : 'week';
 let loading = false;
 let selectedDate;
+let preservedScroll = null;
 const civilNow = () => new Date(Date.now() + 9 * 3600000);
 function calendarHeight() {
   return mobile.matches && period === 'day' ? Math.max(320, Math.min(560, innerHeight * .68)) : !mobile.matches && period === 'month' ? 600 : 'auto';
 }
 function alignCurrentTime() {
   if (!calendar || period !== 'day') return;
-  const today = calendar.getDate().toISOString().slice(0, 10) === seoulDate();
+  if (preservedScroll !== null) {
+    const scroller = get('calendar').querySelector('.fc-scroller-liquid-absolute');
+    if (scroller) scroller.scrollTop = preservedScroll;
+    preservedScroll = null;
+    return;
+  }
+  const today = calendar.view.activeStart.toISOString().slice(0, 10) <= seoulDate()
+    && calendar.view.activeEnd.toISOString().slice(0, 10) > seoulDate();
   const now = civilNow();
   const minutes = today ? now.getUTCHours() * 60 + now.getUTCMinutes() - 90 : 480;
   calendar.scrollToTime({ minutes: Math.max(480, Math.min(1230, minutes)) });
@@ -33,7 +42,7 @@ function updateClock() {
 }
 
 function view() {
-  if (period === 'day') return 'timeGridDay';
+  if (period === 'day') return mobile.matches ? 'timeGridThreeDay' : 'timeGridDay';
   return period === 'month' ? 'dayGridMonth' : mobile.matches ? 'listWeek' : 'timeGridWeek';
 }
 function showTime(event) {
@@ -75,6 +84,7 @@ async function load() {
     calendar = new FullCalendar.Calendar(get('calendar'), {
       initialDate: selectedDate || today, initialView: view(), timeZone: 'UTC', locale: 'ko', firstDay: 1,
       now: civilNow(), nowIndicator: true,
+      views: { timeGridThreeDay: { type: 'timeGrid', duration: { days: 3 }, dateIncrement: { days: 1 }, dateAlignment: 'day', dayHeaderFormat: { month: 'numeric', day: 'numeric', weekday: 'short' } } },
       headerToolbar: false, height: calendarHeight(), scrollTime: '08:00:00',
       validRange: display.range, events: display.events,
       eventColor: '#3278c2', slotMinTime: '08:00:00', slotMaxTime: '22:00:00',
@@ -223,9 +233,35 @@ function changeView() {
 get('day').onclick = () => { period = 'day'; changeView(); };
 get('week').onclick = () => { period = 'week'; changeView(); };
 get('month').onclick = () => { period = 'month'; changeView(); };
-get('prev').onclick = () => calendar?.prev();
-get('next').onclick = () => calendar?.next();
-get('today').onclick = () => { calendar?.gotoDate(seoulDate()); requestAnimationFrame(alignCurrentTime); };
+function moveDate(direction) {
+  if (!calendar || loading || get(direction < 0 ? 'prev' : 'next').disabled) return;
+  if (mobile.matches && period === 'day') preservedScroll = get('calendar').querySelector('.fc-scroller-liquid-absolute')?.scrollTop ?? null;
+  if (direction < 0) calendar.prev(); else calendar.next();
+}
+get('prev').onclick = () => moveDate(-1);
+get('next').onclick = () => moveDate(1);
+get('today').onclick = () => {
+  preservedScroll = null;
+  if (mobile.matches) { period = 'day'; changeView(); }
+  calendar?.gotoDate(seoulDate()); requestAnimationFrame(alignCurrentTime);
+};
+let gesture = null, suppressClickUntil = 0;
+const surface = get('calendar');
+surface.addEventListener('pointerdown', event => {
+  if (!event.isPrimary) { gesture = null; return; }
+  gesture = mobile.matches && period === 'day' && event.pointerType === 'touch'
+    ? { x: event.clientX, y: event.clientY, time: performance.now(), id: event.pointerId } : null;
+}, { passive: true });
+surface.addEventListener('pointercancel', () => { gesture = null; }, { passive: true });
+surface.addEventListener('pointerup', event => {
+  if (!gesture || gesture.id !== event.pointerId) return;
+  const direction = swipeDirection(gesture, { x: event.clientX, y: event.clientY, time: performance.now() }, innerWidth);
+  gesture = null;
+  if (direction) { suppressClickUntil = performance.now() + 400; moveDate(direction); }
+}, { passive: true });
+surface.addEventListener('click', event => {
+  if (performance.now() < suppressClickUntil) { event.preventDefault(); event.stopImmediatePropagation(); }
+}, true);
 get('reload').onclick = load;
 get('retry').onclick = load;
 get('dialog-close').onclick = () => get('dialog').close();

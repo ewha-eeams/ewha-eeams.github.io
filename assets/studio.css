@@ -111,4 +111,9 @@
   .studio-mini-time { display: none; }
   #studio-calendar .fc-timeGridDay-view .fc-timegrid-slot { height: 52px; }
   #studio-calendar .fc-timeGridDay-view .fc-event-time { white-space: nowrap; }
+  #studio-calendar .fc-timeGridThreeDay-view { touch-action: pan-y pinch-zoom; }
+  #studio-calendar .fc-timeGridThreeDay-view .fc-timegrid-slot { height: 52px; }
+  #studio-calendar .fc-timeGridThreeDay-view .fc-event-title { display: none; }
+  #studio-calendar .fc-timeGridThreeDay-view .fc-event-time { font-size: 11px; overflow-wrap: normal; }
+  #studio-calendar .fc-timeGridThreeDay-view .fc-col-header-cell-cushion { padding: 5px 1px; font-size: 11px; }
 }
