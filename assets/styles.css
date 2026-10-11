@@ -1198,7 +1198,8 @@ select {
   .section-disclosure:focus-visible{outline:2px solid #267c91;outline-offset:5px}
   .mobile-disclosure-section.is-collapsed>:not(:first-child){display:none!important}
   .mobile-disclosure-section .section-heading{margin-bottom:0}
-  .mobile-disclosure-section h2{font-size:24px;margin-bottom:8px}
+  .mobile-disclosure-section>:first-child>p{display:none}
+  .mobile-disclosure-section h2{font-size:24px;margin:0}
   .mobile-disclosure-section .heading-en{display:none}
   .mobile-disclosure-section.is-collapsed{row-gap:0}
 }
