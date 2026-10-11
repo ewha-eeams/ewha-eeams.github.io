@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="EEAMS 전자음악 정기연주회와 작품 기록 상세 아카이브."
+    />
+    <title>Archive | EEAMS</title>
+    <link rel="icon" href="assets/eeams-symbol-black.png" />
+    <link rel="stylesheet" href="assets/styles.css?v=20261008-44" />
+  </head>
+  <body data-page="archive">
+    <header class="site-header" aria-label="Main navigation">
+      <div class="utility-bar">
+        <a class="affiliation-link" href="https://music.ewha.ac.kr/emusic/1523/subview.do" target="_blank" rel="noreferrer">
+          Ewha Womans University · College of Music · Department of Composition
+        </a>
+        <div>
+          <a href="#contact">Contact</a>
+        </div>
+      </div>
+      <div class="main-nav">
+        <a class="brand" href="index.html#top" aria-label="EEAMS home">
+          <img class="brand-wordmark" src="assets/eeams-wordmark-black.png" alt="" />
+          <span><small>Ewha Electro-Acoustic Music Studio</small></span>
+        </a>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu">
+          Menu
+        </button>
+        <nav id="site-menu" class="site-menu">
+          <a href="index.html#about">About</a>
+          <a href="index.html#archive">Archive</a>
+          <a href="index.html#research">Research</a>
+          <a href="index.html#education">Education</a>
+          <a href="index.html#people">People</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="detail-hero" aria-labelledby="detail-title">
+        <p class="section-label">Archive</p>
+        <h1 id="detail-title">공연 아카이브 <span class="heading-en">Concert Archive</span></h1>
+        <p>
+          정기연주회와 관련 공연의 기본 정보, 참여 작곡가, 작품, 편성, 프로그램북과
+          관련 미디어 자료를 연도별로 정리합니다.
+        </p>
+        <a class="back-link" href="index.html#archive">← 홈의 공연 아카이브로 돌아가기</a>
+      </section>
+      <section class="section detail-section" aria-label="Concert archive records">
+        <div class="archive-tools detail-tools" aria-label="Concert archive filters">
+          <label>
+            검색
+            <input id="archive-detail-search" type="search" placeholder="공연명, 작곡가, 작품명 검색" />
+          </label>
+          <label>
+            연도
+            <select id="archive-detail-year-filter">
+              <option value="all">전체 연도</option>
+            </select>
+          </label>
+        </div>
+        <div id="detail-list" class="record-archive-list" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <footer id="contact" class="site-footer">
+      <div class="footer-info">
+        <strong>EEAMS</strong>
+        <span>Ewha Electro-Acoustic Music Studio</span>
+        <span>52, Ewhayeodae-gil, Seodaemun-gu, Seoul 03760, Korea</span>
+        <span>Contact · <a href="mailto:music@ewha.ac.kr">music@ewha.ac.kr</a></span>
+      </div>
+      <img class="footer-ewha-signature" src="assets/ewha-signature.png" alt="Ewha Womans University" />
+      <img class="footer-wordmark" src="assets/eeams-wordmark-white-on-green.png" alt="EEAMS" />
+      <div class="footer-credits">
+        <span>Built with HTML, CSS, JavaScript, and CSV data. Source code and license information will be provided where applicable.</span>
+      </div>
+    </footer>
+
+    <script src="assets/detail.js?v=20261008-8" type="module"></script>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+section,section_en,category,category_en,order,person_order,name,name_en,role,role_en,start_year,end_year,project,project_en,profile_url,note,note_en,status,public
+총괄지도,Academic Supervision,지도교수,Faculty Advisor,1,1,윤승현,Seunghyun Yun,교수,Professor,2026,,,,,"EEAMS의 교육, 연구, 공연 활동 전반을 지도합니다.","Provides academic supervision across EEAMS education, research, and concert activities.",current,yes
+연구 및 개발,Research & Development,프로젝트 참여자,Project Contributors,2,1,전현석,Hyunsuk Jun,초빙교수,Visiting Professor,2026,,,,,연구 프로젝트와 스튜디오 프로그램을 함께 기획하고 운영합니다.,Contributes to the planning and operation of research projects and studio programs.,current,yes
+연구 및 개발,Research & Development,프로젝트 참여자,Project Contributors,2,2,도하나,Hana Do,강사,Lecturer,2026,,,,,,,current,yes
+연구 및 개발,Research & Development,프로젝트 참여자,Project Contributors,2,3,장준호,Junho Jang,강사,Lecturer,2026,,,,,,,current,yes
+참여 기록,Contributors,연구 및 아카이브 참여자,Research & Archive Contributors,3,1,서유진,,운영 참여,Operations Contributor,2026,,,,,"공연 기록, 자료 정리, 웹 운영 등 아카이브 실무에 참여합니다.","Contributes to archive operations, including concert documentation, material organization, and website maintenance.",current,yes
+작품 아카이브,Student Composers,참여 작곡가,Participating Composers,4,1,,,,,2026,,,,,정기연주회에서 발표된 작곡가의 작품 기록을 소개합니다.,Presents works by participating composers performed in EEAMS concerts.,,yes

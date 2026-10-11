@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="EEAMS 아카이브 자료 보기와 다운로드."
+    />
+    <title>Media | EEAMS</title>
+    <link rel="icon" href="assets/eeams-symbol-black.png" />
+    <link rel="stylesheet" href="assets/styles.css?v=20261008-44" />
+  </head>
+  <body>
+    <header class="site-header" aria-label="Main navigation">
+      <div class="utility-bar">
+        <a class="affiliation-link" href="https://music.ewha.ac.kr/emusic/1523/subview.do" target="_blank" rel="noreferrer">
+          Ewha Womans University · College of Music · Department of Composition
+        </a>
+        <div>
+          <a href="index.html#contact">Contact</a>
+        </div>
+      </div>
+      <div class="main-nav">
+        <a class="brand" href="index.html#top" aria-label="EEAMS home">
+          <img class="brand-wordmark" src="assets/eeams-wordmark-black.png" alt="" />
+          <span><small>Ewha Electro-Acoustic Music Studio</small></span>
+        </a>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu">
+          Menu
+        </button>
+        <nav id="site-menu" class="site-menu">
+          <a href="index.html#about">About</a>
+          <a href="index.html#archive">Archive</a>
+          <a href="index.html#research">Research</a>
+          <a href="index.html#education">Education</a>
+          <a href="index.html#people">People</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="media-viewer-page">
+      <section class="media-viewer-shell" aria-labelledby="media-title">
+        <div class="media-viewer-toolbar">
+          <a id="media-back" class="back-link" href="archive.html">Archive</a>
+          <a id="media-download" class="button primary" hidden download>Download</a>
+        </div>
+        <div class="media-viewer-head">
+          <p class="section-label" id="media-section-label">Archive Media</p>
+          <h1 id="media-title">자료 보기 <span class="heading-en">Media</span></h1>
+        </div>
+        <div id="media-frame" class="media-frame" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script src="assets/media-viewer.js?v=20261008-4" type="module"></script>
+  </body>
+</html>
