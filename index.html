@@ -16,7 +16,7 @@
     <title>EEAMS | Ewha Electro-Acoustic Music Studio</title>
     <link rel="icon" href="assets/eeams-symbol-black.png" />
     <link rel="stylesheet" href="assets/styles.css?v=20261011-1" />
-    <link rel="stylesheet" href="assets/studio.css?v=20261011-3" />
+    <link rel="stylesheet" href="assets/studio.css?v=20261011-4" />
   </head>
   <body class="home-page">
     <header class="site-header home-header" aria-label="Main navigation">
@@ -48,6 +48,14 @@
           <p class="hero-title-en">Ewha Electro-Acoustic Music Studio</p>
           <p class="hero-copy">이화여자대학교 음악대학 전자음악 스튜디오</p>
         </div>
+        <aside class="studio-summary" aria-labelledby="studio-summary-title">
+          <p class="studio-eyebrow">스튜디오 예약 · 베타</p>
+          <h2 id="studio-summary-title">212-EEAMS</h2>
+          <p>오늘부터 7일간</p>
+          <ol id="studio-summary-week" class="studio-summary-week" aria-label="7일간 예약 건수" hidden></ol>
+          <p id="studio-summary-status" role="status">일정을 불러오고 있습니다.</p>
+          <a class="button" href="#studio">예약 <span aria-hidden="true">→</span></a>
+        </aside>
         <nav class="home-shortcuts" aria-label="주요 바로가기">
           <a href="#research">
             <strong>연구 프로젝트</strong>
@@ -62,14 +70,6 @@
             <span>Special Lectures &amp; Workshops</span>
           </a>
         </nav>
-        <aside class="studio-summary" aria-labelledby="studio-summary-title">
-          <p class="studio-eyebrow">스튜디오 예약 · 베타</p>
-          <h2 id="studio-summary-title">212-EEAMS</h2>
-          <p>오늘부터 7일간</p>
-          <ol id="studio-summary-week" class="studio-summary-week" aria-label="7일간 예약 건수" hidden></ol>
-          <p id="studio-summary-status" role="status">일정을 불러오고 있습니다.</p>
-          <a class="button" href="#studio">예약 <span aria-hidden="true">→</span></a>
-        </aside>
       </section>
 
       <section id="about" class="section intro-grid" aria-labelledby="about-title">
@@ -189,7 +189,7 @@
             <button id="studio-today" type="button">오늘</button>
             <button id="studio-next" type="button" aria-label="다음 기간" title="다음 기간">→</button>
           </div>
-          <h3 id="studio-range" aria-live="polite"></h3>
+          <h3 id="studio-range" aria-live="polite" tabindex="-1"></h3>
           <div class="studio-views" role="group" aria-label="달력 보기">
             <button id="studio-week" type="button" aria-pressed="true">주간</button>
             <button id="studio-month" type="button" aria-pressed="false">월간</button>
@@ -240,6 +240,6 @@
 
     <script src="assets/main.js?v=20261008-6" type="module"></script>
     <script src="assets/vendor/fullcalendar/index.global.min.js" defer></script>
-    <script src="assets/studio-live.js?v=2" type="module"></script>
+    <script src="assets/studio-live.js?v=3" type="module"></script>
   </body>
 </html>

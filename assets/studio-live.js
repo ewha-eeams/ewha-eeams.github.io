@@ -8,8 +8,10 @@ const mobile = matchMedia('(max-width: 680px)');
 let calendar;
 let period = 'week';
 let loading = false;
+let selectedDate;
 
 function view() {
+  if (period === 'day') return mobile.matches ? 'listDay' : 'timeGridDay';
   return period === 'month' ? 'dayGridMonth' : mobile.matches ? 'listWeek' : 'timeGridWeek';
 }
 function showTime(event) {
@@ -28,6 +30,7 @@ async function load() {
   controls(true);
   get('retry').disabled = true;
   get('dialog').close();
+  if (calendar) selectedDate = calendar.getDate().toISOString().slice(0, 10);
   calendar?.destroy();
   calendar = null;
   get('calendar').hidden = true;
@@ -48,7 +51,7 @@ async function load() {
     controls(false);
     get('calendar').hidden = false;
     calendar = new FullCalendar.Calendar(get('calendar'), {
-      initialDate: display.range.start, initialView: view(), timeZone: 'UTC', locale: 'ko', firstDay: 1,
+      initialDate: selectedDate || display.range.start, initialView: view(), timeZone: 'UTC', locale: 'ko', firstDay: 1,
       headerToolbar: false, height: !mobile.matches && period === 'month' ? 600 : 'auto',
       validRange: display.range, events: display.events,
       eventColor: '#286753', slotMinTime: '08:00:00', slotMaxTime: '22:00:00',
@@ -58,6 +61,8 @@ async function load() {
       slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
       datesSet(info) {
         get('range').textContent = info.view.title;
+        get('week').setAttribute('aria-pressed', String(period === 'week'));
+        get('month').setAttribute('aria-pressed', String(period === 'month'));
         get('prev').disabled = info.startStr.slice(0, 10) <= display.range.start.slice(0, 10);
         get('next').disabled = info.endStr.slice(0, 10) >= display.range.end.slice(0, 10);
       },
@@ -77,14 +82,29 @@ async function load() {
     for (const [index, day] of days.entries()) {
       const item = document.createElement('li');
       item.classList.toggle('is-today', index === 0);
-      item.setAttribute('aria-label', `${day.date} ${day.weekday}요일 ${day.count === null ? '미조회' : `예약 ${day.count}건`}`);
-      for (const text of [index === 0 ? '오늘' : day.weekday, `${Number(day.date.slice(5,7))}/${Number(day.date.slice(8))}`, day.count === null ? '—' : `${day.count}건`]) {
-        const span = document.createElement('span'); span.textContent = text; item.append(span);
+      const link = document.createElement(day.count === null ? 'span' : 'a');
+      link.className = 'studio-day';
+      link.setAttribute('aria-label', `${day.date} ${day.weekday}요일 ${day.count === null ? '미조회' : `예약 ${day.count}건, 일정 보기`}`);
+      if (day.count !== null) {
+        link.href = '#studio';
+        link.addEventListener('click', () => {
+          selectedDate = day.date;
+          period = 'day';
+          changeView();
+          calendar.gotoDate(day.date);
+          get('range').focus({ preventScroll: true });
+        });
       }
+      for (const text of [index === 0 ? '오늘' : day.weekday, `${Number(day.date.slice(5,7))}/${Number(day.date.slice(8))}`, day.count === null ? '—' : `${day.count}건`]) {
+        const span = document.createElement('span'); span.textContent = text; link.append(span);
+      }
+      item.append(link);
       get('summary-week').append(item);
     }
     get('summary-week').hidden = false;
-    get('summary-status').textContent = days.some(day => day.count === null) ? '한국 시간 · — 미조회' : '한국 시간 기준';
+    const updated = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
+    get('summary-status').textContent = `한국 시간 ${updated} 갱신${days.some(day => day.count === null) ? ' · — 미조회' : ''}`;
+    get('access-state').textContent += ` · ${updated} 갱신`;
   } catch {
     calendar?.destroy();
     calendar = null;

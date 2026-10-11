@@ -7,9 +7,12 @@
 .studio-summary .button { margin-top: 12px; font-size: 14px; gap: 18px; }
 .studio-summary-week { list-style: none; padding: 0; margin: 16px 0 12px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
 .studio-summary-week[hidden] { display: none; }
-.studio-summary-week li { min-width: 0; display: grid; gap: 5px; padding: 8px 0; text-align: center; font-size: 12px; line-height: 1.4; border-radius: 3px; }
-.studio-summary-week li span:first-child { font-size: 11px; color: #526456; }
-.studio-summary-week li span:last-child { font-weight: 700; }
+.studio-summary-week li { min-width: 0; text-align: center; font-size: 12px; line-height: 1.4; border-radius: 3px; }
+.studio-day { display: grid; gap: 5px; min-height: 68px; padding: 8px 0; border-radius: 3px; color: inherit; text-decoration: none; }
+.studio-day > span:first-child { font-size: 11px; color: #526456; }
+.studio-day > span:last-child { font-weight: 700; }
+.studio-day[href]:hover { background: #cbded1; }
+.studio-day[href]:focus-visible { outline: 3px solid #237b93; outline-offset: 1px; }
 .studio-summary-week .is-today { background: #dce8df; }
 .studio-summary #studio-summary-status { font-size: 12px; line-height: 1.5; color: #526456; }
 .studio-section { background: #edf1ef; }
@@ -69,6 +72,10 @@
   .home-header .main-nav { gap: 14px; }
   .home-header .menu-toggle { order: 3; }
   .home-page .hero { padding-bottom: 28px; }
+  .studio-summary { padding: 18px; }
+  .studio-summary p { margin: 6px 0; }
+  .studio-summary-week { margin: 12px 0 8px; }
+  .home-page .home-shortcuts { margin-top: 0; }
   .studio-section > h2 { font-size: 30px; }
   .studio-toolbar { gap: 16px; }
   .studio-toolbar h3 { order: -1; flex-basis: 100%; font-size: 19px; }
