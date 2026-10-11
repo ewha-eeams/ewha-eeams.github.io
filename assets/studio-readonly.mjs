@@ -31,3 +31,17 @@ export function busyCalendarData(data) {
     })),
   };
 }
+
+// Count each interval on the days it intersects; midnight endings exclude the next day.
+export function busyWeekSummary(display, today) {
+  const start = Date.parse(`${today}T00:00:00Z`);
+  if (!Number.isFinite(start)) throw new Error('INVALID_DATE');
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(start + index * 86400000).toISOString().slice(0, 10);
+    const end = new Date(start + (index + 1) * 86400000).toISOString().slice(0, 10);
+    const from = `${date}T00:00:00.000`, to = `${end}T00:00:00.000`;
+    const covered = display.range.start <= from && display.range.end >= to;
+    return { date, weekday: ['일','월','화','수','목','금','토'][new Date(`${date}T00:00:00Z`).getUTCDay()],
+      count: covered ? display.events.filter(event => event.start < to && event.end > from).length : null };
+  });
+}

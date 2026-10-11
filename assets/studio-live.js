@@ -1,4 +1,4 @@
-import { busyCalendarData } from './studio-readonly.mjs';
+import { busyCalendarData, busyWeekSummary } from './studio-readonly.mjs?v=2';
 import { seoulDate } from './studio-model.mjs';
 
 // Public, test-only read endpoint. No credentials or personal Calendar ID.
@@ -34,7 +34,9 @@ async function load() {
   get('error').hidden = true;
   get('range').textContent = '';
   get('access-state').textContent = '테스트 일정을 확인하고 있습니다.';
-  get('summary-status').textContent = '테스트 일정 확인 중';
+  get('summary-status').textContent = '일정을 불러오고 있습니다.';
+  get('summary-week').replaceChildren();
+  get('summary-week').hidden = true;
   const abort = new AbortController();
   const timeout = setTimeout(() => abort.abort(), 20000);
   try {
@@ -71,15 +73,27 @@ async function load() {
     });
     calendar.render();
     get('access-state').textContent = `한국 시간 · ${display.range.start.slice(0, 10)}부터 ${display.range.end.slice(0, 10)} 00:00 전까지 조회`;
-    const count = display.events.filter(event => event.start.slice(0, 10) <= today && event.end > `${today}T00:00:00.000`).length;
-    get('summary-status').textContent = `오늘 테스트 일정 ${count}건 · 실제 예약 아님`;
+    const days = busyWeekSummary(display, today);
+    for (const [index, day] of days.entries()) {
+      const item = document.createElement('li');
+      item.classList.toggle('is-today', index === 0);
+      item.setAttribute('aria-label', `${day.date} ${day.weekday}요일 ${day.count === null ? '미조회' : `예약 ${day.count}건`}`);
+      for (const text of [index === 0 ? '오늘' : day.weekday, `${Number(day.date.slice(5,7))}/${Number(day.date.slice(8))}`, day.count === null ? '—' : `${day.count}건`]) {
+        const span = document.createElement('span'); span.textContent = text; item.append(span);
+      }
+      get('summary-week').append(item);
+    }
+    get('summary-week').hidden = false;
+    get('summary-status').textContent = days.some(day => day.count === null) ? '한국 시간 · — 미조회' : '한국 시간 기준';
   } catch {
     calendar?.destroy();
     calendar = null;
     get('calendar').hidden = true;
     get('error').hidden = false;
     get('access-state').textContent = '조회 실패 · 예약이 없는 상태가 아닙니다.';
-    get('summary-status').textContent = '테스트 일정 확인 불가';
+    get('summary-week').replaceChildren();
+    get('summary-week').hidden = true;
+    get('summary-status').textContent = '일정을 불러오지 못했습니다.';
     controls(true);
     get('reload').disabled = false;
   } finally {
