@@ -1765,6 +1765,9 @@ select {
 }
 
 @media (max-width: 920px) {
+  .intro-grid { row-gap: 24px; }
+  .intro-grid .lead-copy { padding-top: 0; margin-top: 0; }
+
   .hero,
   .intro-grid,
   .split-band {
