@@ -1,4 +1,9 @@
 .studio-mobile-link { display: none; }
+.studio-overview-link { display: inline-flex; align-items: center; gap: 16px; min-height: 44px; margin-top: 6px; color: #00462a; font-size: 14px; font-weight: 700; text-underline-offset: 5px; }
+.studio-overview-link:hover { color: #247254; }
+.studio-overview-link:focus-visible { outline: 3px solid #237b93; outline-offset: 3px; }
+.studio-section .studio-booking-link { background: #00462a; color: white; }
+.studio-section .studio-booking-link:hover { background: #176246; color: white; }
 #studio-day { display: none; }
 .studio-mini-booking { container-type: size; }
 .studio-mini-time { display: none; color: white; font-size: 10px; line-height: 14px; white-space: nowrap; }
