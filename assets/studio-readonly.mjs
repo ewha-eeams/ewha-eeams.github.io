@@ -33,6 +33,12 @@ export function busyCalendarData(data) {
 }
 
 // Count each interval on the days it intersects; midnight endings exclude the next day.
+export function mondayOfWeek(today) {
+  const date = new Date(`${today}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() - (date.getUTCDay() + 6) % 7);
+  return date.toISOString().slice(0, 10);
+}
+
 export function busyWeekSummary(display, today) {
   const start = Date.parse(`${today}T00:00:00Z`);
   if (!Number.isFinite(start)) throw new Error('INVALID_DATE');

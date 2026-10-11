@@ -1,4 +1,4 @@
-import { busyCalendarData, busyWeekSummary } from './studio-readonly.mjs?v=3';
+import { busyCalendarData, busyWeekSummary, mondayOfWeek } from './studio-readonly.mjs?v=4';
 import { seoulDate } from './studio-model.mjs';
 
 // Public, test-only read endpoint. No credentials or personal Calendar ID.
@@ -9,6 +9,17 @@ let calendar;
 let period = 'week';
 let loading = false;
 let selectedDate;
+const civilNow = () => new Date(Date.now() + 9 * 3600000);
+function updateClock() {
+  const now = civilNow();
+  const date = now.toISOString().slice(0, 10);
+  const minutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+  document.querySelectorAll('.studio-mini-now').forEach(line => {
+    line.hidden = line.dataset.date !== date || minutes < 480 || minutes >= 1320;
+    line.style.top = `${(minutes - 480) / 840 * 100}%`;
+  });
+  calendar?.setOption('now', now);
+}
 
 function view() {
   if (period === 'day') return mobile.matches ? 'listDay' : 'timeGridDay';
@@ -51,10 +62,11 @@ async function load() {
     controls(false);
     get('calendar').hidden = false;
     calendar = new FullCalendar.Calendar(get('calendar'), {
-      initialDate: selectedDate || display.range.start, initialView: view(), timeZone: 'UTC', locale: 'ko', firstDay: 1,
+      initialDate: selectedDate || today, initialView: view(), timeZone: 'UTC', locale: 'ko', firstDay: 1,
+      now: civilNow(), nowIndicator: true,
       headerToolbar: false, height: !mobile.matches && period === 'month' ? 600 : 'auto',
       validRange: display.range, events: display.events,
-      eventColor: '#286753', slotMinTime: '08:00:00', slotMaxTime: '22:00:00',
+      eventColor: '#52758a', slotMinTime: '08:00:00', slotMaxTime: '22:00:00',
       slotDuration: '01:00:00', allDaySlot: false, slotEventOverlap: false, dayMaxEvents: 3,
       noEventsContent: '조회 범위 내 테스트 일정이 없습니다.',
       eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
@@ -67,6 +79,13 @@ async function load() {
         get('next').disabled = info.endStr.slice(0, 10) >= display.range.end.slice(0, 10);
       },
       eventClick(info) { showTime(info.event); },
+      dateClick(info) {
+        if (period !== 'month') return;
+        selectedDate = info.dateStr.slice(0, 10);
+        period = 'day';
+        changeView();
+        calendar.gotoDate(selectedDate);
+      },
       eventDidMount(info) {
         info.el.tabIndex = 0;
         info.el.setAttribute('role', 'button');
@@ -78,7 +97,7 @@ async function load() {
     });
     calendar.render();
     get('access-state').textContent = `한국 시간 · ${display.range.start.slice(0, 10)}부터 ${display.range.end.slice(0, 10)} 00:00 전까지 조회`;
-    const days = busyWeekSummary(display, today);
+    const days = busyWeekSummary(display, mondayOfWeek(today));
     const axis = document.createElement('li');
     axis.className = 'studio-mini-axis';
     axis.setAttribute('aria-hidden', 'true');
@@ -91,7 +110,7 @@ async function load() {
     get('summary-week').append(axis);
     for (const [index, day] of days.entries()) {
       const item = document.createElement('li');
-      item.classList.toggle('is-today', index === 0);
+      item.classList.toggle('is-today', day.date === today);
       const link = document.createElement(day.count === null ? 'span' : 'a');
       link.className = 'studio-day';
       link.setAttribute('aria-label', `${day.date} ${day.weekday}요일 ${day.count === null ? '미조회' : `예약 ${day.count}건, 일정 보기`}`);
@@ -105,7 +124,7 @@ async function load() {
           get('range').focus({ preventScroll: true });
         });
       }
-      for (const text of [index === 0 ? '오늘' : day.weekday, `${Number(day.date.slice(5,7))}/${Number(day.date.slice(8))}`]) {
+      for (const text of [day.date === today ? '오늘' : day.weekday, `${Number(day.date.slice(5,7))}/${Number(day.date.slice(8))}`]) {
         const span = document.createElement('span'); span.textContent = text; link.append(span);
       }
       const track = document.createElement('span');
@@ -120,11 +139,16 @@ async function load() {
         mark.style.height = `${block.height}%`;
         track.append(mark);
       }
+      const line = document.createElement('span');
+      line.className = 'studio-mini-now';
+      line.dataset.date = day.date;
+      track.append(line);
       link.append(track);
       item.append(link);
       get('summary-week').append(item);
     }
     get('summary-week').hidden = false;
+    updateClock();
     const updated = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
     get('summary-status').textContent = `한국 시간 ${updated} 갱신${days.some(day => day.count === null) ? ' · — 미조회' : ''}`;
     get('access-state').textContent += ` · ${updated} 갱신`;
@@ -161,4 +185,5 @@ get('reload').onclick = load;
 get('retry').onclick = load;
 get('dialog-close').onclick = () => get('dialog').close();
 mobile.addEventListener('change', changeView);
+setInterval(updateClock, 60000);
 load();
