@@ -82,6 +82,8 @@ async function load(options = {}) {
   const silent = options.silent === true && !!calendar;
   if (loading) return;
   loading = true;
+  get('reload').disabled = true;
+  get('reload').setAttribute('aria-busy', 'true');
   lastAttempt = Date.now();
   if (!silent) controls(true);
   get('retry').disabled = true;
@@ -272,6 +274,8 @@ async function load(options = {}) {
   } finally {
     clearTimeout(timeout);
     loading = false;
+    get('reload').disabled = false;
+    get('reload').setAttribute('aria-busy', 'false');
     get('retry').disabled = false;
   }
 }

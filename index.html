@@ -16,7 +16,7 @@
     <title>EEAMS | Ewha Electro-Acoustic Music Studio</title>
     <link rel="icon" href="assets/eeams-symbol-black.png" />
     <link rel="stylesheet" href="assets/styles.css?v=20261012-compact3" />
-    <link rel="stylesheet" href="assets/studio.css?v=20261012-scroll4" />
+    <link rel="stylesheet" href="assets/studio.css?v=20261012-refresh" />
   </head>
   <body class="home-page">
     <header class="site-header home-header" aria-label="Main navigation">
@@ -177,7 +177,6 @@
         <a class="button studio-booking-link" href="https://script.google.com/macros/s/AKfycbzshqtcXHcZurFP2NYlbkt0pq7jnstauRc7y0ZV9kvwuCs31hTbJzu0V_P7HWcoOXPk/exec" referrerpolicy="no-referrer">예약하기 <span aria-hidden="true">→</span></a>
         <div class="studio-access-bar">
           <p id="studio-access-state" role="status">테스트 일정 확인 대기</p>
-          <button id="studio-reload" type="button">일정 새로고침</button>
         </div>
         <div class="studio-toolbar" aria-label="달력 탐색">
           <div class="studio-navigation">
@@ -185,7 +184,10 @@
             <button id="studio-today" type="button">오늘</button>
             <button id="studio-next" type="button" aria-label="다음 기간" title="다음 기간">→</button>
           </div>
-          <h3 id="studio-range" aria-live="polite" tabindex="-1"></h3>
+          <div class="studio-date-heading">
+            <h3 id="studio-range" aria-live="polite" tabindex="-1"></h3>
+            <button id="studio-reload" type="button" aria-label="일정 새로고침" title="일정 새로고침"><img src="assets/refresh-cw.svg" width="20" height="20" alt="" /></button>
+          </div>
           <div class="studio-views" role="group" aria-label="달력 보기">
             <button id="studio-day" type="button" aria-pressed="false">3일</button>
             <button id="studio-week" type="button" aria-pressed="true">주간</button>
@@ -237,6 +239,6 @@
 
     <script src="assets/main.js?v=20261012-compact2" type="module"></script>
     <script src="assets/vendor/fullcalendar/index.global.min.js" defer></script>
-    <script src="assets/studio-live.js?v=14" type="module"></script>
+    <script src="assets/studio-live.js?v=15" type="module"></script>
   </body>
 </html>
