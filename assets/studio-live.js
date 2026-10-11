@@ -15,7 +15,7 @@ let preservedScroll = null;
 let lastAttempt = 0;
 const civilNow = () => new Date(Date.now() + 9 * 3600000);
 function calendarHeight() {
-  if (mobile.matches && period === 'day') {
+  if (mobile.matches && period !== 'month') {
     const header = document.querySelector('.site-header')?.getBoundingClientRect().height || 64;
     const toolbar = document.querySelector('.studio-toolbar')?.getBoundingClientRect().height || 90;
     const available = (window.visualViewport?.height || innerHeight) - header - toolbar - 40;
@@ -64,7 +64,7 @@ function updateClock() {
 
 function view() {
   if (period === 'day') return mobile.matches ? 'timeGridThreeDay' : 'timeGridDay';
-  return period === 'month' ? 'dayGridMonth' : mobile.matches ? 'listWeek' : 'timeGridWeek';
+  return period === 'month' ? 'dayGridMonth' : 'timeGridWeek';
 }
 function showTime(event) {
   get('dialog-title').textContent = '테스트 예약 시간';
@@ -117,6 +117,18 @@ async function load(options = {}) {
     get('calendar').hidden = false;
     calendar = new FullCalendar.Calendar(get('calendar'), {
       initialDate: selectedDate || today, initialView: view(), timeZone: 'UTC', locale: 'ko', firstDay: 1,
+      dayHeaderFormat: mobile.matches ? { day: 'numeric', weekday: 'short' } : { month: 'numeric', day: 'numeric', weekday: 'short' },
+      dayHeaderContent(info) {
+        if (!mobile.matches || info.view.type !== 'timeGridWeek') return info.text;
+        const label = document.createElement('span');
+        label.className = 'studio-week-heading';
+        for (const text of [String(info.date.getUTCDate()), ['일', '월', '화', '수', '목', '금', '토'][info.date.getUTCDay()]]) {
+          const line = document.createElement('span');
+          line.textContent = text;
+          label.append(line);
+        }
+        return { domNodes: [label] };
+      },
       now: civilNow(), nowIndicator: true,
       views: { timeGridThreeDay: { type: 'timeGrid', duration: { days: 3 }, dateIncrement: { days: 1 }, dateAlignment: 'day', dayHeaderFormat: { month: 'numeric', day: 'numeric', weekday: 'short' } } },
       headerToolbar: false, height: calendarHeight(), scrollTime: '08:00:00',
