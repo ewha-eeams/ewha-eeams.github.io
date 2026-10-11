@@ -134,14 +134,22 @@
 }
 #studio-summary-status:empty, #studio-access-state:empty { display: none; }
 #studio-viewport{min-width:0}
-#studio-week-position{width:100%;min-height:44px;accent-color:#00462a;margin:0}
+#studio-week-position{appearance:none;-webkit-appearance:none;width:100%;height:44px;background:transparent;margin:0;cursor:pointer}
+#studio-week-position::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:#b8c9c0}
+#studio-week-position::-moz-range-track{height:4px;border-radius:2px;background:#b8c9c0}
+#studio-week-position::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border:2px solid #fff;border-radius:50%;background:#196347;box-shadow:0 1px 3px #0003}
+#studio-week-position::-moz-range-thumb{box-sizing:border-box;width:22px;height:22px;border:2px solid #fff;border-radius:50%;background:#196347;box-shadow:0 1px 3px #0003}
+#studio-week-position:focus-visible{outline:2px solid #237b93;outline-offset:2px}
 #studio-week-slider>div{display:flex;justify-content:space-between;font-size:12px;color:#52665a}
 @media(max-width:680px){
   #studio-day{display:none!important}
   .studio-views{grid-template-columns:repeat(2,minmax(0,1fr))}
-  #studio-viewport.is-week-scroll{overflow-x:auto;overscroll-behavior-x:contain}
+  #studio-viewport.is-week-scroll{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
+  #studio-viewport.is-week-scroll::-webkit-scrollbar{display:none}
   #studio-viewport.is-week-scroll #studio-calendar{width:calc((100% - 44px) * 7 / 3 + 44px)}
   #studio-viewport.is-week-scroll .fc-timeGridWeek-view{font-size:12px}
+  #studio-viewport.is-week-scroll .fc-timeGridWeek-view .fc-col-header-cell-cushion{font-size:13px;padding:8px 0}
+  #studio-viewport.is-week-scroll .fc-timegrid-slot:not(.fc-timegrid-slot-minor){border-top-color:#bdccc4}
   #studio-viewport.is-week-scroll .fc-timegrid-slots{z-index:4;pointer-events:none}
   #studio-viewport.is-week-scroll .fc-timegrid-slot-label-frame,
   #studio-viewport.is-week-scroll .fc-timegrid-axis-frame{position:relative;background:#edf1ef;z-index:4;transform:translateX(var(--week-offset,0px));height:100%}
