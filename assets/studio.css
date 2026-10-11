@@ -133,3 +133,17 @@
   #studio-calendar .fc-timeGridThreeDay-view .fc-col-header-cell-cushion { padding: 5px 1px; font-size: 11px; }
 }
 #studio-summary-status:empty, #studio-access-state:empty { display: none; }
+#studio-viewport{min-width:0}
+#studio-week-position{width:100%;min-height:44px;accent-color:#00462a;margin:0}
+#studio-week-slider>div{display:flex;justify-content:space-between;font-size:12px;color:#52665a}
+@media(max-width:680px){
+  #studio-day{display:none!important}
+  .studio-views{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #studio-viewport.is-week-scroll{overflow-x:auto;overscroll-behavior-x:contain}
+  #studio-viewport.is-week-scroll #studio-calendar{width:calc((100% - 44px) * 7 / 3 + 44px)}
+  #studio-viewport.is-week-scroll .fc-timeGridWeek-view{font-size:12px}
+  #studio-viewport.is-week-scroll .fc-timegrid-slots{z-index:4;pointer-events:none}
+  #studio-viewport.is-week-scroll .fc-timegrid-slot-label-frame,
+  #studio-viewport.is-week-scroll .fc-timegrid-axis-frame{position:relative;background:#edf1ef;z-index:4;transform:translateX(var(--week-offset,0px));height:100%}
+  #studio-week-slider{padding:4px 0 12px}
+}

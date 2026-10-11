@@ -1,6 +1,5 @@
 import { busyCalendarData, busyWeekSummary, mondayOfWeek } from './studio-readonly.mjs?v=5';
 import { seoulDate } from './studio-model.mjs';
-import { swipeDirection } from './studio-swipe.mjs';
 
 // Public, test-only read endpoint. No credentials or personal Calendar ID.
 const endpoint = 'https://script.google.com/macros/s/AKfycbxg4htE_XDuE-XHl1l4QykqGWKjFvqNFbK_7E_5aIaOpPt4dkJT5CNbTHWpHQq-1Ogl/exec';
@@ -8,17 +7,18 @@ const get = id => document.getElementById(`studio-${id}`);
 const mobile = matchMedia('(max-width: 680px)');
 let calendar;
 const qrEntry = new URLSearchParams(location.search).get('studio') === 'today';
-let period = mobile.matches || qrEntry ? 'day' : 'week';
+let period = 'week';
 let loading = false;
 let selectedDate;
 let preservedScroll = null;
+let preservedWeekPosition = null;
 let lastAttempt = 0;
 const civilNow = () => new Date(Date.now() + 9 * 3600000);
 function calendarHeight() {
   if (mobile.matches && period !== 'month') {
     const header = document.querySelector('.site-header')?.getBoundingClientRect().height || 64;
     const toolbar = document.querySelector('.studio-toolbar')?.getBoundingClientRect().height || 90;
-    const available = (window.visualViewport?.height || innerHeight) - header - toolbar - 40;
+    const available = (window.visualViewport?.height || innerHeight) - header - toolbar - 100;
     return Math.max(200, Math.min(560, Math.floor(available)));
   }
   return !mobile.matches && period === 'month' ? 600 : 'auto';
@@ -27,6 +27,7 @@ function updateViewport() {
   const header = document.querySelector('.site-header')?.getBoundingClientRect().height || 64;
   document.querySelector('.studio-toolbar')?.style.setProperty('scroll-margin-top', `${header + 12}px`);
   if (!calendar) return;
+  syncWeekWindow();
   const height = calendarHeight();
   if (calendar.getOption('height') === height) return;
   const scroller = get('calendar').querySelector('.fc-scroller-liquid-absolute');
@@ -45,7 +46,7 @@ function alignCurrentTime() {
     preservedScroll = null;
     return;
   }
-  if (period !== 'day') return;
+  if (!mobile.matches || period === 'month') return;
   const today = calendar.view.activeStart.toISOString().slice(0, 10) <= seoulDate()
     && calendar.view.activeEnd.toISOString().slice(0, 10) > seoulDate();
   const now = civilNow();
@@ -107,6 +108,7 @@ async function load(options = {}) {
     // Never replace a calendar or mini-calendar while it has keyboard focus.
     if (silent && (get('dialog').open || get('calendar').contains(document.activeElement) || get('summary-week').contains(document.activeElement))) return;
     if (silent) {
+      preservedWeekPosition = get('week-position').value;
       selectedDate = calendar.getDate().toISOString().slice(0, 10);
       preservedScroll = get('calendar').querySelector('.fc-scroller-liquid-absolute')?.scrollTop ?? null;
       calendar.destroy();
@@ -146,7 +148,7 @@ async function load(options = {}) {
         get('month').setAttribute('aria-pressed', String(period === 'month'));
         get('prev').disabled = info.startStr.slice(0, 10) <= display.range.start.slice(0, 10);
         get('next').disabled = info.endStr.slice(0, 10) >= display.range.end.slice(0, 10);
-        requestAnimationFrame(alignCurrentTime);
+        requestAnimationFrame(() => { syncWeekWindow(true); alignCurrentTime(); });
       },
       eventClick(info) { showTime(info.event); },
       dayCellDidMount(info) {
@@ -163,7 +165,7 @@ async function load(options = {}) {
         badge.addEventListener('click', event => {
           event.stopPropagation();
           selectedDate = date;
-          period = 'day';
+          period = mobile.matches ? 'week' : 'day';
           changeView();
           calendar.gotoDate(date);
         });
@@ -172,7 +174,7 @@ async function load(options = {}) {
       dateClick(info) {
         if (period !== 'month') return;
         selectedDate = info.dateStr.slice(0, 10);
-        period = 'day';
+        period = mobile.matches ? 'week' : 'day';
         changeView();
         calendar.gotoDate(selectedDate);
       },
@@ -208,7 +210,7 @@ async function load(options = {}) {
         link.href = '#studio';
         link.addEventListener('click', () => {
           selectedDate = day.date;
-          period = 'day';
+          period = mobile.matches ? 'week' : 'day';
           changeView();
           calendar.gotoDate(day.date);
           get('range').focus({ preventScroll: true });
@@ -284,49 +286,46 @@ function changeView() {
 get('day').onclick = () => { period = 'day'; changeView(); };
 get('week').onclick = () => { period = 'week'; changeView(); };
 get('month').onclick = () => { period = 'month'; changeView(); };
-let dateAnimations = [];
-function animateDate(direction) {
-  dateAnimations.forEach(animation => animation.cancel());
-  dateAnimations = [];
-  if (!mobile.matches || period !== 'day' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  // Move date columns only; the time ruler and vertical scroll stay in place.
-  for (const node of document.querySelectorAll('#studio-calendar .fc-timegrid-cols, #studio-calendar .fc-col-header-cell-cushion')) {
-    if (!node.animate) continue;
-    dateAnimations.push(node.animate([
-      { transform: `translateX(${direction * 18}px)`, opacity: 0.65 },
-      { transform: 'translateX(0)', opacity: 1 },
-    ], { duration: 200, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }));
+function syncWeekWindow(centerToday = false) {
+  const viewport = get('viewport');
+  const enabled = mobile.matches && period === 'week';
+  viewport.classList.toggle('is-week-scroll', enabled);
+  get('week-slider').hidden = !enabled;
+  get('day').hidden = true;
+  if (!enabled) return;
+  calendar?.updateSize();
+  if (centerToday && calendar) {
+    const offset = Math.round((calendar.getDate() - calendar.view.activeStart) / 86400000);
+    viewport.scrollLeft = Math.max(0, Math.min(4, offset - 1)) / 4 * (viewport.scrollWidth - viewport.clientWidth);
   }
+  if (preservedWeekPosition !== null) {
+    viewport.scrollLeft = Number(preservedWeekPosition) / 100 * (viewport.scrollWidth - viewport.clientWidth);
+    preservedWeekPosition = null;
+  }
+  viewport.style.setProperty('--week-offset', viewport.scrollLeft + 'px');
+  get('week-position').value = viewport.scrollLeft / Math.max(1, viewport.scrollWidth - viewport.clientWidth) * 100;
 }
+get('week-position').addEventListener('input', () => {
+  const viewport = get('viewport');
+  viewport.scrollLeft = Number(get('week-position').value) / 100 * (viewport.scrollWidth - viewport.clientWidth);
+});
+get('viewport').addEventListener('scroll', () => {
+  const viewport = get('viewport');
+  viewport.style.setProperty('--week-offset', viewport.scrollLeft + 'px');
+  get('week-position').value = viewport.scrollLeft / Math.max(1, viewport.scrollWidth - viewport.clientWidth) * 100;
+}, { passive: true });
 function moveDate(direction) {
   if (!calendar || loading || get(direction < 0 ? 'prev' : 'next').disabled) return;
-  if (mobile.matches && period === 'day') preservedScroll = get('calendar').querySelector('.fc-scroller-liquid-absolute')?.scrollTop ?? null;
+  if (mobile.matches && period !== 'month') preservedScroll = get('calendar').querySelector('.fc-scroller-liquid-absolute')?.scrollTop ?? null;
   if (direction < 0) calendar.prev(); else calendar.next();
-  animateDate(direction);
+
 }
 get('prev').onclick = () => moveDate(-1);
 get('next').onclick = () => moveDate(1);
 get('today').onclick = () => {
   preservedScroll = null;
-  calendar?.gotoDate(seoulDate()); requestAnimationFrame(alignCurrentTime);
+  calendar?.gotoDate(seoulDate()); requestAnimationFrame(() => { syncWeekWindow(true); alignCurrentTime(); });
 };
-let gesture = null, suppressClickUntil = 0;
-const surface = get('calendar');
-surface.addEventListener('pointerdown', event => {
-  if (!event.isPrimary) { gesture = null; return; }
-  gesture = mobile.matches && period === 'day' && event.pointerType === 'touch'
-    ? { x: event.clientX, y: event.clientY, time: performance.now(), id: event.pointerId } : null;
-}, { passive: true });
-surface.addEventListener('pointercancel', () => { gesture = null; }, { passive: true });
-surface.addEventListener('pointerup', event => {
-  if (!gesture || gesture.id !== event.pointerId) return;
-  const direction = swipeDirection(gesture, { x: event.clientX, y: event.clientY, time: performance.now() }, innerWidth);
-  gesture = null;
-  if (direction) { suppressClickUntil = performance.now() + 400; moveDate(direction); }
-}, { passive: true });
-surface.addEventListener('click', event => {
-  if (performance.now() < suppressClickUntil) { event.preventDefault(); event.stopImmediatePropagation(); }
-}, true);
 get('reload').onclick = load;
 get('retry').onclick = load;
 get('dialog-close').onclick = () => get('dialog').close();
