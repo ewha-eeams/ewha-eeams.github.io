@@ -41,7 +41,15 @@ export function busyWeekSummary(display, today) {
     const end = new Date(start + (index + 1) * 86400000).toISOString().slice(0, 10);
     const from = `${date}T00:00:00.000`, to = `${end}T00:00:00.000`;
     const covered = display.range.start <= from && display.range.end >= to;
-    return { date, weekday: ['일','월','화','수','목','금','토'][new Date(`${date}T00:00:00Z`).getUTCDay()],
+    const visibleStart = Date.parse(`${date}T08:00:00Z`);
+    const visibleEnd = Date.parse(`${date}T22:00:00Z`);
+    const blocks = covered ? display.events.flatMap(event => {
+      const begin = Math.max(visibleStart, Date.parse(`${event.start}Z`));
+      const finish = Math.min(visibleEnd, Date.parse(`${event.end}Z`));
+      return finish > begin ? [{ top: (begin - visibleStart) / 50400000 * 100,
+        height: (finish - begin) / 50400000 * 100 }] : [];
+    }) : [];
+    return { date, blocks, weekday: ['일','월','화','수','목','금','토'][new Date(`${date}T00:00:00Z`).getUTCDay()],
       count: covered ? display.events.filter(event => event.start < to && event.end > from).length : null };
   });
 }

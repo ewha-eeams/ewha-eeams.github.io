@@ -1,4 +1,4 @@
-import { busyCalendarData, busyWeekSummary } from './studio-readonly.mjs?v=2';
+import { busyCalendarData, busyWeekSummary } from './studio-readonly.mjs?v=3';
 import { seoulDate } from './studio-model.mjs';
 
 // Public, test-only read endpoint. No credentials or personal Calendar ID.
@@ -79,6 +79,16 @@ async function load() {
     calendar.render();
     get('access-state').textContent = `한국 시간 · ${display.range.start.slice(0, 10)}부터 ${display.range.end.slice(0, 10)} 00:00 전까지 조회`;
     const days = busyWeekSummary(display, today);
+    const axis = document.createElement('li');
+    axis.className = 'studio-mini-axis';
+    axis.setAttribute('aria-hidden', 'true');
+    for (const hour of [8, 12, 16, 20, 22]) {
+      const tick = document.createElement('span');
+      tick.textContent = String(hour).padStart(2, '0');
+      tick.style.top = `${(hour - 8) / 14 * 100}%`;
+      axis.append(tick);
+    }
+    get('summary-week').append(axis);
     for (const [index, day] of days.entries()) {
       const item = document.createElement('li');
       item.classList.toggle('is-today', index === 0);
@@ -95,9 +105,22 @@ async function load() {
           get('range').focus({ preventScroll: true });
         });
       }
-      for (const text of [index === 0 ? '오늘' : day.weekday, `${Number(day.date.slice(5,7))}/${Number(day.date.slice(8))}`, day.count === null ? '—' : `${day.count}건`]) {
+      for (const text of [index === 0 ? '오늘' : day.weekday, `${Number(day.date.slice(5,7))}/${Number(day.date.slice(8))}`]) {
         const span = document.createElement('span'); span.textContent = text; link.append(span);
       }
+      const track = document.createElement('span');
+      track.className = 'studio-mini-track';
+      track.classList.toggle('is-unavailable', day.count === null);
+      track.setAttribute('aria-hidden', 'true');
+      if (day.count === null) track.textContent = '—';
+      for (const block of day.blocks) {
+        const mark = document.createElement('span');
+        mark.className = 'studio-mini-booking';
+        mark.style.top = `${block.top}%`;
+        mark.style.height = `${block.height}%`;
+        track.append(mark);
+      }
+      link.append(track);
       item.append(link);
       get('summary-week').append(item);
     }
