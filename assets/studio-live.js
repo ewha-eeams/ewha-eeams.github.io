@@ -12,6 +12,7 @@ let period = mobile.matches || qrEntry ? 'day' : 'week';
 let loading = false;
 let selectedDate;
 let preservedScroll = null;
+let lastAttempt = 0;
 const civilNow = () => new Date(Date.now() + 9 * 3600000);
 function calendarHeight() {
   return mobile.matches && period === 'day' ? Math.max(320, Math.min(560, innerHeight * .68)) : !mobile.matches && period === 'month' ? 600 : 'auto';
@@ -55,22 +56,26 @@ function showTime(event) {
 function controls(disabled) {
   for (const id of ['prev', 'next', 'today', 'day', 'week', 'month', 'reload']) get(id).disabled = disabled;
 }
-async function load() {
+async function load(options = {}) {
+  const silent = options.silent === true && !!calendar;
   if (loading) return;
   loading = true;
-  controls(true);
+  lastAttempt = Date.now();
+  if (!silent) controls(true);
   get('retry').disabled = true;
-  get('dialog').close();
-  if (calendar) selectedDate = calendar.getDate().toISOString().slice(0, 10);
-  calendar?.destroy();
-  calendar = null;
-  get('calendar').hidden = true;
-  get('error').hidden = true;
-  get('range').textContent = '';
-  get('access-state').textContent = '테스트 일정을 확인하고 있습니다.';
-  get('summary-status').textContent = '일정을 불러오고 있습니다.';
-  get('summary-week').replaceChildren();
-  get('summary-week').hidden = true;
+  if (!silent) {
+    get('dialog').close();
+    if (calendar) selectedDate = calendar.getDate().toISOString().slice(0, 10);
+    calendar?.destroy();
+    calendar = null;
+    get('calendar').hidden = true;
+    get('error').hidden = true;
+    get('range').textContent = '';
+    get('access-state').textContent = '일정을 확인하고 있습니다.';
+    get('summary-status').textContent = '일정을 불러오고 있습니다.';
+    get('summary-week').replaceChildren();
+    get('summary-week').hidden = true;
+  }
   const abort = new AbortController();
   const timeout = setTimeout(() => abort.abort(), 20000);
   try {
@@ -78,6 +83,15 @@ async function load() {
     if (!response.ok) throw new Error('HTTP');
     const display = busyCalendarData(await response.json());
     if (!window.FullCalendar) throw new Error('CALENDAR');
+    // Never replace a calendar or mini-calendar while it has keyboard focus.
+    if (silent && (get('dialog').open || get('calendar').contains(document.activeElement) || get('summary-week').contains(document.activeElement))) return;
+    if (silent) {
+      selectedDate = calendar.getDate().toISOString().slice(0, 10);
+      preservedScroll = get('calendar').querySelector('.fc-scroller-liquid-absolute')?.scrollTop ?? null;
+      calendar.destroy();
+    }
+    get('summary-week').replaceChildren();
+    get('error').hidden = true;
     const today = seoulDate();
     controls(false);
     get('calendar').hidden = false;
@@ -139,7 +153,7 @@ async function load() {
       },
     });
     calendar.render();
-    get('access-state').textContent = `한국 시간 · ${display.range.start.slice(0, 10)}부터 ${display.range.end.slice(0, 10)} 00:00 전까지 조회`;
+    get('access-state').textContent = '';
     const days = busyWeekSummary(display, mondayOfWeek(today));
     const axis = document.createElement('li');
     axis.className = 'studio-mini-axis';
@@ -199,13 +213,16 @@ async function load() {
     }
     get('summary-week').hidden = false;
     updateClock();
-    const updated = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
-    get('summary-status').textContent = `한국 시간 ${updated} 갱신${days.some(day => day.count === null) ? ' · — 미조회' : ''}`;
-    get('access-state').textContent += ` · ${updated} 갱신`;
+    get('summary-status').textContent = days.some(day => day.count === null) ? '— 표시 날짜는 조회되지 않았습니다.' : '';
     if (qrEntry && !selectedDate) requestAnimationFrame(() => {
       get('calendar').scrollIntoView({ block: 'start', behavior: 'instant' });
     });
   } catch {
+    if (silent && calendar) {
+      get('access-state').textContent = '최신 일정을 확인하지 못했습니다. 이전 조회 결과입니다. 새로고침해 주세요.';
+      get('summary-status').textContent = '최신 일정 확인 실패 · 이전 조회 결과';
+      return;
+    }
     calendar?.destroy();
     calendar = null;
     get('calendar').hidden = true;
@@ -267,4 +284,14 @@ get('retry').onclick = load;
 get('dialog-close').onclick = () => get('dialog').close();
 mobile.addEventListener('change', changeView);
 setInterval(updateClock, 60000);
+function refreshVisible() {
+  if (document.hidden || Date.now() - lastAttempt < 60000 || get('dialog').open) return;
+  const visible = ['calendar', 'summary-week'].some(id => {
+    const node = get(id), rect = node.getBoundingClientRect();
+    return !node.hidden && rect.bottom > 0 && rect.top < innerHeight;
+  });
+  if (visible) load({ silent: true });
+}
+setInterval(refreshVisible, 60000);
+document.addEventListener('visibilitychange', () => { updateClock(); refreshVisible(); });
 load();

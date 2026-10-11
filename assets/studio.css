@@ -122,3 +122,4 @@
   #studio-calendar .fc-timeGridThreeDay-view .fc-event-time { font-size: 11px; overflow-wrap: normal; }
   #studio-calendar .fc-timeGridThreeDay-view .fc-col-header-cell-cushion { padding: 5px 1px; font-size: 11px; }
 }
+#studio-summary-status:empty, #studio-access-state:empty { display: none; }
