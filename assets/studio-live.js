@@ -284,10 +284,25 @@ function changeView() {
 get('day').onclick = () => { period = 'day'; changeView(); };
 get('week').onclick = () => { period = 'week'; changeView(); };
 get('month').onclick = () => { period = 'month'; changeView(); };
+let dateAnimations = [];
+function animateDate(direction) {
+  dateAnimations.forEach(animation => animation.cancel());
+  dateAnimations = [];
+  if (!mobile.matches || period !== 'day' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // Move date columns only; the time ruler and vertical scroll stay in place.
+  for (const node of document.querySelectorAll('#studio-calendar .fc-timegrid-cols, #studio-calendar .fc-col-header-cell-cushion')) {
+    if (!node.animate) continue;
+    dateAnimations.push(node.animate([
+      { transform: `translateX(${direction * 18}px)`, opacity: 0.65 },
+      { transform: 'translateX(0)', opacity: 1 },
+    ], { duration: 200, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }));
+  }
+}
 function moveDate(direction) {
   if (!calendar || loading || get(direction < 0 ? 'prev' : 'next').disabled) return;
   if (mobile.matches && period === 'day') preservedScroll = get('calendar').querySelector('.fc-scroller-liquid-absolute')?.scrollTop ?? null;
   if (direction < 0) calendar.prev(); else calendar.next();
+  animateDate(direction);
 }
 get('prev').onclick = () => moveDate(-1);
 get('next').onclick = () => moveDate(1);
