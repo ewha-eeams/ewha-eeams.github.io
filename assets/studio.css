@@ -50,7 +50,7 @@
 .studio-dialog > div { display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
 @media (max-width: 1100px) {
   .home-page .hero { grid-template-columns: minmax(0, 1fr); height: auto; min-height: 460px; padding-bottom: 124px; }
-  .studio-summary { display: none; }
+  .studio-summary { display: block; max-width: 420px; width: 100%; }
   .studio-mobile-link { display: inline-flex; min-height: 44px; align-items: center; color: white; font-size: 14px; margin-left: auto; }
   .home-header .main-nav { gap: 14px; }
   .home-header .menu-toggle { display: inline-flex; order: 3; }
