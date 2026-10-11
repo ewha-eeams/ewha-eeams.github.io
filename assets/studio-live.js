@@ -1,4 +1,4 @@
-import { busyCalendarData, busyWeekSummary, mondayOfWeek } from './studio-readonly.mjs?v=4';
+import { busyCalendarData, busyWeekSummary, mondayOfWeek } from './studio-readonly.mjs?v=5';
 import { seoulDate } from './studio-model.mjs';
 
 // Public, test-only read endpoint. No credentials or personal Calendar ID.
@@ -6,10 +6,21 @@ const endpoint = 'https://script.google.com/macros/s/AKfycbxg4htE_XDuE-XHl1l4Qyk
 const get = id => document.getElementById(`studio-${id}`);
 const mobile = matchMedia('(max-width: 680px)');
 let calendar;
-let period = 'week';
+const qrEntry = new URLSearchParams(location.search).get('studio') === 'today';
+let period = mobile.matches || qrEntry ? 'day' : 'week';
 let loading = false;
 let selectedDate;
 const civilNow = () => new Date(Date.now() + 9 * 3600000);
+function calendarHeight() {
+  return mobile.matches && period === 'day' ? Math.max(320, Math.min(560, innerHeight * .68)) : !mobile.matches && period === 'month' ? 600 : 'auto';
+}
+function alignCurrentTime() {
+  if (!calendar || period !== 'day') return;
+  const today = calendar.getDate().toISOString().slice(0, 10) === seoulDate();
+  const now = civilNow();
+  const minutes = today ? now.getUTCHours() * 60 + now.getUTCMinutes() - 90 : 480;
+  calendar.scrollToTime({ minutes: Math.max(480, Math.min(1230, minutes)) });
+}
 function updateClock() {
   const now = civilNow();
   const date = now.toISOString().slice(0, 10);
@@ -22,7 +33,7 @@ function updateClock() {
 }
 
 function view() {
-  if (period === 'day') return mobile.matches ? 'listDay' : 'timeGridDay';
+  if (period === 'day') return 'timeGridDay';
   return period === 'month' ? 'dayGridMonth' : mobile.matches ? 'listWeek' : 'timeGridWeek';
 }
 function showTime(event) {
@@ -33,7 +44,7 @@ function showTime(event) {
   get('dialog').showModal();
 }
 function controls(disabled) {
-  for (const id of ['prev', 'next', 'today', 'week', 'month', 'reload']) get(id).disabled = disabled;
+  for (const id of ['prev', 'next', 'today', 'day', 'week', 'month', 'reload']) get(id).disabled = disabled;
 }
 async function load() {
   if (loading) return;
@@ -64,7 +75,7 @@ async function load() {
     calendar = new FullCalendar.Calendar(get('calendar'), {
       initialDate: selectedDate || today, initialView: view(), timeZone: 'UTC', locale: 'ko', firstDay: 1,
       now: civilNow(), nowIndicator: true,
-      headerToolbar: false, height: !mobile.matches && period === 'month' ? 600 : 'auto',
+      headerToolbar: false, height: calendarHeight(), scrollTime: '08:00:00',
       validRange: display.range, events: display.events,
       eventColor: '#3278c2', slotMinTime: '08:00:00', slotMaxTime: '22:00:00',
       slotDuration: '01:00:00', allDaySlot: false, slotEventOverlap: false, dayMaxEvents: 3,
@@ -73,10 +84,12 @@ async function load() {
       slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
       datesSet(info) {
         get('range').textContent = info.view.title;
+        get('day').setAttribute('aria-pressed', String(period === 'day'));
         get('week').setAttribute('aria-pressed', String(period === 'week'));
         get('month').setAttribute('aria-pressed', String(period === 'month'));
         get('prev').disabled = info.startStr.slice(0, 10) <= display.range.start.slice(0, 10);
         get('next').disabled = info.endStr.slice(0, 10) >= display.range.end.slice(0, 10);
+        requestAnimationFrame(alignCurrentTime);
       },
       eventClick(info) { showTime(info.event); },
       dayCellDidMount(info) {
@@ -157,6 +170,13 @@ async function load() {
         mark.className = 'studio-mini-booking';
         mark.style.top = `${block.top}%`;
         mark.style.height = `${block.height}%`;
+        mark.style.left = `calc(${block.column / block.columns * 100}% + 1px)`;
+        mark.style.width = `calc(${100 / block.columns}% - 2px)`;
+        mark.title = `${block.start}–${block.end}`;
+        const label = document.createElement('span');
+        label.className = 'studio-mini-time';
+        label.textContent = `${block.start}–${block.end}`;
+        mark.append(label);
         track.append(mark);
       }
       const line = document.createElement('span');
@@ -172,6 +192,9 @@ async function load() {
     const updated = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
     get('summary-status').textContent = `한국 시간 ${updated} 갱신${days.some(day => day.count === null) ? ' · — 미조회' : ''}`;
     get('access-state').textContent += ` · ${updated} 갱신`;
+    if (qrEntry && !selectedDate) requestAnimationFrame(() => {
+      get('calendar').scrollIntoView({ block: 'start', behavior: 'instant' });
+    });
   } catch {
     calendar?.destroy();
     calendar = null;
@@ -191,16 +214,18 @@ async function load() {
 }
 function changeView() {
   if (!calendar) return;
-  calendar.setOption('height', !mobile.matches && period === 'month' ? 600 : 'auto');
+  calendar.setOption('height', calendarHeight());
   calendar.changeView(view());
+  get('day').setAttribute('aria-pressed', String(period === 'day'));
   get('week').setAttribute('aria-pressed', String(period === 'week'));
   get('month').setAttribute('aria-pressed', String(period === 'month'));
 }
+get('day').onclick = () => { period = 'day'; changeView(); };
 get('week').onclick = () => { period = 'week'; changeView(); };
 get('month').onclick = () => { period = 'month'; changeView(); };
 get('prev').onclick = () => calendar?.prev();
 get('next').onclick = () => calendar?.next();
-get('today').onclick = () => calendar?.gotoDate(seoulDate());
+get('today').onclick = () => { calendar?.gotoDate(seoulDate()); requestAnimationFrame(alignCurrentTime); };
 get('reload').onclick = load;
 get('retry').onclick = load;
 get('dialog-close').onclick = () => get('dialog').close();

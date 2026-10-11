@@ -1,4 +1,9 @@
 .studio-mobile-link { display: none; }
+#studio-day { display: none; }
+.studio-mini-booking { container-type: size; }
+.studio-mini-time { display: none; color: white; font-size: 10px; line-height: 14px; white-space: nowrap; }
+@container (min-width: 70px) and (min-height: 16px) { .studio-mini-time { display: block; } }
+#studio-calendar { scroll-margin-top: 80px; }
 .home-page .hero { grid-template-columns: minmax(0, 7fr) minmax(260px, 3fr); gap: 24px; min-height: 520px; }
 .studio-summary { --mini-height: 160px; position: relative; z-index: 2; align-self: start; padding: 24px; background: rgba(245, 248, 245, .95); color: #203d30; border-radius: 4px; }
 .studio-summary h2 { margin: 8px 0; font-size: 26px; line-height: 1.2; }
@@ -101,5 +106,9 @@
   #studio-calendar .fc-dayGridMonth-view .fc-daygrid-day-events { display: none; }
   #studio-calendar .fc-dayGridMonth-view .fc-daygrid-day-frame { min-height: 72px; }
   #studio-calendar .studio-month-count { display: block; width: 100%; min-height: 36px; margin: 2px 0; padding: 4px 0; border: 0; border-radius: 3px; background: #e2effc; color: #185896; font-size: 11px; font-weight: 700; white-space: nowrap; }
-  .studio-section button { padding: 9px 12px; }
+  .studio-section button { padding: 9px 10px; }
+  #studio-day { display: inline-block; }
+  .studio-mini-time { display: none; }
+  #studio-calendar .fc-timeGridDay-view .fc-timegrid-slot { height: 52px; }
+  #studio-calendar .fc-timeGridDay-view .fc-event-time { white-space: nowrap; }
 }

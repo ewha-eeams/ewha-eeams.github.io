@@ -52,9 +52,23 @@ export function busyWeekSummary(display, today) {
     const blocks = covered ? display.events.flatMap(event => {
       const begin = Math.max(visibleStart, Date.parse(`${event.start}Z`));
       const finish = Math.min(visibleEnd, Date.parse(`${event.end}Z`));
-      return finish > begin ? [{ top: (begin - visibleStart) / 50400000 * 100,
+      return finish > begin ? [{ start: event.start.slice(11, 16), end: event.end.slice(11, 16), top: (begin - visibleStart) / 50400000 * 100,
         height: (finish - begin) / 50400000 * 100 }] : [];
     }) : [];
+    // Partition connected overlap groups into non-overlapping columns.
+    blocks.sort((a, b) => a.top - b.top || b.height - a.height);
+    let group = [], ends = [], groupEnd = -1;
+    const finishGroup = () => group.forEach(block => { block.columns = ends.length; });
+    for (const block of blocks) {
+      if (block.top >= groupEnd) { finishGroup(); group = []; ends = []; groupEnd = -1; }
+      let column = ends.findIndex(end => end <= block.top);
+      if (column < 0) column = ends.length;
+      block.column = column;
+      ends[column] = block.top + block.height;
+      groupEnd = Math.max(groupEnd, ends[column]);
+      group.push(block);
+    }
+    finishGroup();
     return { date, blocks, weekday: ['일','월','화','수','목','금','토'][new Date(`${date}T00:00:00Z`).getUTCDay()],
       count: covered ? display.events.filter(event => event.start < to && event.end > from).length : null };
   });
