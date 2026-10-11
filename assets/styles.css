@@ -1188,6 +1188,21 @@ select {
   margin-bottom: 0;
 }
 
+.section-disclosure{display:none}
+@media(max-width:680px){
+  .mobile-disclosure-section{padding-top:24px;padding-bottom:24px;border-bottom:1px solid #cdd8d1}
+  .mobile-disclosure-section .section-desktop-title{display:none}
+  .mobile-disclosure-section .section-disclosure{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:48px;padding:0;border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+  .section-disclosure::after{content:"";width:9px;height:9px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(225deg);flex-shrink:0;margin-right:5px}
+  .section-disclosure[aria-expanded="false"]::after{transform:rotate(45deg)}
+  .section-disclosure:focus-visible{outline:2px solid #267c91;outline-offset:5px}
+  .mobile-disclosure-section.is-collapsed>:not(:first-child){display:none!important}
+  .mobile-disclosure-section .section-heading{margin-bottom:0}
+  .mobile-disclosure-section h2{font-size:24px;margin-bottom:8px}
+  .mobile-disclosure-section .heading-en{display:none}
+  .mobile-disclosure-section.is-collapsed{row-gap:0}
+}
+
 .detail-hero {
   padding: clamp(64px, 8vw, 104px) var(--page-gutter) clamp(46px, 6vw, 72px);
   background: #f1f5f3;
@@ -1214,6 +1229,13 @@ select {
   font-weight: 900;
   text-decoration: underline;
   text-underline-offset: 5px;
+}
+
+@media(max-width:680px){
+  .detail-hero{padding:28px var(--page-gutter) 24px}
+  .detail-hero h1{font-size:32px;margin-bottom:12px}
+  .detail-hero p:not(.section-label){font-size:16px;line-height:1.6}
+  .back-link{min-height:44px;align-items:center;margin-top:8px}
 }
 
 .detail-section {

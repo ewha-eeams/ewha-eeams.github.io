@@ -180,6 +180,12 @@ function sortDatedRows(rows) {
 }
 
 function setupMenu() {
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || !siteMenu.classList.contains("is-open")) return;
+    siteMenu.classList.remove("is-open");
+    menuToggle.setAttribute("aria-expanded", "false");
+    menuToggle.focus();
+  });
   menuToggle.addEventListener("click", () => {
     const isOpen = siteMenu.classList.toggle("is-open");
     menuToggle.setAttribute("aria-expanded", String(isOpen));

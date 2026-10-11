@@ -38,13 +38,14 @@ function updateViewport() {
   });
 }
 function alignCurrentTime() {
-  if (!calendar || period !== 'day') return;
+  if (!calendar) return;
   if (preservedScroll !== null) {
     const scroller = get('calendar').querySelector('.fc-scroller-liquid-absolute');
     if (scroller) scroller.scrollTop = preservedScroll;
     preservedScroll = null;
     return;
   }
+  if (period !== 'day') return;
   const today = calendar.view.activeStart.toISOString().slice(0, 10) <= seoulDate()
     && calendar.view.activeEnd.toISOString().slice(0, 10) > seoulDate();
   const now = civilNow();
@@ -67,9 +68,9 @@ function view() {
   return period === 'month' ? 'dayGridMonth' : 'timeGridWeek';
 }
 function showTime(event) {
-  get('dialog-title').textContent = '테스트 예약 시간';
+  get('dialog-title').textContent = '예약 시간';
   get('dialog-info').textContent = `${event.startStr.slice(0, 16).replace('T', ' ')} ~ ${event.endStr.slice(0, 16).replace('T', ' ')} (한국 시간)`;
-  get('dialog-note').textContent = '연결 확인용 일정입니다. 실제 예약이나 재실 여부를 나타내지 않습니다.';
+  get('dialog-note').textContent = '예약된 시간입니다. 현재 재실 여부를 나타내지는 않습니다.';
   get('cancel').hidden = true;
   get('dialog').showModal();
 }
@@ -292,7 +293,6 @@ get('prev').onclick = () => moveDate(-1);
 get('next').onclick = () => moveDate(1);
 get('today').onclick = () => {
   preservedScroll = null;
-  if (mobile.matches) { period = 'day'; changeView(); }
   calendar?.gotoDate(seoulDate()); requestAnimationFrame(alignCurrentTime);
 };
 let gesture = null, suppressClickUntil = 0;

@@ -431,6 +431,12 @@ function renderPeople(rows) {
 }
 
 function setupMenu() {
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || !siteMenu.classList.contains("is-open")) return;
+    siteMenu.classList.remove("is-open");
+    menuToggle.setAttribute("aria-expanded", "false");
+    menuToggle.focus();
+  });
   menuToggle.addEventListener("click", () => {
     const isOpen = siteMenu.classList.toggle("is-open");
     menuToggle.setAttribute("aria-expanded", String(isOpen));
@@ -473,5 +479,62 @@ async function initData() {
   }
 }
 
+function setupMobileSections() {
+  const media = matchMedia("(max-width: 680px)");
+  const key = "eeams.mobile-sections.v1";
+  let saved = {};
+  try { saved = JSON.parse(sessionStorage.getItem(key)) || {}; } catch {}
+  const sections = ["archive", "research", "education", "people", "structure"].map(id => {
+    const section = document.getElementById(id);
+    const heading = section.querySelector("h2");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "section-disclosure";
+    button.innerHTML = heading.innerHTML;
+    const label = document.createElement("span");
+    label.className = "section-desktop-title";
+    while (heading.firstChild) label.append(heading.firstChild);
+    heading.append(label, button);
+    const panels = [...section.children].slice(1);
+    panels.forEach((panel, index) => { panel.id ||= id + "-panel-" + index; });
+    button.setAttribute("aria-controls", panels.map(panel => panel.id).join(" "));
+    section.classList.add("mobile-disclosure-section");
+    const entry = { section, button, open: saved[id] === true };
+    const update = () => {
+      section.classList.toggle("is-collapsed", media.matches && !entry.open);
+      button.setAttribute("aria-expanded", String(entry.open));
+    };
+    button.addEventListener("click", () => {
+      entry.open = !entry.open;
+      saved[id] = entry.open;
+      try { sessionStorage.setItem(key, JSON.stringify(saved)); } catch {}
+      update();
+    });
+    entry.update = update;
+    update();
+    return entry;
+  });
+  function reveal(hash) {
+    let target;
+    try { target = document.getElementById(decodeURIComponent(hash.slice(1))); } catch { return; }
+    const entry = sections.find(item => item.section === target || item.section.contains(target));
+    if (!entry) return;
+    entry.open = true;
+    saved[entry.section.id] = true;
+    try { sessionStorage.setItem(key, JSON.stringify(saved)); } catch {}
+    entry.update();
+  }
+  document.addEventListener("click", event => {
+    const link = event.target.closest("a[href]");
+    if (!link) return;
+    const url = new URL(link.href, location.href);
+    if (url.origin === location.origin && url.pathname === location.pathname) reveal(url.hash);
+  }, true);
+  window.addEventListener("hashchange", () => reveal(location.hash));
+  media.addEventListener("change", () => sections.forEach(entry => entry.update()));
+  reveal(location.hash);
+}
+
+setupMobileSections();
 setupMenu();
 initData();
