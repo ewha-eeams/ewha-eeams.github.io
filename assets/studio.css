@@ -161,7 +161,8 @@
   #studio-viewport.is-week-scroll .fc-timeGridWeek-view{font-size:12px}
   #studio-viewport.is-week-scroll .fc-timeGridWeek-view .fc-col-header-cell-cushion{font-size:13px;padding:8px 0}
   #studio-viewport.is-week-scroll .fc-timegrid-slot:not(.fc-timegrid-slot-minor){border-top-color:#bdccc4}
-  #studio-viewport.is-week-scroll .fc-timegrid-slots{z-index:4;pointer-events:none}
+  /* Keep grid lines behind events while the translated time labels stay above. */
+  #studio-viewport.is-week-scroll .fc-timegrid-slots{z-index:auto;pointer-events:none}
   #studio-viewport.is-week-scroll .fc-timegrid-slot-label-frame,
   #studio-viewport.is-week-scroll .fc-timegrid-axis-frame{position:relative;background:#edf1ef;z-index:4;transform:translateX(var(--week-offset,0px));height:100%}
   #studio-week-slider{padding:4px 0 12px}
