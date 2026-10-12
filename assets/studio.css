@@ -24,7 +24,6 @@
 .studio-mini-booking { position: absolute; left: 2px; right: 2px; min-height: 2px; background: #3278c2; border-left: 2px solid #215b99; border-radius: 2px; }
 .studio-mini-booking.studio-class { background: #d5edab; border-color: #90b95c; overflow: hidden; }
 .studio-mini-booking.studio-class .studio-mini-time { color: #253d17; }
-.studio-mini-class-title { display: block; padding: 1px 2px; font-size: 10px; line-height: 13px; color: #253d17; overflow-wrap: anywhere; }
 .studio-mini-now { position: absolute; left: 0; right: 0; height: 2px; background: #ba514b; z-index: 2; }
 .studio-mini-now[hidden] { display: none; }
 .studio-mini-now::before { content: ''; position: absolute; width: 5px; height: 5px; border-radius: 50%; background: #ba514b; top: -1.5px; left: 0; }

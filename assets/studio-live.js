@@ -235,17 +235,11 @@ async function load(options = {}) {
         mark.style.height = `${block.height}%`;
         mark.style.left = `calc(${block.column / block.columns * 100}% + 1px)`;
         mark.style.width = `calc(${100 / block.columns}% - 2px)`;
-        mark.title = `${block.title ? block.title+' ' : ''}${block.start}–${block.end}`;
+        mark.title = `${block.start}–${block.end}`;
         const label = document.createElement('span');
         label.className = 'studio-mini-time';
         label.textContent = `${block.start}–${block.end}`;
         mark.append(label);
-        if (block.title) {
-          const title = document.createElement('span');
-          title.className = 'studio-mini-class-title';
-          title.textContent = block.title;
-          mark.append(title);
-        }
         track.append(mark);
       }
       const line = document.createElement('span');
