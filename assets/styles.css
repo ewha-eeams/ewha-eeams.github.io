@@ -1863,7 +1863,8 @@ select {
     right: 18px;
     top: 64px;
     display: none;
-    min-width: 190px;
+    width: min(280px, calc(100vw - 36px));
+    gap: 0;
     flex-direction: column;
     align-items: stretch;
     border: 1px solid var(--line);
@@ -1871,6 +1872,18 @@ select {
     padding: 8px;
     box-shadow: var(--shadow);
   }
+
+  .site-menu a, .home-header .site-menu a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 10px 14px;
+    font-size: 16px;
+    line-height: 1.4;
+    border-radius: 4px;
+  }
+  .site-menu a::after { display: none; }
+  .home-header .site-menu a:hover, .home-header .site-menu a:focus-visible { background: rgba(255,255,255,.1); }
 
   .site-menu.is-open {
     display: flex;
@@ -1994,6 +2007,6 @@ select {
 
   .footer-wordmark {
     justify-self: start;
-    width: min(100%, 210px);
+    width: min(100%, 120px);
   }
 }
