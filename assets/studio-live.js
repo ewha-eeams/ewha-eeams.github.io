@@ -1,4 +1,4 @@
-import { busyCalendarData, busyWeekSummary, mondayOfWeek } from './studio-readonly.mjs?v=6';
+import { busyCalendarData, busyWeekSummary, mondayOfWeek } from './studio-readonly.mjs?v=7';
 import { seoulDate } from './studio-model.mjs';
 
 // Public, test-only read endpoint. No credentials or personal Calendar ID.
@@ -70,7 +70,7 @@ function view() {
 }
 function showTime(event) {
   const isClass = event.extendedProps.kind === 'class';
-  get('dialog-title').textContent = isClass ? event.title : '예약 시간';
+  get('dialog-title').textContent = isClass ? event.title : '스튜디오 예약 중';
   get('dialog-info').textContent = `${event.startStr.slice(0, 16).replace('T', ' ')} ~ ${event.endStr.slice(0, 16).replace('T', ' ')} (한국 시간)`;
   get('dialog-note').textContent = isClass ? '고정 수업 · 구글 캘린더에서만 수정·삭제할 수 있습니다.' : '예약된 시간입니다. 현재 재실 여부를 나타내지는 않습니다.';
   get('cancel').hidden = true;

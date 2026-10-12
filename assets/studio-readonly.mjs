@@ -29,7 +29,7 @@ export function busyCalendarData(data) {
   return {
     range: { start: seoulCivilTime(data.range.start), end: seoulCivilTime(data.range.end) },
     events: data.busy.map((item, index) => ({
-      id: `busy-${index}`, title: item.kind === 'class' ? item.title : '예약 시간',
+      id: `busy-${index}`, title: item.kind === 'class' ? item.title : '스튜디오 예약 중',
       ...(item.kind === 'class' ? {backgroundColor:'#d5edab',borderColor:'#90b95c',textColor:'#253d17',
         classNames:['studio-class'],extendedProps:{kind:'class'}} : {}),
       start: seoulCivilTime(item.start), end: seoulCivilTime(item.end),
