@@ -22,6 +22,9 @@
 .studio-day > span:first-child { font-size: 11px; color: #526456; }
 .studio-mini-track { position: relative; display: block; height: var(--mini-height); background: rgba(255,255,255,.45); overflow: hidden; border-radius: 2px; }
 .studio-mini-booking { position: absolute; left: 2px; right: 2px; min-height: 2px; background: #3278c2; border-left: 2px solid #215b99; border-radius: 2px; }
+.studio-mini-booking.studio-class { background: #d5edab; border-color: #90b95c; overflow: hidden; }
+.studio-mini-booking.studio-class .studio-mini-time { color: #253d17; }
+.studio-mini-class-title { display: block; padding: 1px 2px; font-size: 10px; line-height: 13px; color: #253d17; overflow-wrap: anywhere; }
 .studio-mini-now { position: absolute; left: 0; right: 0; height: 2px; background: #ba514b; z-index: 2; }
 .studio-mini-now[hidden] { display: none; }
 .studio-mini-now::before { content: ''; position: absolute; width: 5px; height: 5px; border-radius: 50%; background: #ba514b; top: -1.5px; left: 0; }
@@ -123,7 +126,7 @@
   #studio-calendar .fc-timeGridWeek-view .fc-col-header-cell-cushion { padding: 7px 0; font-size: 10px; white-space: normal; }
   .studio-week-heading { display: grid; gap: 2px; line-height: 1.3; text-align: center; white-space: nowrap; }
   #studio-calendar .fc-timeGridWeek-view .fc-timegrid-slot { height: 44px; }
-  #studio-calendar .fc-timeGridWeek-view .fc-event-title { display: none; }
+  #studio-calendar .fc-timeGridWeek-view .fc-event-title { white-space: normal; overflow-wrap: anywhere; }
   #studio-calendar .fc-timeGridWeek-view .fc-event-time { font-size: 10px; line-height: 1.3; }
   #studio-calendar .fc-list-event-time { white-space: nowrap; width: 110px; }
   #studio-calendar .fc-daygrid-day-events { min-height: 24px; }
@@ -137,7 +140,7 @@
   #studio-calendar .fc-timeGridDay-view .fc-event-time { white-space: nowrap; }
   #studio-calendar .fc-timeGridThreeDay-view { touch-action: pan-y pinch-zoom; }
   #studio-calendar .fc-timeGridThreeDay-view .fc-timegrid-slot { height: 52px; }
-  #studio-calendar .fc-timeGridThreeDay-view .fc-event-title { display: none; }
+  #studio-calendar .fc-timeGridThreeDay-view .fc-event-title { white-space: normal; overflow-wrap: anywhere; }
   #studio-calendar .fc-timeGridThreeDay-view .fc-event-time { font-size: 11px; overflow-wrap: normal; }
   #studio-calendar .fc-timeGridThreeDay-view .fc-col-header-cell-cushion { padding: 5px 1px; font-size: 11px; }
 }

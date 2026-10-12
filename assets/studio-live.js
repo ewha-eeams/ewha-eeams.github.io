@@ -1,4 +1,4 @@
-import { busyCalendarData, busyWeekSummary, mondayOfWeek } from './studio-readonly.mjs?v=5';
+import { busyCalendarData, busyWeekSummary, mondayOfWeek } from './studio-readonly.mjs?v=6';
 import { seoulDate } from './studio-model.mjs';
 
 // Public, test-only read endpoint. No credentials or personal Calendar ID.
@@ -69,9 +69,10 @@ function view() {
   return period === 'month' ? 'dayGridMonth' : 'timeGridWeek';
 }
 function showTime(event) {
-  get('dialog-title').textContent = '예약 시간';
+  const isClass = event.extendedProps.kind === 'class';
+  get('dialog-title').textContent = isClass ? event.title : '예약 시간';
   get('dialog-info').textContent = `${event.startStr.slice(0, 16).replace('T', ' ')} ~ ${event.endStr.slice(0, 16).replace('T', ' ')} (한국 시간)`;
-  get('dialog-note').textContent = '예약된 시간입니다. 현재 재실 여부를 나타내지는 않습니다.';
+  get('dialog-note').textContent = isClass ? '고정 수업 · 구글 캘린더에서만 수정·삭제할 수 있습니다.' : '예약된 시간입니다. 현재 재실 여부를 나타내지는 않습니다.';
   get('cancel').hidden = true;
   get('dialog').showModal();
 }
@@ -183,7 +184,7 @@ async function load(options = {}) {
       eventDidMount(info) {
         info.el.tabIndex = 0;
         info.el.setAttribute('role', 'button');
-        info.el.setAttribute('aria-label', `${info.event.startStr.slice(0, 16).replace('T', ' ')} 테스트 예약 시간 보기`);
+        info.el.setAttribute('aria-label', `${info.event.startStr.slice(0, 16).replace('T', ' ')} ${info.event.title} 보기`);
         info.el.addEventListener('keydown', event => {
           if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); showTime(info.event); }
         });
@@ -229,15 +230,22 @@ async function load(options = {}) {
       for (const block of day.blocks) {
         const mark = document.createElement('span');
         mark.className = 'studio-mini-booking';
+        mark.classList.toggle('studio-class', block.kind === 'class');
         mark.style.top = `${block.top}%`;
         mark.style.height = `${block.height}%`;
         mark.style.left = `calc(${block.column / block.columns * 100}% + 1px)`;
         mark.style.width = `calc(${100 / block.columns}% - 2px)`;
-        mark.title = `${block.start}–${block.end}`;
+        mark.title = `${block.title ? block.title+' ' : ''}${block.start}–${block.end}`;
         const label = document.createElement('span');
         label.className = 'studio-mini-time';
         label.textContent = `${block.start}–${block.end}`;
         mark.append(label);
+        if (block.title) {
+          const title = document.createElement('span');
+          title.className = 'studio-mini-class-title';
+          title.textContent = block.title;
+          mark.append(title);
+        }
         track.append(mark);
       }
       const line = document.createElement('span');

@@ -7,11 +7,14 @@ const isoTime = value => typeof value === 'string'
 
 export function validBusyResponse(data) {
   if (!exactKeys(data, ['ok', 'schema', 'mode', 'timeZone', 'range', 'busy'])
-    || data.ok !== true || data.schema !== 1 || data.mode !== 'test-read-only'
+    || data.ok !== true || ![1, 2].includes(data.schema) || data.mode !== 'test-read-only'
     || data.timeZone !== 'Asia/Seoul' || !Array.isArray(data.busy) || data.busy.length > 1000) return false;
   const interval = value => exactKeys(value, ['start', 'end'])
     && isoTime(value.start) && isoTime(value.end) && value.end > value.start;
-  return interval(data.range) && data.busy.every(item => interval(item)
+  return interval(data.range) && data.busy.every(item => (interval(item)
+    || (data.schema === 2 && exactKeys(item, ['start','end','kind','title'])
+      && item.kind === 'class' && typeof item.title === 'string' && item.title.trim().length > 0
+      && item.title.length <= 200 && isoTime(item.start) && isoTime(item.end) && item.end > item.start))
     && item.start >= data.range.start && item.end <= data.range.end);
 }
 
@@ -26,7 +29,9 @@ export function busyCalendarData(data) {
   return {
     range: { start: seoulCivilTime(data.range.start), end: seoulCivilTime(data.range.end) },
     events: data.busy.map((item, index) => ({
-      id: `busy-${index}`, title: '예약 시간',
+      id: `busy-${index}`, title: item.kind === 'class' ? item.title : '예약 시간',
+      ...(item.kind === 'class' ? {backgroundColor:'#d5edab',borderColor:'#90b95c',textColor:'#253d17',
+        classNames:['studio-class'],extendedProps:{kind:'class'}} : {}),
       start: seoulCivilTime(item.start), end: seoulCivilTime(item.end),
     })),
   };
@@ -53,7 +58,8 @@ export function busyWeekSummary(display, today) {
       const begin = Math.max(visibleStart, Date.parse(`${event.start}Z`));
       const finish = Math.min(visibleEnd, Date.parse(`${event.end}Z`));
       return finish > begin ? [{ start: event.start.slice(11, 16), end: event.end.slice(11, 16), top: (begin - visibleStart) / 50400000 * 100,
-        height: (finish - begin) / 50400000 * 100 }] : [];
+        height: (finish - begin) / 50400000 * 100,
+        ...(event.extendedProps?.kind === 'class' ? {kind:'class',title:event.title} : {}) }] : [];
     }) : [];
     // Partition connected overlap groups into non-overlapping columns.
     blocks.sort((a, b) => a.top - b.top || b.height - a.height);
