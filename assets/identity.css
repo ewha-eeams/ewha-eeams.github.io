@@ -39,7 +39,7 @@
   .home-page .section-actions { margin-top:20px; }
   .home-page .section-actions .detail-link { min-height:44px; }
   .home-page .mobile-disclosure-section { padding-top:24px; padding-bottom:24px; }
-  .home-page .mobile-disclosure-section:not(#education) { background:#f8faf9; color:#00462a; border-bottom-color:#b7cec7; }
+  .home-page .mobile-disclosure-section:not(.split-band) { background:#f8faf9; color:#00462a; border-bottom-color:#b7cec7; }
   .home-page #archive, .home-page #structure { background:#dcebe6; }
   .home-page .mobile-disclosure-section:not(.is-collapsed)>:nth-child(2) { margin-top:20px; }
   .home-page .home-shortcuts a span { font-size:12px; line-height:1.5; }
