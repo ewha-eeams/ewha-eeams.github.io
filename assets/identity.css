@@ -1,0 +1,27 @@
+:root {
+  --identity-gradient: linear-gradient(110deg, #00462a 0%, #00462a 22%, #075d65 60%, #185ba0 100%);
+  --identity-blue: #185b8f;
+}
+.home-header, .utility-bar, .site-footer, .split-band { background: var(--identity-gradient); }
+.home-page .hero {
+  background:
+    linear-gradient(90deg, rgba(7,20,14,.72), rgba(7,20,14,.34) 60%, rgba(7,20,14,.08)),
+    url('media/home/eeams-hero-main-no-right-led.png') center / cover no-repeat;
+}
+.home-shortcuts a { background:#f8fafb; border-color:#d7e2e6; border-top:3px solid #2875b9; }
+.home-shortcuts a strong, .home-shortcuts a::after { color:var(--identity-blue); }
+.home-shortcuts a:hover { background:#edf5fa; border-color:#2875b9; }
+.studio-summary { background:#f7faf9; box-shadow:0 12px 32px #102b381a; }
+.studio-overview-link { color:var(--identity-blue); }
+.studio-overview-link:hover { color:#00462a; }
+.studio-section .studio-booking-link { background:var(--identity-blue); border-color:var(--identity-blue); }
+.studio-section .studio-booking-link:hover { background:#10456f; color:white; }
+.split-band .detail-link { color:var(--identity-blue); }
+.split-band .detail-link:hover { color:white; }
+.site-footer { background:linear-gradient(90deg,#185ba0 0%,#075d65 40%,#00462a 78%); color:rgba(255,255,255,.9); }
+.footer-credits { color:rgba(255,255,255,.75); }
+@media(max-width:680px) {
+  .home-header, .site-footer { background:linear-gradient(90deg,#00462a 0%,#00462a 40%,#075d65 70%,#185ba0 100%); }
+  .home-header .site-menu { background:#085763; }
+  .home-shortcuts a { border-top:1px solid #d7e2e6; border-left:3px solid #2875b9; }
+}
