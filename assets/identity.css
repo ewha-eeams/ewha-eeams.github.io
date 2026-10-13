@@ -31,6 +31,7 @@
 }
 #studio-access-state:not(:empty) { padding:10px 12px; border-left:3px solid #2875b9; background:#e3edf3; color:#294f66; }
 @media(max-width:680px) {
+  .home-page .home-shortcuts { display:none; }
   .home-header { background:linear-gradient(90deg,#00462a 0%,#00462a 40%,#075d65 70%,#185ba0 100%); }
   .site-footer { background:linear-gradient(90deg,#00462a 0%,#00462a 40%,#084d46 70%,#164c66 100%); }
   .home-header .site-menu { background:#085763; }
