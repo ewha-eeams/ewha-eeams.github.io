@@ -298,7 +298,13 @@ function syncWeekWindow(centerToday = false) {
   viewport.classList.toggle('is-week-scroll', enabled);
   get('week-slider').hidden = !enabled;
   get('day').hidden = true;
-  if (!enabled) return;
+  if (!enabled) {
+    viewport.scrollLeft = 0;
+    viewport.style.setProperty('--week-offset', '0px');
+    // FullCalendar measured the old, expanded week width before this class changed.
+    calendar?.updateSize();
+    return;
+  }
   calendar?.updateSize();
   if (centerToday && calendar) {
     const offset = Math.round((calendar.getDate() - calendar.view.activeStart) / 86400000);
