@@ -128,11 +128,7 @@ async function load(options = {}) {
         if (!mobile.matches || info.view.type !== 'timeGridWeek') return info.text;
         const label = document.createElement('span');
         label.className = 'studio-week-heading';
-        for (const text of [String(info.date.getUTCDate()), ['일', '월', '화', '수', '목', '금', '토'][info.date.getUTCDay()]]) {
-          const line = document.createElement('span');
-          line.textContent = text;
-          label.append(line);
-        }
+        label.textContent = `${info.date.getUTCDate()}일 (${['일', '월', '화', '수', '목', '금', '토'][info.date.getUTCDay()]})`;
         return { domNodes: [label] };
       },
       now: civilNow(), nowIndicator: true,
