@@ -39,16 +39,8 @@
   .home-page .section-actions { margin-top:20px; }
   .home-page .section-actions .detail-link { min-height:44px; }
   .home-page .mobile-disclosure-section { padding-top:24px; padding-bottom:24px; }
-  .home-page .mobile-disclosure-section { background:#f8faf9; color:#00462a; border-bottom-color:#b7cec7; }
-  .home-page #archive, .home-page #education, .home-page #structure { background:#dcebe6; }
-  .home-page #education h2, .home-page #education .timeline-list strong { color:#00462a; }
-  .home-page #education p { color:#354f47; }
-  .home-page #education .section-label,
-  .home-page #education .timeline-list span,
-  .home-page #education .bilingual-secondary { color:#49665e; }
-  .home-page #education .education-card-action,
-  .home-page #education .detail-link { color:#185b8f; border-color:#839f98; }
-  .home-page #education .detail-link:hover { background:#c8dfd6; color:#10456f; }
+  .home-page .mobile-disclosure-section:not(#education) { background:#f8faf9; color:#00462a; border-bottom-color:#b7cec7; }
+  .home-page #archive, .home-page #structure { background:#dcebe6; }
   .home-page .mobile-disclosure-section:not(.is-collapsed)>:nth-child(2) { margin-top:20px; }
   .home-page .home-shortcuts a span { font-size:12px; line-height:1.5; }
 }
