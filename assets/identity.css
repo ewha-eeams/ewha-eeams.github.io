@@ -18,10 +18,26 @@
 .studio-section .studio-booking-link:hover { background:#10456f; color:white; }
 .split-band .detail-link { color:var(--identity-blue); }
 .split-band .detail-link:hover { color:white; }
-.site-footer { background:linear-gradient(90deg,#185ba0 0%,#075d65 40%,#00462a 78%); color:rgba(255,255,255,.9); }
+.split-band { background:linear-gradient(115deg,#00462a 0%,#075b54 55%,#155f80 100%); }
+.site-footer { background:linear-gradient(90deg,#164c66 0%,#084d46 40%,#00462a 78%); color:rgba(255,255,255,.9); }
 .footer-credits { color:rgba(255,255,255,.75); }
+.home-page .section-actions .detail-link { border-color:#96b0ad; }
+.home-page .split-band .detail-link { background:transparent; border-color:#b3d2ce; color:#fff; }
+.home-page .split-band .detail-link:hover { background:#ffffff18; }
+.home-page .section-label { font-size:12px; line-height:1.5; font-weight:600; }
+.home-page .heading-en { line-height:1.5; font-weight:500; }
+.studio-booking-link:focus-visible, .detail-link:focus-visible, .studio-overview-link:focus-visible {
+  outline:3px solid #2875b9; outline-offset:4px;
+}
+#studio-access-state:not(:empty) { padding:10px 12px; border-left:3px solid #2875b9; background:#e3edf3; color:#294f66; }
 @media(max-width:680px) {
-  .home-header, .site-footer { background:linear-gradient(90deg,#00462a 0%,#00462a 40%,#075d65 70%,#185ba0 100%); }
+  .home-header { background:linear-gradient(90deg,#00462a 0%,#00462a 40%,#075d65 70%,#185ba0 100%); }
+  .site-footer { background:linear-gradient(90deg,#00462a 0%,#00462a 40%,#084d46 70%,#164c66 100%); }
   .home-header .site-menu { background:#085763; }
   .home-shortcuts a { border-top:1px solid #d7e2e6; border-left:3px solid #2875b9; }
+  .home-page .section-actions { margin-top:20px; }
+  .home-page .section-actions .detail-link { min-height:44px; }
+  .home-page .mobile-disclosure-section { padding-top:24px; padding-bottom:24px; }
+  .home-page .mobile-disclosure-section:not(.is-collapsed)>:nth-child(2) { margin-top:20px; }
+  .home-page .home-shortcuts a span { font-size:12px; line-height:1.5; }
 }
