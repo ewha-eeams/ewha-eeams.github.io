@@ -2,7 +2,6 @@
   "date": "2026-05-20",
   "slug": "concert1",
   "title": "Soundscape 2026",
-  "title_en": "CMS 입력 시험, \"한글·인용\"",
   "venue": "이화여자대학교 음악관 국악연주홀",
   "venue_en": "Korean Music Recital Hall, Music Building, Ewha Womans University",
   "poster": "/cms-sandbox/media/concerts/2026/2026-concert1-poster.jpg",
@@ -12,7 +11,7 @@
       "composer": "장준호",
       "composer_en": "Junho Jang",
       "work_title": "왜곡된 프리즘",
-      "work_title_en": "Form trial, \"인용\"",
+      "work_title_en": "A Distorted Prism",
       "format": "2-ch Live Electronics"
     },
     {
