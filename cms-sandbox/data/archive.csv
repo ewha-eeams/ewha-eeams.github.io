@@ -1,5 +1,6 @@
-date,slug,title,title_en,venue,venue_en,composer,composer_en,work_order,work_title,work_title_en,format,media_url
-2026-05-20,concert1,Soundscape 2026,,이화여자대학교 음악관 국악연주홀,"Korean Music Recital Hall, Music Building, Ewha Womans University",장준호,Junho Jang,1,왜곡된 프리즘,A Distorted Prism,2-ch Live Electronics,
+﻿date,slug,title,title_en,venue,venue_en,composer,composer_en,work_order,work_title,work_title_en,format,media_url
+2026-05-20,concert1,Soundscape 2026,,이화여자대학교 음악관 국악연주홀,"Korean Music Recital Hall, Music Building, Ewha Womans University",장준호,Junho Jang,1,왜곡된 프리즘,"CMS CSV 시험, ""인용""
+둘째 줄",2-ch Live Electronics,
 2026-05-20,concert1,Soundscape 2026,,이화여자대학교 음악관 국악연주홀,"Korean Music Recital Hall, Music Building, Ewha Womans University",문민혜,,2,수향(水響),Aqueous Flow,2-ch Tape,
 2026-05-20,concert1,Soundscape 2026,,이화여자대학교 음악관 국악연주홀,"Korean Music Recital Hall, Music Building, Ewha Womans University",조희원,,3,양흘리기,Sheep Spilling,2-ch Tape,
 2026-05-20,concert1,Soundscape 2026,,이화여자대학교 음악관 국악연주홀,"Korean Music Recital Hall, Music Building, Ewha Womans University",도하나,Hana Do,4,인안나,Inanna,Guitar and 4-ch Audio Visual,
