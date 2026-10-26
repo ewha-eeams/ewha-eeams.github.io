@@ -1,0 +1,14 @@
+# Trial only: points to copies, never data/archive.csv or live media paths.
+media:
+  - name: concert_trial_media
+    label: 공연 자료 사본
+    input: cms-sandbox/media/concerts
+    output: /cms-sandbox/media/concerts
+    rename: false
+    extensions: [jpg, pdf]
+content:
+  - name: concert_archive
+    label: 공연 아카이브 사본
+    type: file
+    path: cms-sandbox/data/archive.csv
+    format: datagrid
