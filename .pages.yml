@@ -7,8 +7,85 @@ media:
     rename: false
     extensions: [jpg, pdf]
 content:
+  - name: concert_form
+    label: 공연 입력 폼 · 사본
+    type: file
+    path: cms-sandbox/forms/2026-concert1.json
+    format: json
+    operations:
+      create: false
+      rename: false
+      delete: false
+    fields:
+      - name: date
+        label: 공연일
+        type: string
+        readonly: true
+      - name: slug
+        label: 공연 식별자
+        type: string
+        readonly: true
+      - name: title
+        label: 공연명
+        type: string
+        required: true
+      - name: title_en
+        label: 공연명 · 영문 (선택)
+        type: string
+      - name: venue
+        label: 장소
+        type: string
+        required: true
+      - name: venue_en
+        label: 장소 · 영문 (선택)
+        type: string
+      - name: poster
+        label: 포스터
+        type: image
+        options:
+          media: concert_trial_media
+          path: cms-sandbox/media/concerts/2026
+          extensions: [jpg]
+          rename: false
+      - name: program_book
+        label: 프로그램북
+        type: file
+        options:
+          media: concert_trial_media
+          path: cms-sandbox/media/concerts/2026
+          extensions: [pdf]
+          rename: false
+      - name: works
+        label: 작품 목록
+        type: object
+        list:
+          min: 1
+          collapsible:
+            collapsed: true
+            summary: '{index}. {composer} · {work_title}'
+        fields:
+          - name: composer
+            label: 작곡가
+            type: string
+            required: true
+          - name: composer_en
+            label: 작곡가 · 영문 (선택)
+            type: string
+          - name: work_title
+            label: 작품명
+            type: string
+            required: true
+          - name: work_title_en
+            label: 작품명 · 영문 (선택)
+            type: string
+          - name: format
+            label: 편성
+            type: string
+          - name: media_url
+            label: 관련 자료 URL (선택)
+            type: string
   - name: concert_archive
-    label: 공연 아카이브 사본
+    label: CSV 사본 · 형식 검증용
     type: file
     path: cms-sandbox/data/archive.csv
     format: datagrid
