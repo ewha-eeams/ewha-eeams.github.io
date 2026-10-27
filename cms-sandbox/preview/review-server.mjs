@@ -6,7 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { join, resolve, dirname } from 'node:path';
 import { buildReview, publicReview, preparePlan, assertCurrent, allowedPublishPath } from './review-model.mjs';
 import { parseCsv } from './csv-parser.mjs';
-import { repository, branch, rawUrl } from './preview-model.mjs';
+import { repository, branch, rawUrl, uuidPattern } from './preview-model.mjs';
 
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const gitSha = bytes => createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
@@ -36,7 +36,8 @@ export class GitHubReader {
   }
   async bytes(commit, path) {
     const file = (await this.tree(commit)).find(f => f.path === path && f.type === 'blob');
-    if (!file || file.size > maxFile) throw new Error(`파일을 확인해 주세요: ${path}`);
+    if (!file) { const error = new Error(`파일을 찾지 못했습니다: ${path}`); error.code = 'ENOENT'; throw error; }
+    if (file.size > maxFile) throw new Error(`파일을 확인해 주세요: ${path}`);
     if (!this.bytesCache.has(file.sha)) {
       const bytes = Buffer.from(await (await this.response(rawUrl(commit, path))).arrayBuffer());
       if (bytes.length !== file.size || gitSha(bytes) !== file.sha) throw new Error(`저장된 파일과 내용이 다릅니다: ${path}`);
@@ -56,6 +57,18 @@ export function createReviewService({ reader = new GitHubReader(), artifactRoot,
   };
   return {
     reader, results,
+    async findResult(id) {
+      if (results.has(id)) return results.get(id);
+      if (!uuidPattern.test(id)) throw new Error('반영 시험 결과를 확인해 주세요.');
+      const directory = join(artifactRoot, id), receipt = JSON.parse(await readFile(join(directory, 'review.json'), 'utf8'));
+      if (receipt.schema !== 1 || receipt.published !== false || receipt.trialOnly !== true || !/^[0-9a-f]{40}$/.test(receipt.baseCommit || '') || !Array.isArray(receipt.files) || receipt.files.some(f => !allowedPublishPath(f.path)) || !Array.isArray(receipt.deleted) || receipt.deleted.some(p => !allowedPublishPath(p)) || !/^[0-9]{4}-concert[1-9][0-9]*$/.test(receipt.mapping?.[0]?.publicId || '')) throw new Error('반영 시험 결과의 형식이 올바르지 않습니다.');
+      for (const file of receipt.files) {
+        const bytes = await readFile(join(directory, file.path));
+        if (bytes.length !== file.bytes || sha256(bytes) !== file.sha256) throw new Error('반영 시험 자료가 변경됐습니다. 다시 확인해 주세요.');
+      }
+      const summary = { id, trialOnly: true, published: false, preview: `/rehearsals/${id}/archive.html#${receipt.mapping[0].publicId}`, package: `/rehearsals/${id}/review-package.zip`, files: receipt.files.length, deleted: receipt.deleted.length };
+      const result = { receipt, directory, summary }; results.set(id, result); return result;
+    },
     async load() {
       const refs = await reader.refs();
       const [baseTree, draftTree] = await Promise.all([reader.tree(refs.baseCommit), reader.tree(refs.draftCommit)]);
@@ -139,13 +152,13 @@ export function createReviewServer({ root, service }) {
       if (path === '/api/review') return send(200, JSON.stringify(await service.load()));
       const match = path.match(/^\/rehearsals\/([0-9a-f-]{36})\/(.+)$/);
       if (match) {
-        const result = service.results.get(match[1]), file = match[2];
+        const result = await service.findResult(match[1]), file = match[2];
         if (!result || result.receipt.deleted.includes(file)) return send(404, '{}');
         if (file === 'review-package.zip') { res.setHeader('Content-Disposition', 'attachment; filename="eeams-reviewed-content.zip"'); return send(200, await readFile(join(result.directory, file)), mime(file)); }
         if (!previewPathAllowed(file)) return send(404, '{}');
         const local = result.receipt.files.some(f => f.path === file);
         let bytes = local ? await readFile(join(result.directory, file)) : await service.reader.bytes(result.receipt.baseCommit, file);
-        if (file.endsWith('.html')) bytes = Buffer.from(bytes.toString('utf8').replace('<head>', '<head><meta name="robots" content="noindex,nofollow">').replace(/href="index.html(#[^"]*)?"/g, 'href="https://ewha-eeams.github.io/index.html$1" target="_blank" rel="noopener noreferrer"').replace('<main', '<div style="padding:10px;text-align:center;background:#eaf2f8;color:#175c87;font:13px system-ui">사본 반영 시험 · 운영 홈페이지는 유지됩니다. <a href="/cms-sandbox/preview/review.html">변경 확인으로 돌아가기</a></div><main'));
+        if (file.endsWith('.html')) bytes = Buffer.from(bytes.toString('utf8').replace('<head>', '<head><meta name="robots" content="noindex,nofollow">').replace(/<title>.*?<\/title>/, '<title>사본 반영 결과 | EEAMS</title>').replace(/href="index.html(#[^"]*)?"/g, 'href="https://ewha-eeams.github.io/index.html$1" target="_blank" rel="noopener noreferrer"').replace('<main', '<div style="padding:10px;text-align:center;background:#eaf2f8;color:#175c87;font:13px system-ui">사본 반영 시험 · 운영 홈페이지는 유지됩니다. <a href="/cms-sandbox/preview/review.html">변경 확인으로 돌아가기</a></div><main'));
         return send(200, bytes, mime(file));
       }
       const file = path === '/' ? 'cms-sandbox/preview/review.html' : path.slice(1);

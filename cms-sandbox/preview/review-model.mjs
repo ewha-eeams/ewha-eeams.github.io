@@ -82,6 +82,7 @@ export function preparePlan(review, selectedIds) {
   const csv = csvChanged ? serializeCsv(rows) : review.baseCsv;
   if (csvChanged) operations.unshift({ action: 'replace', path: 'data/archive.csv', kind: 'csv' });
   if (!operations.length || operations.some(op => !allowedPublishPath(op.path))) throw new Error('허용되지 않은 반영 범위입니다.');
+  if (operations.reduce((sum, op) => sum + (op.size || 0), new TextEncoder().encode(csv).length) > 80 * 1024 * 1024) throw new Error('한 번에 준비할 자료는 합계 80 MB 이내로 선택해 주세요.');
   return { schema: 1, trialOnly: true, published: false, baseCommit: review.baseCommit, draftCommit: review.draftCommit, selectedIds: selected.map(e => e.cms_id), mapping, operations, csv, csvChanged, rows };
 }
 

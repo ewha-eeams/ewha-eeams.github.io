@@ -32,3 +32,14 @@ This directory contains public content copies for Pages CMS testing on branch `c
 - Disposable upload fixtures and edited form values were restored/removed after verification; history retains the trial evidence.
 - Saved CMS draft preview was verified with a disposable new concert, two reordered works, a year-only date, blank optional values, PDF, poster and photo. The fixture is removed after verification; existing copies remain intact.
 - Do not treat this as production CMS acceptance. Shared preview hosting and reviewed publication remain to be implemented.
+
+## Change review and copy-only publication rehearsal
+
+- Open **변경 확인·반영 준비** in Pages CMS, or use http://127.0.0.1:8921/ on the current computer. Start `cms-sandbox/preview/review-server.mjs` with Node to serve it.
+- CMS Save → compare with current public content → select reviewed concerts → confirm metadata, works and media → rehearse in a new copy. Final status is **공개 반영 대기**. The live website is not published by this flow.
+- Existing public IDs stay fixed. New IDs and media filenames are proposed without collisions. Only selected changes are included; unchanged media is detected by content hash rather than the different sandbox path.
+- Reviews are bound to both saved revisions and the exact selected plan. Changed/expired reviews are rejected. A failed or outdated rehearsal removes temporary output and preserves previous data. Successful duplicate requests reuse the result.
+- Rehearsals are confined to ignored `cms-sandbox/rehearsals/` folders. Review ZIPs include changed content files and a receipt with explicit exclusions and `published: false`. Results can be reopened after a server restart when their file hashes still match.
+- The server has no GitHub write, merge or deployment operation and no Google integration. Local mutation routes require the same origin, JSON and the review header. No credentials are stored.
+- A real CMS Save, stale-save rejection, new-concert-only rehearsal, preservation of all 27 original work rows, matching attachment bytes, ZIP and current-design candidate rendering were verified. Disposable edits/entries are restored or removed afterward.
+- Production application is a later approved step: use the reviewed content paths only, conditionally check the base revision, and then synchronize the CMS baseline/new-concert mapping while preserving any unselected draft edits. Never merge this entire trial branch into main.

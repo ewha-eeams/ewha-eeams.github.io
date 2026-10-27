@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-let review, plan;
+let review, plan, reviewValid = false;
 const selected = new Set();
 const names = { poster: '포스터', pdf: '프로그램북 PDF', photos: '공연 사진' };
 const actionNames = { add: '추가', replace: '교체', delete: '제외' };
@@ -12,10 +12,11 @@ async function api(path, data) {
 }
 function showError(error) {
   $('error').textContent = error.message; $('error').hidden = false;
-  if (['STALE_REVIEW', 'EXPIRED_REVIEW'].includes(error.code)) { plan = null; $('prepared').hidden = true; $('result').hidden = true; }
+  if (['STALE_REVIEW', 'EXPIRED_REVIEW'].includes(error.code)) { plan = null; reviewValid = false; $('prepared').hidden = true; $('result').hidden = true; $('prepare').disabled = true; $('status').textContent = '저장본이 달라져 다시 확인해야 합니다.'; }
+  $('error').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 function resetPlan() { plan = null; $('prepared').hidden = true; $('result').hidden = true; $('confirm').checked = false; $('rehearse').disabled = true; $('review-step').classList.add('current'); $('prepare-step').classList.remove('current'); }
-function updateSelection() { resetPlan(); $('selected-count').textContent = `선택한 공연 ${selected.size}건`; $('prepare').disabled = !selected.size; }
+function updateSelection() { resetPlan(); $('selected-count').textContent = `선택한 공연 ${selected.size}건`; $('prepare').disabled = !selected.size || !reviewValid; }
 function valueColumn(value, label) { const column = el('div'); column.append(el('small', label, 'caption'), el('p', value || '—')); return column; }
 function worksColumn(works, label) {
   const column = el('div'); column.append(el('strong', label, 'caption'));
@@ -47,7 +48,7 @@ function renderEntries() {
     entry.mediaChanges.forEach(kind => {
       const before = kind === 'photos' ? entry.beforeMedia.photos.map(p => p.path.split('/').pop()).join(', ') : entry.beforeMedia[kind]?.path.split('/').pop();
       const after = kind === 'photos' ? entry.afterMedia.photos.map(p => p.path.split('/').pop()).join(', ') : entry.afterMedia[kind]?.path.split('/').pop();
-      body.append(el('p', `${names[kind]}: ${before || '없음'} → ${after || '없음'}`, 'media-change'));
+      body.append(el('p', before && before === after ? `${names[kind]}: 파일명은 같고 내용이 변경됐습니다.` : `${names[kind]}: ${before || '없음'} → ${after || '없음'}`, 'media-change'));
     });
     details.append(body); card.append(details); $('entries').append(card);
     input.addEventListener('change', () => { input.checked ? selected.add(entry.cms_id) : selected.delete(entry.cms_id); updateSelection(); });
@@ -56,9 +57,9 @@ function renderEntries() {
 }
 async function load() {
   $('reload').disabled = true; $('error').hidden = true; $('status').textContent = '공개 내용과 저장된 초안을 비교하는 중입니다.';
-  $('entries').replaceChildren(); $('selection').hidden = true; selected.clear(); resetPlan();
+  $('entries').replaceChildren(); $('selection').hidden = true; selected.clear(); reviewValid = false; resetPlan();
   try {
-    review = await api('/api/review'); renderEntries(); updateSelection();
+    review = await api('/api/review'); reviewValid = true; renderEntries(); updateSelection();
     const changes = review.entries.filter(e => e.status !== 'unchanged').length;
     $('status').textContent = `저장된 공연 ${review.entries.length}건 · 변경 ${changes}건`;
   } catch (error) { showError(error); $('status').textContent = '최신 저장본을 확인하지 못했습니다.'; }
@@ -69,13 +70,16 @@ $('prepare').addEventListener('click', async () => {
   $('prepare').disabled = true; $('error').hidden = true;
   try {
     plan = await api('/api/prepare', { reviewId: review.id, selectedIds: [...selected] });
-    $('mapping').replaceChildren(); $('operations').replaceChildren(); $('confirm').checked = false; $('rehearse').disabled = true;
-    plan.mapping.forEach(item => $('mapping').append(el('p', `${item.title} · ${item.existing ? '기존 주소 유지' : '새 주소 준비'}: ${item.publicId}`)));
-    plan.operations.forEach(operation => $('operations').append(el('li', `${actionNames[operation.action]} · ${operation.path}`)));
+    $('mapping').replaceChildren(); $('operations').replaceChildren(); $('operation-paths').replaceChildren(); $('confirm').checked = false; $('rehearse').disabled = true;
+    plan.mapping.forEach(item => $('mapping').append(el('p', `${item.title} · ${item.existing ? '기존 주소 유지' : '새 공연 주소 준비'}`)));
+    plan.operations.forEach(operation => {
+      const kind = operation.path === 'data/archive.csv' ? '공연 정보' : operation.path.endsWith('-poster.jpg') ? '포스터' : operation.path.endsWith('-program-book.pdf') ? '프로그램북 PDF' : `공연 사진 ${operation.path.match(/-photo([0-9]+)\.jpg$/)?.[1] || ''}`;
+      $('operations').append(el('li', `${kind} ${actionNames[operation.action]}`)); $('operation-paths').append(el('li', `${actionNames[operation.action]} · ${operation.path}`));
+    });
     $('prepared').hidden = false; $('result').hidden = true; $('progress').textContent = ''; $('review-step').classList.remove('current'); $('prepare-step').classList.add('current');
     $('prepared').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (error) { showError(error); }
-  finally { $('prepare').disabled = !selected.size; }
+  finally { $('prepare').disabled = !selected.size || !reviewValid; }
 });
 $('confirm').addEventListener('change', () => { $('rehearse').disabled = !$('confirm').checked || !plan; });
 $('rehearse').addEventListener('click', async () => {
