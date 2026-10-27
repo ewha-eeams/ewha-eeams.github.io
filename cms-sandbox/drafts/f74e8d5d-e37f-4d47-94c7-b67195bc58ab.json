@@ -1,0 +1,22 @@
+{
+  "title": "게시 흐름 검증 · 사본",
+  "date": "2027",
+  "venue": "CMS 미리보기",
+  "works": [
+    {
+      "composer": "검증 작곡가 B",
+      "work_title": "첫 번째 작품"
+    },
+    {
+      "composer": "검증 작곡가 A",
+      "work_title": "두 번째, \"작품\""
+    }
+  ],
+  "poster": "/cms-sandbox/media/concerts/2026/2026-concert1-poster.jpg",
+  "program_book": "/cms-sandbox/media/concerts/2026/2026-concert1-program-book.pdf",
+  "photos": [
+    "/cms-sandbox/media/concerts/2024/2024-concert1-photo1.jpg"
+  ],
+  "cms_id": "f74e8d5d-e37f-4d47-94c7-b67195bc58ab",
+  "source_sha256": "3dd85a1e7859d45f9224c6ab90c318c7fb0d2c160627d36fa4d30117078346db"
+}

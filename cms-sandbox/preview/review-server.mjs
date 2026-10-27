@@ -1,0 +1,161 @@
+import http from 'node:http';
+import { readFile, writeFile, mkdir, rename, rm } from 'node:fs/promises';
+import { createHash, randomUUID } from 'node:crypto';
+import { createRequire } from 'node:module';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { join, resolve, dirname } from 'node:path';
+import { buildReview, publicReview, preparePlan, assertCurrent, allowedPublishPath } from './review-model.mjs';
+import { parseCsv } from './csv-parser.mjs';
+import { repository, branch, rawUrl } from './preview-model.mjs';
+
+const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
+const gitSha = bytes => createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
+const ttl = 30 * 60 * 1000;
+const maxFile = 20 * 1024 * 1024;
+const JSZip = createRequire(import.meta.url)('./jszip.min.cjs');
+export class GitHubReader {
+  trees = new Map(); bytesCache = new Map();
+  async response(url) {
+    const response = await fetch(url, { headers: { Accept: 'application/vnd.github+json' }, signal: AbortSignal.timeout(25000) });
+    if (!response.ok) throw new Error(response.status === 403 || response.status === 429 ? 'GitHub 읽기 한도에 도달했습니다. 잠시 후 다시 불러와 주세요.' : `저장본을 읽지 못했습니다. (${response.status})`);
+    return response;
+  }
+  async refs() {
+    const [base, draft] = await Promise.all(['main', branch].map(async ref => (await this.response(`https://api.github.com/repos/${repository}/branches/${ref}`)).json()));
+    const result = { baseCommit: base.commit?.sha, draftCommit: draft.commit?.sha };
+    if (Object.values(result).some(s => !/^[0-9a-f]{40}$/.test(s || ''))) throw new Error('저장본을 확인하지 못했습니다.');
+    return result;
+  }
+  async tree(commit) {
+    if (!this.trees.has(commit)) {
+      const result = await (await this.response(`https://api.github.com/repos/${repository}/git/trees/${commit}?recursive=1`)).json();
+      if (result.truncated || !Array.isArray(result.tree)) throw new Error('파일 목록 일부가 누락됐습니다. 다시 확인해 주세요.');
+      this.trees.set(commit, result.tree);
+    }
+    return this.trees.get(commit);
+  }
+  async bytes(commit, path) {
+    const file = (await this.tree(commit)).find(f => f.path === path && f.type === 'blob');
+    if (!file || file.size > maxFile) throw new Error(`파일을 확인해 주세요: ${path}`);
+    if (!this.bytesCache.has(file.sha)) {
+      const bytes = Buffer.from(await (await this.response(rawUrl(commit, path))).arrayBuffer());
+      if (bytes.length !== file.size || gitSha(bytes) !== file.sha) throw new Error(`저장된 파일과 내용이 다릅니다: ${path}`);
+      this.bytesCache.set(file.sha, bytes);
+    }
+    return this.bytesCache.get(file.sha);
+  }
+}
+
+export function createReviewService({ reader = new GitHubReader(), artifactRoot, fault = async () => {} }) {
+  const reviews = new Map(), plans = new Map(), results = new Map();
+  const active = new Set();
+  const requireLive = (map, id) => {
+    const value = map.get(id);
+    if (!value || Date.now() - value.created > ttl) { const error = new Error('확인 시간이 지났습니다. 변경 내용을 다시 불러와 주세요.'); error.code = 'EXPIRED_REVIEW'; throw error; }
+    return value;
+  };
+  return {
+    reader, results,
+    async load() {
+      const refs = await reader.refs();
+      const [baseTree, draftTree] = await Promise.all([reader.tree(refs.baseCommit), reader.tree(refs.draftCommit)]);
+      const bytes = await reader.bytes(refs.baseCommit, 'data/archive.csv');
+      const source = { sha256: sha256(bytes), rows: parseCsv(bytes.toString('utf8')) };
+      const paths = draftTree.filter(f => f.type === 'blob' && /^cms-sandbox\/(?:forms|drafts)\/[^/]+\.json$/.test(f.path));
+      if (paths.length > 200 || paths.some(p => p.size > 1024 * 1024)) throw new Error('공연 사본의 개수 또는 크기를 확인해 주세요.');
+      const files = [];
+      for (let i = 0; i < paths.length; i += 8) files.push(...await Promise.all(paths.slice(i, i + 8).map(async f => ({ path: f.path, data: JSON.parse((await reader.bytes(refs.draftCommit, f.path)).toString('utf8')) }))));
+      const review = buildReview({ source, files, baseTree, draftTree, ...refs, baseCsv: bytes.toString('utf8') });
+      const id = randomUUID(); reviews.set(id, { ...review, created: Date.now() });
+      for (const [key, item] of reviews) if (Date.now() - item.created > ttl) reviews.delete(key);
+      return { id, ...publicReview(review) };
+    },
+    async prepare(reviewId, selectedIds) {
+      const review = requireLive(reviews, reviewId); assertCurrent(review, await reader.refs());
+      const plan = preparePlan(review, selectedIds), digest = sha256(JSON.stringify(plan)), id = randomUUID();
+      plans.set(id, { plan, digest, created: Date.now() });
+      return { id, digest, mapping: plan.mapping, operations: plan.operations, baseCommit: plan.baseCommit, draftCommit: plan.draftCommit };
+    },
+    async rehearse(id, digest) {
+      const item = requireLive(plans, id), { plan } = item;
+      if (item.digest !== digest || sha256(JSON.stringify(plan)) !== digest) throw new Error('확인한 변경 내용과 요청이 다릅니다. 다시 확인해 주세요.');
+      assertCurrent(plan, await reader.refs());
+      if (results.has(id)) return results.get(id).summary;
+      if (active.has(id)) throw new Error('같은 반영 시험을 처리하고 있습니다. 잠시 기다려 주세요.');
+      active.add(id);
+      const temporary = join(artifactRoot, `.pending-${id}`), final = join(artifactRoot, id);
+      try {
+        await mkdir(temporary, { recursive: true });
+        const files = [], deleted = plan.operations.filter(o => o.action === 'delete').map(o => o.path);
+        const save = async (path, bytes) => {
+          if (!allowedPublishPath(path)) throw new Error('허용되지 않은 파일 변경입니다.');
+          const target = join(temporary, path); await mkdir(dirname(target), { recursive: true }); await writeFile(target, bytes);
+          files.push({ path, bytes: bytes.length, sha256: sha256(bytes) });
+        };
+        await save('data/archive.csv', Buffer.from(plan.csv, 'utf8'));
+        for (const operation of plan.operations.filter(o => o.sourcePath)) {
+          const bytes = await reader.bytes(operation.sourceCommit, operation.sourcePath);
+          if (gitSha(bytes) !== operation.sha) throw new Error('첨부 파일의 저장본이 달라졌습니다.');
+          if (operation.path.endsWith('.pdf') ? bytes.subarray(0, 5).toString() !== '%PDF-' : bytes[0] !== 0xff || bytes[1] !== 0xd8) throw new Error('첨부 파일의 형식을 확인해 주세요.');
+          await save(operation.path, bytes);
+        }
+        await fault('after-files');
+        const receipt = { schema: 1, trialOnly: true, published: false, publicState: 'unchanged', planDigest: digest, baseCommit: plan.baseCommit, draftCommit: plan.draftCommit, selectedIds: plan.selectedIds, mapping: plan.mapping, operations: plan.operations, deleted, files, created: new Date().toISOString() };
+        await writeFile(join(temporary, 'review.json'), JSON.stringify(receipt, null, 2) + '\n');
+        const zip = new JSZip(); zip.file('review.json', JSON.stringify(receipt, null, 2) + '\n');
+        for (const file of files) if (plan.operations.some(o => o.path === file.path && o.action !== 'delete')) zip.file(file.path, await readFile(join(temporary, file.path)));
+        await writeFile(join(temporary, 'review-package.zip'), await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }));
+        await fault('before-commit'); assertCurrent(plan, await reader.refs());
+        await rename(temporary, final);
+        const summary = { id, trialOnly: true, published: false, preview: `/rehearsals/${id}/archive.html#${plan.mapping[0].publicId}`, package: `/rehearsals/${id}/review-package.zip`, files: files.length, deleted: deleted.length };
+        results.set(id, { receipt, directory: final, summary }); return summary;
+      } catch (error) { await rm(temporary, { recursive: true, force: true }); throw error; }
+      finally { active.delete(id); }
+    },
+  };
+}
+
+const mime = path => path.endsWith('.html') ? 'text/html; charset=utf-8' : /\.(mjs|js)$/.test(path) ? 'text/javascript; charset=utf-8' : path.endsWith('.css') ? 'text/css; charset=utf-8' : path.endsWith('.json') ? 'application/json; charset=utf-8' : path.endsWith('.csv') ? 'text/csv; charset=utf-8' : path.endsWith('.pdf') ? 'application/pdf' : path.endsWith('.png') ? 'image/png' : /\.jpe?g$/.test(path) ? 'image/jpeg' : path.endsWith('.webp') ? 'image/webp' : path.endsWith('.zip') ? 'application/zip' : 'application/octet-stream';
+const previewPathAllowed = path => ['archive.html', 'media.html', 'data/archive.csv'].includes(path) || /^assets\/(?:[a-zA-Z0-9_.-]+\.(?:css|js|png|jpg|webp)|media\/(?:concerts|home)\/[a-zA-Z0-9_./-]+\.(?:jpg|png|webp|pdf))$/.test(path);
+export function trustedMutation(headers, origin) { return headers.origin === origin && headers['content-type']?.split(';')[0] === 'application/json' && headers['x-eeams-review'] === '1'; }
+
+export function createReviewServer({ root, service }) {
+  return http.createServer(async (req, res) => {
+    const host = req.headers.host || '';
+    const send = (status, body, type = 'application/json; charset=utf-8') => { res.writeHead(status, { 'Content-Type': type, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(req.method === 'HEAD' ? undefined : body); };
+    try {
+      if (!/^(?:127\.0\.0\.1|localhost):[0-9]+$/.test(host)) return send(403, JSON.stringify({ message: '접속 주소를 확인해 주세요.' }));
+      const url = new URL(req.url, `http://${host}`), path = decodeURIComponent(url.pathname);
+      if (path.includes('..') || path.includes('\\')) return send(400, '{}');
+      if (req.method === 'POST') {
+        if (!trustedMutation(req.headers, `http://${host}`)) return send(403, JSON.stringify({ message: '이 컴퓨터의 변경 확인 화면에서 진행해 주세요.' }));
+        let body = ''; for await (const chunk of req) { body += chunk; if (Buffer.byteLength(body) > 16384) throw new Error('요청 크기를 확인해 주세요.'); }
+        const data = JSON.parse(body);
+        const result = path === '/api/prepare' ? await service.prepare(data.reviewId, data.selectedIds) : path === '/api/rehearse' ? await service.rehearse(data.planId, data.digest) : null;
+        return result ? send(200, JSON.stringify(result)) : send(404, '{}');
+      }
+      if (!['GET', 'HEAD'].includes(req.method)) return send(405, '{}');
+      if (path === '/') { res.writeHead(302, { Location: '/cms-sandbox/preview/review.html', 'Cache-Control': 'no-store' }); return res.end(); }
+      if (path === '/api/review') return send(200, JSON.stringify(await service.load()));
+      const match = path.match(/^\/rehearsals\/([0-9a-f-]{36})\/(.+)$/);
+      if (match) {
+        const result = service.results.get(match[1]), file = match[2];
+        if (!result || result.receipt.deleted.includes(file)) return send(404, '{}');
+        if (file === 'review-package.zip') { res.setHeader('Content-Disposition', 'attachment; filename="eeams-reviewed-content.zip"'); return send(200, await readFile(join(result.directory, file)), mime(file)); }
+        if (!previewPathAllowed(file)) return send(404, '{}');
+        const local = result.receipt.files.some(f => f.path === file);
+        let bytes = local ? await readFile(join(result.directory, file)) : await service.reader.bytes(result.receipt.baseCommit, file);
+        if (file.endsWith('.html')) bytes = Buffer.from(bytes.toString('utf8').replace('<head>', '<head><meta name="robots" content="noindex,nofollow">').replace(/href="index.html(#[^"]*)?"/g, 'href="https://ewha-eeams.github.io/index.html$1" target="_blank" rel="noopener noreferrer"').replace('<main', '<div style="padding:10px;text-align:center;background:#eaf2f8;color:#175c87;font:13px system-ui">사본 반영 시험 · 운영 홈페이지는 유지됩니다. <a href="/cms-sandbox/preview/review.html">변경 확인으로 돌아가기</a></div><main'));
+        return send(200, bytes, mime(file));
+      }
+      const file = path === '/' ? 'cms-sandbox/preview/review.html' : path.slice(1);
+      if ((!file.startsWith('cms-sandbox/preview/') && !file.startsWith('assets/')) || /(?:review-server|jszip\.min\.cjs)/.test(file) || !/\.(?:html|mjs|js|css|json|png|jpg|webp)$/.test(file)) return send(404, '{}');
+      return send(200, await readFile(join(root, file)), mime(file));
+    } catch (error) { send(error.code === 'STALE_REVIEW' || error.code === 'EXPIRED_REVIEW' ? 409 : error.code === 'ENOENT' ? 404 : 400, JSON.stringify({ code: error.code || 'REVIEW_ERROR', message: error.message })); }
+  });
+}
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  const root = fileURLToPath(new URL('../../', import.meta.url));
+  const service = createReviewService({ artifactRoot: join(root, 'cms-sandbox/rehearsals') });
+  createReviewServer({ root, service }).listen(8921, '127.0.0.1', () => console.log('CMS copy review ready at http://127.0.0.1:8921/ — no publication API.'));
+}

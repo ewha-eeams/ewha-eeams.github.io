@@ -464,6 +464,26 @@
       ]
     },
     {
+      "name": "publish_guide",
+      "label": "변경 확인·반영 준비",
+      "type": "file",
+      "path": "cms-sandbox/publish-guide.json",
+      "format": "json",
+      "fields": [
+        {
+          "name": "body",
+          "label": false,
+          "type": "rich-text",
+          "readonly": true,
+          "options": {
+            "format": "html",
+            "switcher": false,
+            "media": false
+          }
+        }
+      ]
+    },
+    {
       "name": "upload_guide",
       "label": "자료 업로드 안내",
       "type": "file",
