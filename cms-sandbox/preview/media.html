@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <base href="../../">
+    <meta name="robots" content="noindex,nofollow">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="EEAMS 아카이브 자료 보기와 다운로드."
+    />
+    <title>CMS 공연 미리보기 | EEAMS</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Media | EEAMS" />
+    <meta property="og:description" content="EEAMS 아카이브 자료 보기와 다운로드." />
+    <meta property="og:url" content="https://ewha-eeams.github.io/media.html" />
+    <meta property="og:site_name" content="EEAMS" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:image" content="https://ewha-eeams.github.io/assets/eeams-share-v1.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="EEAMS · Ewha Electro-Acoustic Music Studio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://ewha-eeams.github.io/assets/eeams-share-v1.png" />
+    <meta name="twitter:image:alt" content="EEAMS · Ewha Electro-Acoustic Music Studio" />
+    <link rel="icon" type="image/png" sizes="128x128" href="assets/eeams-favicon-teal-v1.png" />
+    <link rel="stylesheet" href="assets/styles.css?v=20261008-44" />
+    <link rel="stylesheet" href="assets/identity.css?v=20261013" />
+  </head>
+  <body>
+    <header class="site-header" aria-label="Main navigation">
+      <div class="utility-bar">
+        <a class="affiliation-link" href="https://music.ewha.ac.kr/emusic/1523/subview.do" target="_blank" rel="noreferrer">
+          Ewha Womans University · College of Music · Department of Composition
+        </a>
+        <div>
+          <a href="https://ewha-eeams.github.io/index.html#contact" target="_blank" rel="noopener noreferrer">Contact</a>
+        </div>
+      </div>
+      <div class="main-nav">
+        <a class="brand" href="https://ewha-eeams.github.io/index.html#top" target="_blank" rel="noopener noreferrer" aria-label="EEAMS home">
+          <img class="brand-wordmark" src="assets/eeams-wordmark-black.png" alt="" />
+          <span><small>Ewha Electro-Acoustic Music Studio</small></span>
+        </a>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu">
+          Menu
+        </button>
+        <nav id="site-menu" class="site-menu">
+          <a href="https://ewha-eeams.github.io/index.html#about" target="_blank" rel="noopener noreferrer">About</a>
+          <a href="https://ewha-eeams.github.io/index.html#archive" target="_blank" rel="noopener noreferrer">Archive</a>
+          <a href="https://ewha-eeams.github.io/index.html#research" target="_blank" rel="noopener noreferrer">Research</a>
+          <a href="https://ewha-eeams.github.io/index.html#education" target="_blank" rel="noopener noreferrer">Education</a>
+          <a href="https://ewha-eeams.github.io/index.html#people" target="_blank" rel="noopener noreferrer">People</a>
+        </nav>
+      </div>
+    </header>
+
+    <div style="padding:8px 20px;background:#eaf2f8;color:#175c87;font:13px system-ui;text-align:center">CMS 미리보기 · 공개 반영 전</div>
+    <main class="media-viewer-page">
+      <section class="media-viewer-shell" aria-labelledby="media-title">
+        <div class="media-viewer-toolbar">
+          <a id="media-back" class="back-link" href="archive.html">Archive</a>
+          <a id="media-download" class="button primary" hidden download>Download</a>
+        </div>
+        <div class="media-viewer-head">
+          <p class="section-label" id="media-section-label">Archive Media</p>
+          <h1 id="media-title">자료 보기 <span class="heading-en">Media</span></h1>
+        </div>
+        <div id="media-frame" class="media-frame" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script src="cms-sandbox/preview/saved-media.mjs" type="module"></script>
+  </body>
+</html>

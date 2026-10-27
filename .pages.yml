@@ -444,6 +444,26 @@
       ]
     },
     {
+      "name": "preview_guide",
+      "label": "홈페이지 미리보기",
+      "type": "file",
+      "path": "cms-sandbox/preview-guide.json",
+      "format": "json",
+      "fields": [
+        {
+          "name": "body",
+          "label": false,
+          "type": "rich-text",
+          "readonly": true,
+          "options": {
+            "format": "html",
+            "switcher": false,
+            "media": false
+          }
+        }
+      ]
+    },
+    {
       "name": "upload_guide",
       "label": "자료 업로드 안내",
       "type": "file",
