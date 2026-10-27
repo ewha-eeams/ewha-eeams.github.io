@@ -20,6 +20,10 @@
       "path": "cms-sandbox/forms",
       "format": "json",
       "subfolders": false,
+      "filename": {
+        "template": "{fields.cms_id}.json",
+        "field": false
+      },
       "operations": {
         "create": false,
         "rename": false,
