@@ -1,80 +1,63 @@
 {
-  "cms_id": "b49eb7d9-4c05-4e30-af53-276871e60408",
-  "origin_id": "2026-concert1",
-  "source_sha256": "3dd85a1e7859d45f9224c6ab90c318c7fb0d2c160627d36fa4d30117078346db",
-  "date": "2026-05-20",
-  "slug": "concert1",
   "title": "Soundscape 2026",
-  "title_en": "",
+  "date": "2026-05-20",
   "venue": "이화여자대학교 음악관 국악연주홀",
   "venue_en": "Korean Music Recital Hall, Music Building, Ewha Womans University",
   "works": [
     {
-      "composer": "장준호",
-      "composer_en": "Junho Jang",
-      "work_title": "왜곡된 프리즘",
-      "work_title_en": "A Distorted Prism",
-      "format": "2-ch Live Electronics",
-      "media_url": ""
+      "composer": "문민혜",
+      "work_title": "수향(水響)",
+      "format": "2-ch Tape",
+      "work_title_en": "Aqueous Flow"
     },
     {
-      "composer": "문민혜",
-      "composer_en": "",
-      "work_title": "수향(水響)",
-      "work_title_en": "Aqueous Flow",
-      "format": "2-ch Tape",
-      "media_url": ""
+      "composer": "장준호",
+      "work_title": "왜곡된 프리즘",
+      "format": "2-ch Live Electronics",
+      "composer_en": "Junho Jang",
+      "work_title_en": "A Distorted Prism"
     },
     {
       "composer": "조희원",
-      "composer_en": "",
       "work_title": "양흘리기",
-      "work_title_en": "Sheep Spilling",
       "format": "2-ch Tape",
-      "media_url": ""
+      "work_title_en": "Sheep Spilling"
     },
     {
       "composer": "도하나",
-      "composer_en": "Hana Do",
       "work_title": "인안나",
-      "work_title_en": "Inanna",
       "format": "Guitar and 4-ch Audio Visual",
-      "media_url": ""
+      "composer_en": "Hana Do",
+      "work_title_en": "Inanna"
     },
     {
       "composer": "김수미",
-      "composer_en": "",
       "work_title": "직조(織造)",
-      "work_title_en": "Weaving",
       "format": "Piano and 4-ch Live Electronics",
-      "media_url": ""
+      "work_title_en": "Weaving"
     },
     {
       "composer": "고도현",
-      "composer_en": "",
       "work_title": "깨어진 세계",
-      "work_title_en": "Zerrwelt",
       "format": "2-ch Tape",
-      "media_url": ""
+      "work_title_en": "Zerrwelt"
     },
     {
       "composer": "조윤희",
-      "composer_en": "",
       "work_title": "🥚 ...",
-      "work_title_en": "",
-      "format": "2-ch Tape",
-      "media_url": ""
+      "format": "2-ch Tape"
     },
     {
       "composer": "구민경",
-      "composer_en": "",
       "work_title": "흔적(痕跡)",
-      "work_title_en": "Trace ?",
       "format": "Cello and 2-ch Tape",
-      "media_url": ""
+      "work_title_en": "Trace ?"
     }
   ],
   "poster": "/cms-sandbox/media/concerts/2026/2026-concert1-poster.jpg",
   "program_book": "/cms-sandbox/media/concerts/2026/2026-concert1-program-book.pdf",
-  "photos": []
+  "cms_id": "b49eb7d9-4c05-4e30-af53-276871e60408",
+  "origin_id": "2026-concert1",
+  "slug": "concert1",
+  "source_sha256": "3dd85a1e7859d45f9224c6ab90c318c7fb0d2c160627d36fa4d30117078346db"
 }
