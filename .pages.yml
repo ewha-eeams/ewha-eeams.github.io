@@ -157,6 +157,7 @@
           "name": "poster",
           "label": "포스터 (선택)",
           "type": "image",
+          "description": "JPG 한 장을 선택하세요. 첨부한 뒤 Save를 눌러 공연에 연결합니다.",
           "options": {
             "media": "concert_trial_media",
             "extensions": [
@@ -169,6 +170,7 @@
           "name": "program_book",
           "label": "프로그램북 PDF (선택)",
           "type": "file",
+          "description": "3 MB를 넘는 PDF는 왼쪽의 자료 업로드 안내에서 원본을 올린 뒤 Select로 선택하세요. 연결 후 Save를 누릅니다.",
           "options": {
             "media": "concert_trial_media",
             "extensions": [
@@ -181,6 +183,7 @@
           "name": "photos",
           "label": "공연 사진 (선택)",
           "type": "image",
+          "description": "JPG를 최대 20장 선택할 수 있습니다. 첨부한 뒤 Save를 눌러 공연에 연결합니다.",
           "options": {
             "media": "concert_trial_media",
             "extensions": [
@@ -370,6 +373,7 @@
           "name": "poster",
           "label": "포스터 (선택)",
           "type": "image",
+          "description": "JPG 한 장을 선택하세요. 첨부한 뒤 Save를 눌러 공연에 연결합니다.",
           "options": {
             "media": "concert_trial_media",
             "extensions": [
@@ -382,6 +386,7 @@
           "name": "program_book",
           "label": "프로그램북 PDF (선택)",
           "type": "file",
+          "description": "3 MB를 넘는 PDF는 왼쪽의 자료 업로드 안내에서 원본을 올린 뒤 Select로 선택하세요. 연결 후 Save를 누릅니다.",
           "options": {
             "media": "concert_trial_media",
             "extensions": [
@@ -394,6 +399,7 @@
           "name": "photos",
           "label": "공연 사진 (선택)",
           "type": "image",
+          "description": "JPG를 최대 20장 선택할 수 있습니다. 첨부한 뒤 Save를 눌러 공연에 연결합니다.",
           "options": {
             "media": "concert_trial_media",
             "extensions": [
@@ -434,6 +440,26 @@
           "hidden": true,
           "readonly": true,
           "default": "3dd85a1e7859d45f9224c6ab90c318c7fb0d2c160627d36fa4d30117078346db"
+        }
+      ]
+    },
+    {
+      "name": "upload_guide",
+      "label": "자료 업로드 안내",
+      "type": "file",
+      "path": "cms-sandbox/upload-guide.json",
+      "format": "json",
+      "fields": [
+        {
+          "name": "body",
+          "label": false,
+          "type": "rich-text",
+          "readonly": true,
+          "options": {
+            "format": "html",
+            "switcher": false,
+            "media": false
+          }
         }
       ]
     }
