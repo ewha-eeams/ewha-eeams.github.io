@@ -1,0 +1,88 @@
+{
+  "cms_id": "1709aefb-4344-45e2-ab84-ebf43db451ea",
+  "origin_id": "2025-concert2",
+  "source_sha256": "3dd85a1e7859d45f9224c6ab90c318c7fb0d2c160627d36fa4d30117078346db",
+  "date": "2025-12-09",
+  "slug": "concert2",
+  "title": "Soundscape Exhibition 2025 (12.09–12.11)",
+  "title_en": "",
+  "venue": "이화여자대학교 음악관 212호 EEAMS",
+  "venue_en": "EEAMS, Room 212, Music Building, Ewha Womans University",
+  "works": [
+    {
+      "composer": "고도현",
+      "composer_en": "",
+      "work_title": "Underdepths",
+      "work_title_en": "",
+      "format": "",
+      "media_url": ""
+    },
+    {
+      "composer": "신혜린",
+      "composer_en": "",
+      "work_title": "2+2=5",
+      "work_title_en": "",
+      "format": "",
+      "media_url": ""
+    },
+    {
+      "composer": "장준호",
+      "composer_en": "Junho Jang",
+      "work_title": "Speak Out!",
+      "work_title_en": "",
+      "format": "",
+      "media_url": ""
+    },
+    {
+      "composer": "조수아",
+      "composer_en": "",
+      "work_title": "심연(深淵)",
+      "work_title_en": "",
+      "format": "",
+      "media_url": ""
+    },
+    {
+      "composer": "구민경",
+      "composer_en": "",
+      "work_title": "꿈의 잔선(殘線)",
+      "work_title_en": "",
+      "format": "",
+      "media_url": ""
+    },
+    {
+      "composer": "도하나",
+      "composer_en": "Hana Do",
+      "work_title": "Musicvidéo",
+      "work_title_en": "",
+      "format": "",
+      "media_url": ""
+    },
+    {
+      "composer": "김수미",
+      "composer_en": "",
+      "work_title": "숨",
+      "work_title_en": "",
+      "format": "",
+      "media_url": ""
+    },
+    {
+      "composer": "정예본",
+      "composer_en": "",
+      "work_title": "멍하니, 바다",
+      "work_title_en": "",
+      "format": "",
+      "media_url": ""
+    },
+    {
+      "composer": "권영서",
+      "composer_en": "",
+      "work_title": "쉴틈없이달려야한다면",
+      "work_title_en": "",
+      "format": "",
+      "media_url": ""
+    }
+  ],
+  "poster": "/cms-sandbox/media/concerts/2025/2025-concert2-poster.jpg",
+  "program_book": "/cms-sandbox/media/concerts/2025/2025-concert2-program-book.pdf",
+  "photos": []
+}

@@ -1,0 +1,96 @@
+{
+  "cms_id": "71d00a69-20d1-4b21-a81d-7dd2743cbc34",
+  "origin_id": "2025-concert1",
+  "source_sha256": "3dd85a1e7859d45f9224c6ab90c318c7fb0d2c160627d36fa4d30117078346db",
+  "date": "2025-05-28",
+  "slug": "concert1",
+  "title": "Soundscape 2025 Spring",
+  "title_en": "",
+  "venue": "이화여자대학교 음악관 국악연주홀",
+  "venue_en": "Korean Music Recital Hall, Music Building, Ewha Womans University",
+  "works": [
+    {
+      "composer": "서연우",
+      "composer_en": "",
+      "work_title": "Wunderkammer",
+      "work_title_en": "",
+      "format": "4-ch Tape",
+      "media_url": ""
+    },
+    {
+      "composer": "김수미",
+      "composer_en": "",
+      "work_title": "Bi",
+      "work_title_en": "",
+      "format": "Image and 2-ch Tape",
+      "media_url": ""
+    },
+    {
+      "composer": "신혜린",
+      "composer_en": "",
+      "work_title": "상실(喪失)",
+      "work_title_en": "",
+      "format": "2-ch Tape",
+      "media_url": ""
+    },
+    {
+      "composer": "김청은",
+      "composer_en": "",
+      "work_title": "Toys’ Dream",
+      "work_title_en": "",
+      "format": "2-ch Tape",
+      "media_url": ""
+    },
+    {
+      "composer": "조서연",
+      "composer_en": "",
+      "work_title": "Osaka Dream",
+      "work_title_en": "",
+      "format": "Video and 4-ch Tape",
+      "media_url": ""
+    },
+    {
+      "composer": "김지현",
+      "composer_en": "",
+      "work_title": "\"track\"- reconstructable memory",
+      "work_title_en": "",
+      "format": "2-ch Tape",
+      "media_url": ""
+    },
+    {
+      "composer": "전현석",
+      "composer_en": "Hyunsuk Jun",
+      "work_title": "aus dem dunkel",
+      "work_title_en": "",
+      "format": "2-ch Tape",
+      "media_url": ""
+    },
+    {
+      "composer": "조희원",
+      "composer_en": "",
+      "work_title": "래다밤",
+      "work_title_en": "",
+      "format": "Audiovisual and 2-ch Tape",
+      "media_url": ""
+    },
+    {
+      "composer": "강사라",
+      "composer_en": "",
+      "work_title": "의미와 무의미",
+      "work_title_en": "",
+      "format": "4-ch Tape",
+      "media_url": ""
+    },
+    {
+      "composer": "도하나",
+      "composer_en": "Hana Do",
+      "work_title": "20211015",
+      "work_title_en": "",
+      "format": "Audiovisual and 4-ch Tape",
+      "media_url": ""
+    }
+  ],
+  "poster": "/cms-sandbox/media/concerts/2025/2025-concert1-poster.jpg",
+  "program_book": "/cms-sandbox/media/concerts/2025/2025-concert1-program-book.pdf",
+  "photos": []
+}
