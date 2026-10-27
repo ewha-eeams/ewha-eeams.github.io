@@ -273,7 +273,8 @@
           "pattern": {
             "regex": "\\S",
             "message": "공백이 아닌 내용을 입력해 주세요."
-          }
+          },
+          "description": "작품 목록에 한 곡 이상 추가한 뒤 저장해 주세요."
         },
         {
           "name": "date",
@@ -317,13 +318,6 @@
               "summary": "{index}. {composer} · {work_title}"
             }
           },
-          "default": [
-            {
-              "composer": "",
-              "work_title": "",
-              "format": ""
-            }
-          ],
           "fields": [
             {
               "name": "composer",

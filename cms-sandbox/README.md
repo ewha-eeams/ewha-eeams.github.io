@@ -4,7 +4,7 @@ This directory contains public content copies for Pages CMS testing on branch `c
 
 - Use `기존 공연 수정 · 사본` to select one of the three copied concerts. Existing dates and identifiers stay fixed in this review phase.
 - Use `새 공연 초안` to create an entry in `cms-sandbox/drafts/`. Draft filenames/UUIDs are generated automatically; users do not enter a technical filename or public concert identifier.
-- Input order is basic concert information, works, then optional poster/PDF/photos. English fields are optional. A new concert starts with one blank work.
+- Input order is basic concert information, works, then optional poster/PDF/photos. English fields are optional. Add at least one work before saving; the editor provides an Add an item button.
 - CMS draft identifiers are independent of the public `YYYY-concertN` mapping. Assigning public identifiers, media naming/optimization, preview and publication remain later steps.
 - `cms-sandbox/data/archive.csv` is the raw CSV compatibility-test copy. The hosted editor currently shows code rather than a table.
 - Saving the JSON form does not update the CSV or publish the website. Conversion/review/publishing is not connected yet.
