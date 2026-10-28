@@ -69,6 +69,8 @@
 #studio-calendar .fc-event { cursor: pointer; }
 #studio-calendar .fc-event:focus-visible { outline: 3px solid #237b93; outline-offset: 2px; }
 #studio-calendar .fc-event:hover { filter: brightness(1.13); }
+#studio-calendar .fc-event.studio-past { cursor: default; }
+#studio-calendar .fc-event.studio-past:hover { filter: none; }
 #studio-calendar .fc-daygrid-event { white-space: normal; }
 #studio-calendar .fc-event-time { white-space: normal; overflow-wrap: anywhere; }
 #studio-calendar .fc-list-event-title { white-space: normal; }

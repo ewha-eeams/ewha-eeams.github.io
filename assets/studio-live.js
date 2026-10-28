@@ -69,6 +69,7 @@ function view() {
   return period === 'month' ? 'dayGridMonth' : 'timeGridWeek';
 }
 function showTime(event) {
+  if (event.startStr.slice(0, 10) < seoulDate()) return;
   const isClass = event.extendedProps.kind === 'class';
   get('dialog-title').textContent = isClass ? event.title : '스튜디오 예약 중';
   get('dialog-info').textContent = `${event.startStr.slice(0, 16).replace('T', ' ')} ~ ${event.endStr.slice(0, 16).replace('T', ' ')} (한국 시간)`;
@@ -149,7 +150,14 @@ async function load(options = {}) {
         get('next').disabled = info.endStr.slice(0, 10) >= display.range.end.slice(0, 10);
         requestAnimationFrame(() => { syncWeekWindow(true); alignCurrentTime(); });
       },
-      eventClick(info) { showTime(info.event); },
+      eventClick(info) {
+        if (info.event.startStr.slice(0, 10) < seoulDate()) {
+          info.jsEvent.preventDefault();
+          info.jsEvent.stopPropagation();
+          return;
+        }
+        showTime(info.event);
+      },
       dayCellDidMount(info) {
         if (info.view.type !== 'dayGridMonth' || info.isDisabled) return;
         const date = info.date.toISOString().slice(0, 10);
@@ -177,7 +185,13 @@ async function load(options = {}) {
         changeView();
         calendar.gotoDate(selectedDate);
       },
+      eventClassNames(info) { return info.event.startStr.slice(0, 10) < seoulDate() ? ['studio-past'] : []; },
       eventDidMount(info) {
+        if (info.event.startStr.slice(0, 10) < seoulDate()) {
+          info.el.tabIndex = -1;
+          info.el.setAttribute('aria-disabled', 'true');
+          return;
+        }
         info.el.tabIndex = 0;
         info.el.setAttribute('role', 'button');
         info.el.setAttribute('aria-label', `${info.event.startStr.slice(0, 16).replace('T', ' ')} ${info.event.title} 보기`);
