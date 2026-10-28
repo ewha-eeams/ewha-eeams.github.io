@@ -9,6 +9,8 @@ import { parseCsv } from './csv-parser.mjs';
 import { repository, branch, rawUrl, uuidPattern } from './preview-model.mjs';
 import { createLocalPublicationCopy, LocalPublicationCopy } from './publication-copy.mjs';
 import { GitSnapshotReader } from './git-snapshot-reader.mjs';
+import { ActualPublisher } from './publication-remote.mjs';
+import { execFileSync } from 'node:child_process';
 
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const gitSha = bytes => createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
@@ -49,7 +51,7 @@ export class GitHubReader {
   }
 }
 
-export function createReviewService({ reader = new GitHubReader(), artifactRoot, sourceRepository, fault = async () => {} }) {
+export function createReviewService({ reader = new GitHubReader(), artifactRoot, sourceRepository, publisher = null, fault = async () => {} }) {
   const reviews = new Map(), plans = new Map(), results = new Map();
   const active = new Set();
   const requireLive = (map, id) => {
@@ -83,7 +85,7 @@ export function createReviewService({ reader = new GitHubReader(), artifactRoot,
       const review = buildReview({ source, files, baseTree, draftTree, ...refs, baseCsv: bytes.toString('utf8') });
       const id = randomUUID(); reviews.set(id, { ...review, created: Date.now() });
       for (const [key, item] of reviews) if (Date.now() - item.created > ttl) reviews.delete(key);
-      return { id, ...publicReview(review) };
+      return { id, publicationEnabled: !!publisher, ...publicReview(review) };
     },
     async prepare(reviewId, selectedIds) {
       const review = requireLive(reviews, reviewId); assertCurrent(review, await reader.refs());
@@ -148,6 +150,26 @@ export function createReviewService({ reader = new GitHubReader(), artifactRoot,
           report: `/rehearsals/${id}/publication-check.json` };
       } finally { active.delete(key); }
     },
+    async prepareActualPublication(id, digest) {
+      if (!publisher) throw new Error('실제 게시 연결이 열려 있지 않습니다. 사본 확인은 계속 사용할 수 있습니다.');
+      const { plan, digest: expected } = requireLive(plans, id);
+      if (expected !== digest) throw new Error('확인한 게시 내용이 다릅니다.');
+      assertCurrent(plan, await reader.refs());
+      const result = await this.findResult(id);
+      const proof = JSON.parse(await readFile(join(result.directory, 'publication-check.json'), 'utf8'));
+      if (proof.digest !== digest || proof.baseCommit !== plan.baseCommit || proof.draftCommit !== plan.draftCommit || proof.selectedUnchanged !== plan.mapping.length) throw new Error('같은 내용으로 사본 게시·CMS 동기화를 먼저 확인해 주세요.');
+      const key = `actual-prepare-${id}`; if (active.has(key)) throw new Error('게시 연결을 확인하는 중입니다.');
+      active.add(key);
+      try { return await publisher.prepare({ id, plan, digest }); } finally { active.delete(key); }
+    },
+    async applyActualPublication(id, seal, confirmed) {
+      if (!publisher) throw new Error('실제 게시 연결이 열려 있지 않습니다.');
+      return publisher.apply({ id, seal, confirmed });
+    },
+    async publicationStatus(id) {
+      if (!publisher) throw new Error('게시 기록 확인 연결이 열려 있지 않습니다.');
+      return publisher.status(id);
+    },
   };
 }
 
@@ -155,7 +177,7 @@ const mime = path => path.endsWith('.html') ? 'text/html; charset=utf-8' : /\.(m
 const previewPathAllowed = path => ['archive.html', 'media.html', 'data/archive.csv'].includes(path) || /^assets\/(?:[a-zA-Z0-9_.-]+\.(?:css|js|png|jpg|webp)|media\/(?:concerts|home)\/[a-zA-Z0-9_./-]+\.(?:jpg|png|webp|pdf))$/.test(path);
 export function trustedMutation(headers, origin) { return headers.origin === origin && headers['content-type']?.split(';')[0] === 'application/json' && headers['x-eeams-review'] === '1'; }
 
-export function createReviewServer({ root, service }) {
+export function createReviewServer({ root, service, pageNotice = '' }) {
   return http.createServer(async (req, res) => {
     const host = req.headers.host || '';
     const send = (status, body, type = 'application/json; charset=utf-8') => { res.writeHead(status, { 'Content-Type': type, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(req.method === 'HEAD' ? undefined : body); };
@@ -167,12 +189,13 @@ export function createReviewServer({ root, service }) {
         if (!trustedMutation(req.headers, `http://${host}`)) return send(403, JSON.stringify({ message: '이 컴퓨터의 변경 확인 화면에서 진행해 주세요.' }));
         let body = ''; for await (const chunk of req) { body += chunk; if (Buffer.byteLength(body) > 16384) throw new Error('요청 크기를 확인해 주세요.'); }
         const data = JSON.parse(body);
-        const result = path === '/api/prepare' ? await service.prepare(data.reviewId, data.selectedIds) : path === '/api/rehearse' ? await service.rehearse(data.planId, data.digest) : path === '/api/validate-publication' ? await service.validatePublication(data.planId, data.digest) : null;
+        const result = path === '/api/prepare' ? await service.prepare(data.reviewId, data.selectedIds) : path === '/api/rehearse' ? await service.rehearse(data.planId, data.digest) : path === '/api/validate-publication' ? await service.validatePublication(data.planId, data.digest) : path === '/api/publication/prepare' ? await service.prepareActualPublication(data.planId, data.digest) : path === '/api/publication/apply' ? await service.applyActualPublication(data.publicationId, data.seal, data.confirmed) : null;
         return result ? send(200, JSON.stringify(result)) : send(404, '{}');
       }
       if (!['GET', 'HEAD'].includes(req.method)) return send(405, '{}');
       if (path === '/') { res.writeHead(302, { Location: '/cms-sandbox/preview/review.html', 'Cache-Control': 'no-store' }); return res.end(); }
       if (path === '/api/review') return send(200, JSON.stringify(await service.load()));
+      if (path === '/api/publication/status') return send(200, JSON.stringify(await service.publicationStatus(url.searchParams.get('id'))));
       const match = path.match(/^\/rehearsals\/([0-9a-f-]{36})\/(.+)$/);
       if (match) {
         const result = await service.findResult(match[1]), file = match[2];
@@ -186,8 +209,13 @@ export function createReviewServer({ root, service }) {
         return send(200, bytes, mime(file));
       }
       const file = path === '/' ? 'cms-sandbox/preview/review.html' : path.slice(1);
-      if ((!file.startsWith('cms-sandbox/preview/') && !file.startsWith('assets/')) || /(?:review-server|publication-copy|git-snapshot-reader|jszip\.min\.cjs)/.test(file) || !/\.(?:html|mjs|js|css|json|png|jpg|webp)$/.test(file)) return send(404, '{}');
-      return send(200, await readFile(join(root, file)), mime(file));
+      if ((!file.startsWith('cms-sandbox/preview/') && !file.startsWith('assets/')) || /(?:review-server|publication-copy|publication-remote|git-snapshot-reader|jszip\.min\.cjs)/.test(file) || !/\.(?:html|mjs|js|css|json|png|jpg|webp)$/.test(file)) return send(404, '{}');
+      let bytes = await readFile(join(root, file));
+      if (pageNotice && file === 'cms-sandbox/preview/review.html') {
+        const notice = pageNotice.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+        bytes = Buffer.from(bytes.toString('utf8').replace('<body>', `<body><div role="note" style="position:sticky;top:0;z-index:20;padding:12px;text-align:center;background:#fff1c9;color:#624708;font:14px system-ui">${notice}</div>`));
+      }
+      return send(200, bytes, mime(file));
     } catch (error) { send(error.code === 'STALE_REVIEW' || error.code === 'EXPIRED_REVIEW' ? 409 : error.code === 'ENOENT' ? 404 : 400, JSON.stringify({ code: error.code || 'REVIEW_ERROR', message: error.message })); }
   });
 }
@@ -195,6 +223,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   const root = fileURLToPath(new URL('../../', import.meta.url));
   const artifactRoot = join(root, 'cms-sandbox/rehearsals');
   const reader = new GitSnapshotReader({ directory: join(artifactRoot, '.read-cache.git'), sourceRepository: root });
-  const service = createReviewService({ reader, artifactRoot, sourceRepository: root });
-  createReviewServer({ root, service }).listen(8921, '127.0.0.1', () => console.log('CMS copy review ready at http://127.0.0.1:8921/ — local copy publication only.'));
+  const enabled = process.argv.includes('--allow-publication');
+  const identity = enabled ? Object.fromEntries(['name', 'email'].map(key => [key, execFileSync('git', ['config', `user.${key}`], { cwd: root, encoding: 'utf8' }).trim()])) : null;
+  const publisher = enabled ? new ActualPublisher({ artifactRoot, sourceRepository: root, reader, identity }) : null;
+  const service = createReviewService({ reader, artifactRoot, sourceRepository: root, publisher });
+  createReviewServer({ root, service }).listen(8921, '127.0.0.1', () => console.log(`CMS review ready at http://127.0.0.1:8921/ — publication ${enabled ? 'enabled for reviewed content' : 'disabled'}.`));
 }

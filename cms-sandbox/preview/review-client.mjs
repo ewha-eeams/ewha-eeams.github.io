@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-let review, plan, reviewValid = false;
+let review, plan, actual, reviewValid = false;
 const selected = new Set();
 const names = { poster: '포스터', pdf: '프로그램북 PDF', photos: '공연 사진' };
 const actionNames = { add: '추가', replace: '교체', delete: '제외' };
@@ -15,7 +15,7 @@ function showError(error) {
   if (['STALE_REVIEW', 'EXPIRED_REVIEW'].includes(error.code)) { plan = null; reviewValid = false; $('prepared').hidden = true; $('result').hidden = true; $('prepare').disabled = true; $('status').textContent = '저장본이 달라져 다시 확인해야 합니다.'; }
   $('error').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
-function resetPlan() { plan = null; $('prepared').hidden = true; $('result').hidden = true; $('sync-result').hidden = true; $('sync-progress').textContent = ''; $('validate-publication').disabled = false; $('confirm').checked = false; $('rehearse').disabled = true; $('review-step').classList.add('current'); $('prepare-step').classList.remove('current'); }
+function resetPlan() { plan = null; actual = null; $('actual-publication').hidden = true; $('actual-ready').hidden = true; $('actual-progress').textContent = ''; $('confirm-actual').checked = false; $('publish-actual').disabled = true; $('prepare-actual').disabled = false; $('check-publication').hidden = true; $('prepared').hidden = true; $('result').hidden = true; $('sync-result').hidden = true; $('sync-progress').textContent = ''; $('validate-publication').disabled = false; $('confirm').checked = false; $('rehearse').disabled = true; $('review-step').classList.add('current'); $('prepare-step').classList.remove('current'); }
 function updateSelection() { resetPlan(); $('selected-count').textContent = `선택한 공연 ${selected.size}건`; $('prepare').disabled = !selected.size || !reviewValid; }
 function valueColumn(value, label) { const column = el('div'); column.append(el('small', label, 'caption'), el('p', value || '—')); return column; }
 function worksColumn(works, label) {
@@ -60,6 +60,8 @@ async function load() {
   $('entries').replaceChildren(); $('selection').hidden = true; selected.clear(); reviewValid = false; resetPlan();
   try {
     review = await api('/api/review'); reviewValid = true; renderEntries(); updateSelection();
+    $('scope-notice').textContent = review.publicationEnabled ? 'Save는 초안 저장입니다. 실제 공개는 사본 확인 후 별도 게시 단계에서 진행합니다. 예약 기록은 변경하지 않습니다.' : '이번 흐름은 사본에만 적용합니다. 운영 홈페이지와 예약 기록은 변경되지 않습니다.';
+    $('publish-stage-caption').textContent = review.publicationEnabled ? '사본 확인 후 공개 게시' : '이번에는 사본에서 시험';
     const changes = review.entries.filter(e => e.status !== 'unchanged').length;
     $('status').textContent = `저장된 공연 ${review.entries.length}건 · 변경 ${changes}건`;
   } catch (error) { showError(error); $('status').textContent = '최신 저장본을 확인하지 못했습니다.'; }
@@ -104,8 +106,69 @@ $('validate-publication').addEventListener('click', async () => {
     $('sync-summary').replaceChildren();
     for (const text of [`반영한 공연 ${result.selectedSynced}건의 CMS 기준 갱신`, `새 공연 ${result.promoted}건을 기존 공연 목록으로 전환`, `선택하지 않은 공연·초안 ${result.preserved}건 보존`, `남아 있는 미반영 변경 ${result.remainingChanges}건`, '운영 홈페이지와 예약 기록 유지']) $('sync-summary').append(el('li', text));
     $('sync-report').href = result.report; $('sync-result').hidden = false;
+    $('actual-publication').hidden = !review.publicationEnabled;
     $('sync-progress').textContent = result.repeated ? '이미 완료한 사본 검증 결과를 다시 확인했습니다. 중복 반영하지 않았습니다.' : '사본 검증 완료 · 실제 공개 반영은 아직 진행하지 않았습니다.';
   } catch (error) { if (plan?.id === requested.id) { showError(error); $('sync-progress').textContent = '사본 검증을 완료하지 못했습니다. 운영 자료는 유지됩니다.'; } }
   finally { $('validate-publication').disabled = false; }
 });
-load();
+function rememberPublication(id) { const url = new URL(location.href); url.searchParams.set('publication', id); history.replaceState(null, '', url); }
+function showPublished(result) {
+  $('publication-recovery').hidden = true;
+  $('published-summary').textContent = `공연 ${result.selectedSynced}건의 운영 저장과 CMS 기준 갱신을 확인했습니다. 남은 미반영 변경 ${result.remainingChanges}건입니다.`;
+  $('published-link').href = `https://ewha-eeams.github.io/archive.html#${result.mapping[0].publicId}`;
+  $('published').hidden = false;
+}
+$('prepare-actual').addEventListener('click', async () => {
+  if (!plan) return; const requested = plan;
+  $('prepare-actual').disabled = true; $('actual-progress').textContent = '게시 대상과 CMS 저장본을 다시 확인하는 중입니다.';
+  try {
+    const prepared = await api('/api/publication/prepare', { planId: requested.id, digest: requested.digest });
+    if (plan?.id !== requested.id) return;
+    actual = prepared; $('actual-mapping').replaceChildren();
+    prepared.mapping.forEach(m => $('actual-mapping').append(el('li', m.title)));
+    $('confirm-actual').checked = false; $('publish-actual').disabled = true; $('actual-ready').hidden = false;
+    $('actual-progress').textContent = '게시 연결 확인 완료 · 아직 공개 반영하지 않았습니다.';
+  } catch (error) { $('actual-progress').textContent = error.message; }
+  finally { $('prepare-actual').disabled = false; }
+});
+$('confirm-actual').addEventListener('change', () => { $('publish-actual').disabled = !actual || !$('confirm-actual').checked; });
+$('publish-actual').addEventListener('click', async () => {
+  if (!actual || !$('confirm-actual').checked) return;
+  const requested = actual; rememberPublication(requested.id);
+  $('publish-actual').disabled = true; $('prepare-actual').disabled = true; $('reload').disabled = true; $('check-publication').hidden = false;
+  $('actual-progress').textContent = '운영 홈페이지와 CMS에 함께 반영하고 결과를 확인하는 중입니다.';
+  try {
+    const result = await api('/api/publication/apply', { publicationId: requested.id, seal: requested.seal, confirmed: true });
+    await load(); showPublished(result); $('published').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (error) { $('actual-progress').textContent = error.message; showRecovery(error.message); }
+  finally { $('reload').disabled = false; }
+});
+function showRecovery(message) { $('recovery-message').textContent = message; $('publication-recovery').hidden = false; }
+async function checkPublication(id) {
+  const result = await api(`/api/publication/status?id=${encodeURIComponent(id)}`);
+  if (result.status === 'published') { showPublished(result); return true; }
+  const message = result.message || '아직 공개 반영되지 않았습니다. 저장된 변경 내용을 확인해 주세요.';
+  $('actual-progress').textContent = message; showRecovery(message);
+  if (result.status === 'not-published' && actual) { $('prepare-actual').disabled = false; $('publish-actual').disabled = !$('confirm-actual').checked; }
+  return false;
+}
+$('check-publication').addEventListener('click', async () => {
+  const id = actual?.id || new URLSearchParams(location.search).get('publication'); if (!id) return;
+  $('check-publication').disabled = true;
+  try { if (await checkPublication(id)) { await load(); await checkPublication(id); } }
+  catch (error) { $('actual-progress').textContent = error.message; }
+  finally { $('check-publication').disabled = false; }
+});
+$('recheck-publication').addEventListener('click', async () => {
+  const id = new URLSearchParams(location.search).get('publication'); if (!id) return;
+  $('recheck-publication').disabled = true;
+  try { if (await checkPublication(id)) { await load(); await checkPublication(id); } }
+  catch (error) { showRecovery(error.message); }
+  finally { $('recheck-publication').disabled = false; }
+});
+await load();
+const previousPublication = new URLSearchParams(location.search).get('publication');
+if (previousPublication) {
+  try { await checkPublication(previousPublication); }
+  catch (error) { showRecovery(error.message); }
+}

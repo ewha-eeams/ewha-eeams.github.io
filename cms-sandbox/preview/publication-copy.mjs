@@ -15,10 +15,11 @@ const refs = { baseCommit: 'refs/heads/site-copy', draftCommit: 'refs/heads/cms-
 const marker = 'eeams-local-publication-copy.json';
 const failure = (message, code = 'COPY_PUBLICATION_ERROR') => Object.assign(new Error(message), { code });
 const formPath = path => /^cms-sandbox\/(?:forms\/[0-9]{4}-concert[1-9][0-9]*|drafts\/[0-9a-f-]{36})\.json$/i.test(path);
-const syncPath = path => allowedPublishPath(path) || formPath(path) || ['.pages.yml', 'cms-sandbox/data/archive.csv', 'cms-sandbox/preview/source.json', 'cms-sandbox/preview/build-info.json'].includes(path) || /^cms-sandbox\/publications\/[0-9a-f]{64}\.json$/.test(path);
+export const allowedCmsSyncPath = path => allowedPublishPath(path) || formPath(path) || ['.pages.yml', 'cms-sandbox/data/archive.csv', 'cms-sandbox/preview/source.json', 'cms-sandbox/preview/build-info.json'].includes(path) || /^cms-sandbox\/publications\/[0-9a-f]{64}\.json$/.test(path);
+const syncPath = allowedCmsSyncPath;
 
 /** Advance the baseline, retaining all unselected editor content and uploaded media paths. */
-export function synchronizeCms({ review, plan, files, config, buildInfo, publicCommit, digest }) {
+export function synchronizeCms({ review, plan, files, config, buildInfo, publicCommit, digest, publicationRecord = false }) {
   if (!shaPattern.test(publicCommit)) throw failure('사본 게시 저장본을 확인해 주세요.');
   if (JSON.stringify(preparePlan(review, plan.selectedIds)) !== JSON.stringify(plan)) throw failure('확인한 반영 범위가 달라졌습니다.');
   const hash = sha256(Buffer.from(plan.csv)), selected = new Map(plan.mapping.map(m => [m.cms_id, m]));
@@ -58,21 +59,24 @@ export function synchronizeCms({ review, plan, files, config, buildInfo, publicC
   patches.set('cms-sandbox/data/archive.csv', Buffer.from(plan.csv));
   patches.set('cms-sandbox/preview/source.json', json({ schema: 1, sha256: hash, rows: plan.rows }));
   patches.set('cms-sandbox/preview/build-info.json', json({ ...buildInfo, publicBase: publicCommit, sourceRows: plan.rows.length }));
-  const ledger = { schema: 1, copyOnly: true, productionPublished: false, digest, previousPublicCommit: plan.baseCommit, previousCmsCommit: plan.draftCommit, publicCommit, source_sha256: hash, mapping: plan.mapping };
+  const ledger = { schema: 1, ...(publicationRecord ? { kind: 'paired-publication', copyOnly: false } : { copyOnly: true, productionPublished: false }), digest, previousPublicCommit: plan.baseCommit, previousCmsCommit: plan.draftCommit, publicCommit, source_sha256: hash, mapping: plan.mapping };
   patches.set(`cms-sandbox/publications/${digest}.json`, json(ledger));
   if ([...patches.keys()].some(path => !syncPath(path))) throw failure('동기화 범위를 확인해 주세요.');
   return { patches, hash, transformed, preserved, ledger };
 }
 
 export class LocalPublicationCopy {
-  constructor(directory) { this.directory = resolve(directory); }
+  constructor(directory, { identity } = {}) {
+    this.directory = resolve(directory); this.identity = identity;
+    if (identity && (!identity.name || !identity.email || /[\x00-\x1f<>]/.test(identity.name + identity.email))) throw failure('게시 담당자 정보를 확인해 주세요.');
+  }
   git(args, options = {}) {
     return execFileSync('git', ['--no-replace-objects', '--git-dir', this.directory, ...args], {
       maxBuffer: 128 * 1024 * 1024, stdio: ['pipe', 'pipe', 'pipe'],
       ...options,
-      env: { ...process.env, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_TERMINAL_PROMPT: '0',
-        GIT_AUTHOR_NAME: 'EEAMS CMS copy verification', GIT_AUTHOR_EMAIL: 'cms-copy@example.invalid',
-        GIT_COMMITTER_NAME: 'EEAMS CMS copy verification', GIT_COMMITTER_EMAIL: 'cms-copy@example.invalid', ...options.env },
+      env: { ...Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('GIT_'))), GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_TERMINAL_PROMPT: '0',
+        GIT_AUTHOR_NAME: this.identity?.name || 'EEAMS CMS copy verification', GIT_AUTHOR_EMAIL: this.identity?.email || 'cms-copy@example.invalid',
+        GIT_COMMITTER_NAME: this.identity?.name || 'EEAMS CMS copy verification', GIT_COMMITTER_EMAIL: this.identity?.email || 'cms-copy@example.invalid', ...options.env },
     });
   }
   async verify() {
@@ -187,13 +191,13 @@ export class LocalPublicationCopy {
   }
 }
 
-export async function createLocalPublicationCopy({ directory, sourceRepository, baseCommit, draftCommit }) {
+export async function createLocalPublicationCopy({ directory, sourceRepository, baseCommit, draftCommit, identity }) {
   if (![baseCommit, draftCommit].every(s => shaPattern.test(s || ''))) throw failure('복사할 저장본을 확인해 주세요.');
   const source = await realpath(sourceRepository), target = resolve(directory);
   if (target === source || source.startsWith(target + '/')) throw failure('원본과 분리된 새 사본이 필요합니다.');
   // A fresh directory and no remote make a mistaken production write impossible here.
   await mkdir(target);
-  const store = new LocalPublicationCopy(target);
+  const store = new LocalPublicationCopy(target, { identity });
   try {
     execFileSync('git', ['init', '--bare', '--quiet', target], { stdio: 'pipe' });
     store.git(['-c', 'protocol.file.allow=always', 'fetch', '--quiet', '--no-tags', '--no-write-fetch-head', source, baseCommit, draftCommit]);
