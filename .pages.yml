@@ -468,7 +468,6 @@
           "name": "records",
           "label": "참여자 목록",
           "type": "object",
-          "description": "항목을 펼쳐 편집하고 Save를 누르세요. Save는 사본 저장이며 공개 게시는 아닙니다.",
           "list": {
             "min": 0,
             "max": 500,
@@ -641,7 +640,6 @@
           "name": "records",
           "label": "특강·워크숍 목록",
           "type": "object",
-          "description": "항목을 펼쳐 편집하고 Save를 누르세요. Save는 사본 저장이며 공개 게시는 아닙니다.",
           "list": {
             "min": 0,
             "max": 500,
@@ -765,7 +763,6 @@
           "name": "records",
           "label": "연구 프로젝트 목록",
           "type": "object",
-          "description": "항목을 펼쳐 편집하고 Save를 누르세요. Save는 사본 저장이며 공개 게시는 아닙니다.",
           "list": {
             "min": 0,
             "max": 500,
