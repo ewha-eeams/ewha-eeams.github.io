@@ -15,7 +15,7 @@ function showError(error) {
   if (['STALE_REVIEW', 'EXPIRED_REVIEW'].includes(error.code)) { plan = null; reviewValid = false; $('prepared').hidden = true; $('result').hidden = true; $('prepare').disabled = true; $('status').textContent = '저장본이 달라져 다시 확인해야 합니다.'; }
   $('error').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
-function resetPlan() { plan = null; $('prepared').hidden = true; $('result').hidden = true; $('confirm').checked = false; $('rehearse').disabled = true; $('review-step').classList.add('current'); $('prepare-step').classList.remove('current'); }
+function resetPlan() { plan = null; $('prepared').hidden = true; $('result').hidden = true; $('sync-result').hidden = true; $('sync-progress').textContent = ''; $('validate-publication').disabled = false; $('confirm').checked = false; $('rehearse').disabled = true; $('review-step').classList.add('current'); $('prepare-step').classList.remove('current'); }
 function updateSelection() { resetPlan(); $('selected-count').textContent = `선택한 공연 ${selected.size}건`; $('prepare').disabled = !selected.size || !reviewValid; }
 function valueColumn(value, label) { const column = el('div'); column.append(el('small', label, 'caption'), el('p', value || '—')); return column; }
 function worksColumn(works, label) {
@@ -92,5 +92,20 @@ $('rehearse').addEventListener('click', async () => {
     $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (error) { showError(error); $('progress').textContent = '반영 시험을 완료하지 못했습니다. 기존 자료는 유지됩니다.'; }
   finally { $('rehearse').disabled = !plan || !$('confirm').checked; }
+});
+$('validate-publication').addEventListener('click', async () => {
+  if (!plan || !$('confirm').checked) return;
+  const requested = plan;
+  $('validate-publication').disabled = true; $('error').hidden = true; $('sync-result').hidden = true;
+  $('sync-progress').textContent = '별도 사본에서 게시와 CMS 동기화를 확인하는 중입니다.';
+  try {
+    const result = await api('/api/validate-publication', { planId: requested.id, digest: requested.digest });
+    if (plan?.id !== requested.id) return;
+    $('sync-summary').replaceChildren();
+    for (const text of [`반영한 공연 ${result.selectedSynced}건의 CMS 기준 갱신`, `새 공연 ${result.promoted}건을 기존 공연 목록으로 전환`, `선택하지 않은 공연·초안 ${result.preserved}건 보존`, `남아 있는 미반영 변경 ${result.remainingChanges}건`, '운영 홈페이지와 예약 기록 유지']) $('sync-summary').append(el('li', text));
+    $('sync-report').href = result.report; $('sync-result').hidden = false;
+    $('sync-progress').textContent = result.repeated ? '이미 완료한 사본 검증 결과를 다시 확인했습니다. 중복 반영하지 않았습니다.' : '사본 검증 완료 · 실제 공개 반영은 아직 진행하지 않았습니다.';
+  } catch (error) { if (plan?.id === requested.id) { showError(error); $('sync-progress').textContent = '사본 검증을 완료하지 못했습니다. 운영 자료는 유지됩니다.'; } }
+  finally { $('validate-publication').disabled = false; }
 });
 load();

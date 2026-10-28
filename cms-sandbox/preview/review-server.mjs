@@ -7,6 +7,7 @@ import { join, resolve, dirname } from 'node:path';
 import { buildReview, publicReview, preparePlan, assertCurrent, allowedPublishPath } from './review-model.mjs';
 import { parseCsv } from './csv-parser.mjs';
 import { repository, branch, rawUrl, uuidPattern } from './preview-model.mjs';
+import { createLocalPublicationCopy, LocalPublicationCopy } from './publication-copy.mjs';
 
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const gitSha = bytes => createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
@@ -47,7 +48,7 @@ export class GitHubReader {
   }
 }
 
-export function createReviewService({ reader = new GitHubReader(), artifactRoot, fault = async () => {} }) {
+export function createReviewService({ reader = new GitHubReader(), artifactRoot, sourceRepository, fault = async () => {} }) {
   const reviews = new Map(), plans = new Map(), results = new Map();
   const active = new Set();
   const requireLive = (map, id) => {
@@ -125,6 +126,27 @@ export function createReviewService({ reader = new GitHubReader(), artifactRoot,
       } catch (error) { await rm(temporary, { recursive: true, force: true }); throw error; }
       finally { active.delete(id); }
     },
+    async validatePublication(id, digest) {
+      const { plan, digest: expected } = requireLive(plans, id);
+      if (expected !== digest || sha256(JSON.stringify(plan)) !== digest) throw new Error('확인한 변경 내용과 요청이 다릅니다.');
+      if (!sourceRepository) throw new Error('이 컴퓨터의 사본 게시 검증을 준비해 주세요.');
+      assertCurrent(plan, await reader.refs());
+      const result = await this.findResult(id), key = `publication-${id}`;
+      if (active.has(key)) throw new Error('같은 사본 검증을 처리하고 있습니다. 잠시 기다려 주세요.');
+      active.add(key);
+      try {
+        const directory = join(result.directory, 'publication-copy.git');
+        let copy;
+        try { copy = await createLocalPublicationCopy({ directory, sourceRepository, baseCommit: plan.baseCommit, draftCommit: plan.draftCommit }); }
+        catch (error) { if (error.code !== 'EEXIST') throw error; copy = new LocalPublicationCopy(directory); }
+        const report = await copy.publish(plan, digest);
+        assertCurrent(plan, await reader.refs());
+        await writeFile(join(result.directory, 'publication-check.json'), JSON.stringify(report, null, 2) + '\n');
+        return { copyOnly: true, productionPublished: false, selectedSynced: report.selectedUnchanged, remainingChanges: report.remainingChanges,
+          promoted: report.transformed.filter(f => f.from !== f.to).length, preserved: report.preserved.length, repeated: report.repeated,
+          report: `/rehearsals/${id}/publication-check.json` };
+      } finally { active.delete(key); }
+    },
   };
 }
 
@@ -144,7 +166,7 @@ export function createReviewServer({ root, service }) {
         if (!trustedMutation(req.headers, `http://${host}`)) return send(403, JSON.stringify({ message: '이 컴퓨터의 변경 확인 화면에서 진행해 주세요.' }));
         let body = ''; for await (const chunk of req) { body += chunk; if (Buffer.byteLength(body) > 16384) throw new Error('요청 크기를 확인해 주세요.'); }
         const data = JSON.parse(body);
-        const result = path === '/api/prepare' ? await service.prepare(data.reviewId, data.selectedIds) : path === '/api/rehearse' ? await service.rehearse(data.planId, data.digest) : null;
+        const result = path === '/api/prepare' ? await service.prepare(data.reviewId, data.selectedIds) : path === '/api/rehearse' ? await service.rehearse(data.planId, data.digest) : path === '/api/validate-publication' ? await service.validatePublication(data.planId, data.digest) : null;
         return result ? send(200, JSON.stringify(result)) : send(404, '{}');
       }
       if (!['GET', 'HEAD'].includes(req.method)) return send(405, '{}');
@@ -155,6 +177,7 @@ export function createReviewServer({ root, service }) {
         const result = await service.findResult(match[1]), file = match[2];
         if (!result || result.receipt.deleted.includes(file)) return send(404, '{}');
         if (file === 'review-package.zip') { res.setHeader('Content-Disposition', 'attachment; filename="eeams-reviewed-content.zip"'); return send(200, await readFile(join(result.directory, file)), mime(file)); }
+        if (file === 'publication-check.json') return send(200, await readFile(join(result.directory, file)), mime(file));
         if (!previewPathAllowed(file)) return send(404, '{}');
         const local = result.receipt.files.some(f => f.path === file);
         let bytes = local ? await readFile(join(result.directory, file)) : await service.reader.bytes(result.receipt.baseCommit, file);
@@ -162,13 +185,13 @@ export function createReviewServer({ root, service }) {
         return send(200, bytes, mime(file));
       }
       const file = path === '/' ? 'cms-sandbox/preview/review.html' : path.slice(1);
-      if ((!file.startsWith('cms-sandbox/preview/') && !file.startsWith('assets/')) || /(?:review-server|jszip\.min\.cjs)/.test(file) || !/\.(?:html|mjs|js|css|json|png|jpg|webp)$/.test(file)) return send(404, '{}');
+      if ((!file.startsWith('cms-sandbox/preview/') && !file.startsWith('assets/')) || /(?:review-server|publication-copy|jszip\.min\.cjs)/.test(file) || !/\.(?:html|mjs|js|css|json|png|jpg|webp)$/.test(file)) return send(404, '{}');
       return send(200, await readFile(join(root, file)), mime(file));
     } catch (error) { send(error.code === 'STALE_REVIEW' || error.code === 'EXPIRED_REVIEW' ? 409 : error.code === 'ENOENT' ? 404 : 400, JSON.stringify({ code: error.code || 'REVIEW_ERROR', message: error.message })); }
   });
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const root = fileURLToPath(new URL('../../', import.meta.url));
-  const service = createReviewService({ artifactRoot: join(root, 'cms-sandbox/rehearsals') });
-  createReviewServer({ root, service }).listen(8921, '127.0.0.1', () => console.log('CMS copy review ready at http://127.0.0.1:8921/ — no publication API.'));
+  const service = createReviewService({ artifactRoot: join(root, 'cms-sandbox/rehearsals'), sourceRepository: root });
+  createReviewServer({ root, service }).listen(8921, '127.0.0.1', () => console.log('CMS copy review ready at http://127.0.0.1:8921/ — local copy publication only.'));
 }
