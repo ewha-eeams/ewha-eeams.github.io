@@ -8,6 +8,7 @@ import { buildReview, publicReview, preparePlan, assertCurrent, allowedPublishPa
 import { parseCsv } from './csv-parser.mjs';
 import { repository, branch, rawUrl, uuidPattern } from './preview-model.mjs';
 import { createLocalPublicationCopy, LocalPublicationCopy } from './publication-copy.mjs';
+import { GitSnapshotReader } from './git-snapshot-reader.mjs';
 
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const gitSha = bytes => createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
@@ -137,7 +138,7 @@ export function createReviewService({ reader = new GitHubReader(), artifactRoot,
       try {
         const directory = join(result.directory, 'publication-copy.git');
         let copy;
-        try { copy = await createLocalPublicationCopy({ directory, sourceRepository, baseCommit: plan.baseCommit, draftCommit: plan.draftCommit }); }
+        try { copy = await createLocalPublicationCopy({ directory, sourceRepository: reader.copySource || sourceRepository, baseCommit: plan.baseCommit, draftCommit: plan.draftCommit }); }
         catch (error) { if (error.code !== 'EEXIST') throw error; copy = new LocalPublicationCopy(directory); }
         const report = await copy.publish(plan, digest);
         assertCurrent(plan, await reader.refs());
@@ -185,13 +186,15 @@ export function createReviewServer({ root, service }) {
         return send(200, bytes, mime(file));
       }
       const file = path === '/' ? 'cms-sandbox/preview/review.html' : path.slice(1);
-      if ((!file.startsWith('cms-sandbox/preview/') && !file.startsWith('assets/')) || /(?:review-server|publication-copy|jszip\.min\.cjs)/.test(file) || !/\.(?:html|mjs|js|css|json|png|jpg|webp)$/.test(file)) return send(404, '{}');
+      if ((!file.startsWith('cms-sandbox/preview/') && !file.startsWith('assets/')) || /(?:review-server|publication-copy|git-snapshot-reader|jszip\.min\.cjs)/.test(file) || !/\.(?:html|mjs|js|css|json|png|jpg|webp)$/.test(file)) return send(404, '{}');
       return send(200, await readFile(join(root, file)), mime(file));
     } catch (error) { send(error.code === 'STALE_REVIEW' || error.code === 'EXPIRED_REVIEW' ? 409 : error.code === 'ENOENT' ? 404 : 400, JSON.stringify({ code: error.code || 'REVIEW_ERROR', message: error.message })); }
   });
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const root = fileURLToPath(new URL('../../', import.meta.url));
-  const service = createReviewService({ artifactRoot: join(root, 'cms-sandbox/rehearsals'), sourceRepository: root });
+  const artifactRoot = join(root, 'cms-sandbox/rehearsals');
+  const reader = new GitSnapshotReader({ directory: join(artifactRoot, '.read-cache.git'), sourceRepository: root });
+  const service = createReviewService({ reader, artifactRoot, sourceRepository: root });
   createReviewServer({ root, service }).listen(8921, '127.0.0.1', () => console.log('CMS copy review ready at http://127.0.0.1:8921/ — local copy publication only.'));
 }
