@@ -71,12 +71,6 @@
       "project_group_en": "Curve Lab",
       "description_en": "A module for designing base frequency, oscillator deviation, and spectral slope across time with curves.",
       "origin_key": "research-0006"
-    },
-    {
-      "title": "CMS 연결 확인용 프로젝트",
-      "project_group": "관리 확인 사본",
-      "status": "사본 시험",
-      "order": "99"
     }
   ],
   "source_sha256": "a34ff3a18ca89c469ef11d9d07bdb4022725e2072cf3632164467a805c7ae107"
