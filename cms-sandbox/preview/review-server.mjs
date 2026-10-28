@@ -10,6 +10,7 @@ import { repository, branch, rawUrl, uuidPattern } from './preview-model.mjs';
 import { createLocalPublicationCopy, LocalPublicationCopy } from './publication-copy.mjs';
 import { GitSnapshotReader } from './git-snapshot-reader.mjs';
 import { ActualPublisher } from './publication-remote.mjs';
+import { createManagementService } from './management-service.mjs';
 import { execFileSync } from 'node:child_process';
 
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -177,7 +178,7 @@ const mime = path => path.endsWith('.html') ? 'text/html; charset=utf-8' : /\.(m
 const previewPathAllowed = path => ['archive.html', 'media.html', 'data/archive.csv'].includes(path) || /^assets\/(?:[a-zA-Z0-9_.-]+\.(?:css|js|png|jpg|webp)|media\/(?:concerts|home)\/[a-zA-Z0-9_./-]+\.(?:jpg|png|webp|pdf))$/.test(path);
 export function trustedMutation(headers, origin) { return headers.origin === origin && headers['content-type']?.split(';')[0] === 'application/json' && headers['x-eeams-review'] === '1'; }
 
-export function createReviewServer({ root, service, pageNotice = '' }) {
+export function createReviewServer({ root, service, pageNotice = '', management = null }) {
   return http.createServer(async (req, res) => {
     const host = req.headers.host || '';
     const send = (status, body, type = 'application/json; charset=utf-8') => { res.writeHead(status, { 'Content-Type': type, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(req.method === 'HEAD' ? undefined : body); };
@@ -193,7 +194,17 @@ export function createReviewServer({ root, service, pageNotice = '' }) {
         return result ? send(200, JSON.stringify(result)) : send(404, '{}');
       }
       if (!['GET', 'HEAD'].includes(req.method)) return send(405, '{}');
-      if (path === '/') { res.writeHead(302, { Location: '/cms-sandbox/preview/review.html', 'Cache-Control': 'no-store' }); return res.end(); }
+      if (path === '/' || ['/manage', '/preview', '/review'].includes(path)) {
+        const name = path === '/preview' ? 'index' : path === '/review' || url.searchParams.has('publication') ? 'review' : management ? 'manage' : 'review';
+        res.writeHead(302, { Location: `/cms-sandbox/preview/${name}.html${url.search}`, 'Cache-Control': 'no-store' }); return res.end();
+      }
+      if (management && path === '/api/manage/health') return send(200, JSON.stringify(management.health()));
+      if (management && path === '/api/manage/status') return send(200, JSON.stringify(await management.status()));
+      if (management && path === '/api/saved-preview') return send(200, JSON.stringify(await management.preview()));
+      if (management && path === '/api/saved-media') {
+        const file = await management.media(url.searchParams.get('commit'), url.searchParams.get('path'));
+        return send(200, file.bytes, file.mime);
+      }
       if (path === '/api/review') return send(200, JSON.stringify(await service.load()));
       if (path === '/api/publication/status') return send(200, JSON.stringify(await service.publicationStatus(url.searchParams.get('id'))));
       const match = path.match(/^\/rehearsals\/([0-9a-f-]{36})\/(.+)$/);
@@ -209,8 +220,10 @@ export function createReviewServer({ root, service, pageNotice = '' }) {
         return send(200, bytes, mime(file));
       }
       const file = path === '/' ? 'cms-sandbox/preview/review.html' : path.slice(1);
-      if ((!file.startsWith('cms-sandbox/preview/') && !file.startsWith('assets/')) || /(?:review-server|publication-copy|publication-remote|git-snapshot-reader|jszip\.min\.cjs)/.test(file) || !/\.(?:html|mjs|js|css|json|png|jpg|webp)$/.test(file)) return send(404, '{}');
+      if ((!file.startsWith('cms-sandbox/preview/') && !file.startsWith('assets/')) || /(?:review-server|management-service|publication-copy|publication-remote|git-snapshot-reader|jszip\.min\.cjs)/.test(file) || !/\.(?:html|mjs|js|css|json|png|jpg|webp)$/.test(file)) return send(404, '{}');
       let bytes = await readFile(join(root, file));
+      if (management && file === 'cms-sandbox/preview/index.html') bytes = Buffer.from(bytes.toString('utf8').replace('<body>', '<body data-preview-source="manager">'));
+      if (management && file === 'cms-sandbox/preview/review.html') bytes = Buffer.from(bytes.toString('utf8').replace('id="manager-home" href="/manage" hidden', 'id="manager-home" href="/manage"'));
       if (pageNotice && file === 'cms-sandbox/preview/review.html') {
         const notice = pageNotice.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
         bytes = Buffer.from(bytes.toString('utf8').replace('<body>', `<body><div role="note" style="position:sticky;top:0;z-index:20;padding:12px;text-align:center;background:#fff1c9;color:#624708;font:14px system-ui">${notice}</div>`));
@@ -227,5 +240,6 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   const identity = enabled ? Object.fromEntries(['name', 'email'].map(key => [key, execFileSync('git', ['config', `user.${key}`], { cwd: root, encoding: 'utf8' }).trim()])) : null;
   const publisher = enabled ? new ActualPublisher({ artifactRoot, sourceRepository: root, reader, identity }) : null;
   const service = createReviewService({ reader, artifactRoot, sourceRepository: root, publisher });
-  createReviewServer({ root, service }).listen(8921, '127.0.0.1', () => console.log(`CMS review ready at http://127.0.0.1:8921/ — publication ${enabled ? 'enabled for reviewed content' : 'disabled'}.`));
+  const management = createManagementService({ reader, publicationEnabled: enabled });
+  createReviewServer({ root, service, management }).listen(8921, '127.0.0.1', () => console.log(`EEAMS CMS manager ready at http://127.0.0.1:8921/manage — publication ${enabled ? 'enabled for reviewed content' : 'disabled'}.`));
 }

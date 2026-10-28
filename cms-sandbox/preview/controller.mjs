@@ -29,9 +29,15 @@ async function refresh() {
   frame.hidden = true; $('edit').hidden = true; $('standalone').hidden = true;
   $('status').textContent = 'CMS에 저장된 내용을 불러오는 중입니다.';
   try {
+    let commit;
+    if (document.body.dataset.previewSource === 'manager') {
+      snapshot = await (await get('/api/saved-preview')).json();
+      commit = snapshot.commit;
+      if (snapshot.schema !== 1 || snapshot.delivery !== 'local-server' || !/^[0-9a-f]{40}$/.test(commit || '')) throw new Error('관리 화면의 저장된 초안을 확인해 주세요.');
+    } else {
     const api = `https://api.github.com/repos/${repository}`;
     const ref = await (await get(`${api}/branches/${branch}`)).json();
-    const commit = ref.commit?.sha;
+    commit = ref.commit?.sha;
     if (!/^[0-9a-f]{40}$/.test(commit || '')) throw new Error('저장본을 확인하지 못했습니다.');
     const treeResponse = await (await get(`${api}/git/trees/${commit}?recursive=1`)).json();
     if (treeResponse.truncated || !Array.isArray(treeResponse.tree)) throw new Error('자료 목록 일부가 누락됐습니다. 다시 불러와 주세요.');
@@ -42,6 +48,7 @@ async function refresh() {
       ...paths.map(async ({ path }) => ({ path, data: await (await get(rawUrl(commit, path))).json() })),
     ]);
     snapshot = compileSnapshot({ source, files, tree: treeResponse.tree, commit });
+    }
     localStorage.setItem(storageKey(commit), JSON.stringify(snapshot));
     select.replaceChildren();
     for (const [label, existing] of [['기존 공연 사본', true], ['새 공연 초안', false]]) {
@@ -54,7 +61,7 @@ async function refresh() {
     if (snapshot.entries.some(e => e.recordId === selected)) select.value = selected;
     for (const message of snapshot.warnings) { const li = document.createElement('li'); li.textContent = message; $('warnings').append(li); }
     $('warnings').hidden = !snapshot.warnings.length;
-    $('status').textContent = `저장된 사본 ${snapshot.entries.length}건 · ${commit.slice(0, 7)} · 공개 반영 전`;
+    $('status').textContent = `저장된 공연 ${snapshot.entries.length}건 · 미리보기`;
     select.disabled = false; showSelected();
   } catch (error) {
     $('errors').textContent = error.name === 'TimeoutError' ? '연결이 지연되고 있습니다. 잠시 후 다시 불러와 주세요.' : error.message;

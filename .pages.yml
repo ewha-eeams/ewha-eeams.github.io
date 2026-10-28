@@ -445,7 +445,7 @@
     },
     {
       "name": "preview_guide",
-      "label": "홈페이지 미리보기",
+      "label": "관리 시작·미리보기",
       "type": "file",
       "path": "cms-sandbox/preview-guide.json",
       "format": "json",

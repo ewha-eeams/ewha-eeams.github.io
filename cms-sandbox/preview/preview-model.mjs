@@ -70,10 +70,16 @@ export function compileSnapshot({ source, files, tree, commit }) {
 }
 
 export const storageKey = commit => `eeams-cms-saved-preview-v1:${commit}`;
+export function savedResourceUrl(snapshot, src) {
+  const resource = snapshot.resources[src];
+  if (!resource || rawUrl(snapshot.commit, resource.path) !== src) throw new Error('저장된 미리보기 자료를 확인해 주세요.');
+  return snapshot.delivery === 'local-server' ? `/api/saved-media?${new URLSearchParams({ commit: snapshot.commit, path: resource.path })}` : src;
+}
 export function readSnapshot(commit, storage = localStorage) {
   if (!/^[0-9a-f]{40}$/.test(commit || '')) throw new Error('미리보기 목록에서 저장된 초안을 먼저 불러와 주세요.');
   const snapshot = JSON.parse(storage.getItem(storageKey(commit)) || 'null');
   if (!snapshot || snapshot.schema !== 1 || snapshot.commit !== commit || snapshot.branch !== branch || snapshot.repository !== repository) throw new Error('미리보기 목록에서 저장된 초안을 먼저 불러와 주세요.');
+  if (snapshot.delivery != null && snapshot.delivery !== 'local-server') throw new Error('미리보기 자료 연결을 확인해 주세요.');
   for (const [url, resource] of Object.entries(snapshot.resources)) if (rawUrl(commit, resource.path) !== url || !resource.path.startsWith('cms-sandbox/media/concerts/')) throw new Error('미리보기 자료 경로를 확인해 주세요.');
   return snapshot;
 }
