@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "kind": "paired-publication",
+  "copyOnly": false,
+  "digest": "37ba41b3eda19b8745ed7d06afecfd8327c59f1f1c80742c2ba9e38609faedeb",
+  "previousPublicCommit": "33641712c5d9ad5d76996f236118cc5ce6b24b43",
+  "previousCmsCommit": "77e5adfafd01cd8f4f87607d0307bc8eb9ed0a04",
+  "publicCommit": "1b573513eba142c193387ed8f7cffb1e40c1f75e",
+  "source_sha256": "851ecd06d8ad9ceb695944aca9450bf63406e970efcf433aa5d6cc6c762c1e63",
+  "mapping": [
+    {
+      "cms_id": "71d00a69-20d1-4b21-a81d-7dd2743cbc34",
+      "publicId": "2025-concert1",
+      "title": "Soundscape 2025-1",
+      "existing": true
+    },
+    {
+      "cms_id": "1709aefb-4344-45e2-ab84-ebf43db451ea",
+      "publicId": "2025-concert2",
+      "title": "Soundscape 2025-2",
+      "existing": true
+    },
+    {
+      "cms_id": "b49eb7d9-4c05-4e30-af53-276871e60408",
+      "publicId": "2026-concert1",
+      "title": "Soundscape 2026-1",
+      "existing": true
+    }
+  ]
+}
