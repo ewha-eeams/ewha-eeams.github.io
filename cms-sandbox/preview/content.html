@@ -1,0 +1,8 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>자료 미리보기 | EEAMS 관리</title><link rel="stylesheet" href="preview.css"><link rel="stylesheet" href="content.css"></head><body>
+<header><img src="../../assets/eeams-wordmark-black.png" width="112" alt="EEAMS"><div><p>CMS 사본</p><h1 id="title">자료 미리보기</h1></div><nav class="header-links" aria-label="관리 도구"><a href="/manage">관리 시작</a><a id="edit" target="_blank" rel="noopener noreferrer">CMS에서 편집 ↗</a></nav></header>
+<main><p>CMS에서 Save한 자료를 현재 홈페이지 디자인으로 확인합니다. 공개 홈페이지에는 반영되지 않습니다.</p>
+<div class="controls"><label>관리 자료<select id="kind"><option value="people">참여자</option><option value="education">특강·워크숍</option><option value="research">연구 프로젝트</option></select></label><button id="reload" type="button">저장된 내용 다시 불러오기</button></div>
+<p id="status" role="status">저장된 자료를 확인하고 있습니다.</p><p id="error" role="alert" hidden></p>
+<details id="changes"><summary id="change-title">변경 내용 확인</summary><div id="change-list"></div><p>새 자료의 공개 주소와 첨부 경로는 공개 반영 전에 검토합니다.</p></details>
+<section class="preview-shell" aria-label="홈페이지 디자인 미리보기"><div class="viewport-switch" role="group" aria-label="화면 크기"><button id="desktop" type="button" aria-pressed="true">컴퓨터</button><button id="mobile" type="button" aria-pressed="false">휴대폰</button></div><iframe id="content-frame" title="홈페이지 자료 미리보기" hidden></iframe></section>
+</main><script type="module" src="content-client.mjs"></script></body></html>

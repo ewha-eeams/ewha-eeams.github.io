@@ -1,0 +1,77 @@
+{
+  "source_sha256": "a34ff3a18ca89c469ef11d9d07bdb4022725e2072cf3632164467a805c7ae107",
+  "records": [
+    {
+      "project_group": "Curve Lab",
+      "project_group_en": "Curve Lab",
+      "title": "Audio Curve Lab",
+      "title_en": "Audio Curve Lab",
+      "status": "Prototype",
+      "description": "재생 속도, 피치, 패닝의 변화를 시간 축 위에서 곡선으로 설계하는 모듈",
+      "description_en": "A module for designing time-based changes in playback speed, pitch, and panning with curves.",
+      "url": "https://hyunsukjun.github.io/audio-curve-lab/",
+      "order": "1",
+      "origin_key": "research-0001"
+    },
+    {
+      "project_group": "Curve Lab",
+      "project_group_en": "Curve Lab",
+      "title": "Timbre Curve Lab",
+      "title_en": "Timbre Curve Lab",
+      "status": "Prototype",
+      "description": "필터와 딜레이 계열 이펙트를 통해 음색의 변화를 시간 축 위에서 곡선으로 설계하는 모듈",
+      "description_en": "A module for designing time-based timbre transformations with filters and delay-based effects using curves.",
+      "url": "https://hyunsukjun.github.io/timbre-curve-lab/",
+      "order": "2",
+      "origin_key": "research-0002"
+    },
+    {
+      "project_group": "Curve Lab",
+      "project_group_en": "Curve Lab",
+      "title": "Space Curve Lab",
+      "title_en": "Space Curve Lab",
+      "status": "Prototype",
+      "description": "공간 방향과 거리 변화를 시간 축 위에서 곡선으로 설계하고, Stereo/Quad/Octo WAV로 출력하는 모듈",
+      "description_en": "A module for designing time-based spatial direction and distance movements with curves, and exporting them as Stereo, Quad, or Octo WAV files.",
+      "url": "https://hyunsukjun.github.io/SpaceCurveLab/",
+      "order": "3",
+      "origin_key": "research-0003"
+    },
+    {
+      "project_group": "Curve Lab",
+      "project_group_en": "Curve Lab",
+      "title": "Granular Curve Lab",
+      "title_en": "Granular Curve Lab",
+      "status": "Prototype",
+      "description": "그레인 재생 위치, 크기, 밀도, 피치 범위를 시간 축 위에서 곡선으로 설계하는 모듈",
+      "description_en": "A module for designing grain position, size, density, and pitch range across time with curves.",
+      "url": "https://hyunsukjun.github.io/granular-curve-lab/",
+      "order": "4",
+      "origin_key": "research-0004"
+    },
+    {
+      "project_group": "Curve Lab",
+      "project_group_en": "Curve Lab",
+      "title": "Spectral Curve Lab",
+      "title_en": "Spectral Curve Lab",
+      "status": "Prototype",
+      "description": "스펙트럼 이동, 확장, 블러, 배음성, 프리즈의 변화를 시간 축 위에서 곡선으로 설계하는 모듈",
+      "description_en": "A module for designing spectral shift, stretch, blur, harmonicity, and freeze across time with curves.",
+      "url": "https://hyunsukjun.github.io/spectral-curve-lab/",
+      "order": "5",
+      "origin_key": "research-0005"
+    },
+    {
+      "project_group": "Curve Lab",
+      "project_group_en": "Curve Lab",
+      "title": "Oscillator Curve Lab",
+      "title_en": "Oscillator Curve Lab",
+      "status": "Prototype",
+      "description": "기본 주파수, 오실레이터 편차, 스펙트럼 기울기의 변화를 시간 축 위에서 곡선으로 설계하는 모듈",
+      "description_en": "A module for designing base frequency, oscillator deviation, and spectral slope across time with curves.",
+      "url": "https://hyunsukjun.github.io/oscillator-curve-lab/",
+      "order": "6",
+      "origin_key": "research-0006"
+    }
+  ]
+}

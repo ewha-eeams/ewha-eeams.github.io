@@ -201,6 +201,11 @@ export function createReviewServer({ root, service, pageNotice = '', management 
       if (management && path === '/api/manage/health') return send(200, JSON.stringify(management.health()));
       if (management && path === '/api/manage/status') return send(200, JSON.stringify(await management.status()));
       if (management && path === '/api/saved-preview') return send(200, JSON.stringify(await management.preview()));
+      if (management && path === '/api/content') return send(200, JSON.stringify(await management.content(url.searchParams.get('kind'))));
+      if (management && path === '/api/content-media') {
+        const file = await management.contentMedia(url.searchParams.get('kind'), url.searchParams.get('commit'), url.searchParams.get('path'));
+        return send(200, file.bytes, file.mime);
+      }
       if (management && path === '/api/saved-media') {
         const file = await management.media(url.searchParams.get('commit'), url.searchParams.get('path'));
         return send(200, file.bytes, file.mime);

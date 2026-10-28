@@ -10,6 +10,20 @@
         "jpg",
         "pdf"
       ]
+    },
+    {
+      "name": "education_trial_media",
+      "label": "특강·워크숍 자료 · 사본",
+      "input": "cms-sandbox/media/education",
+      "output": "/cms-sandbox/media/education",
+      "extensions": [
+        "jpg",
+        "jpeg",
+        "png",
+        "webp",
+        "pdf"
+      ],
+      "rename": false
     }
   ],
   "content": [
@@ -440,6 +454,404 @@
           "hidden": true,
           "readonly": true,
           "default": "851ecd06d8ad9ceb695944aca9450bf63406e970efcf433aa5d6cc6c762c1e63"
+        }
+      ]
+    },
+    {
+      "name": "people",
+      "label": "참여자 · 사본",
+      "type": "file",
+      "path": "cms-sandbox/content/people.json",
+      "format": "json",
+      "fields": [
+        {
+          "name": "records",
+          "label": "참여자 목록",
+          "type": "object",
+          "description": "항목을 펼쳐 편집하고 Save를 누르세요. Save는 사본 저장이며 공개 게시는 아닙니다.",
+          "list": {
+            "min": 0,
+            "max": 500,
+            "collapsible": {
+              "collapsed": true,
+              "summary": "{name} · {category}"
+            }
+          },
+          "fields": [
+            {
+              "name": "name",
+              "label": "이름 (분류 안내만 입력할 때는 생략)",
+              "type": "string",
+              "description": "이름이 없는 항목은 분류 안내로 사용합니다."
+            },
+            {
+              "name": "role",
+              "label": "역할 (선택)",
+              "type": "string"
+            },
+            {
+              "name": "section",
+              "label": "구분",
+              "type": "string",
+              "required": true,
+              "pattern": {
+                "regex": "\\S",
+                "message": "공백이 아닌 내용을 입력해 주세요."
+              }
+            },
+            {
+              "name": "category",
+              "label": "분류",
+              "type": "string",
+              "required": true,
+              "pattern": {
+                "regex": "\\S",
+                "message": "공백이 아닌 내용을 입력해 주세요."
+              }
+            },
+            {
+              "name": "public",
+              "label": "공개 여부",
+              "type": "select",
+              "default": "yes",
+              "options": {
+                "values": [
+                  {
+                    "name": "yes",
+                    "label": "공개"
+                  },
+                  {
+                    "name": "no",
+                    "label": "숨김"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "order",
+              "label": "분류 표시 순서",
+              "type": "string",
+              "pattern": {
+                "regex": "^[0-9]{0,4}$",
+                "message": "0~9999 사이의 정수로 입력해 주세요."
+              },
+              "description": "작은 숫자부터 표시합니다."
+            },
+            {
+              "name": "person_order",
+              "label": "분류 안의 표시 순서",
+              "type": "string",
+              "pattern": {
+                "regex": "^[0-9]{0,4}$",
+                "message": "0~9999 사이의 정수로 입력해 주세요."
+              },
+              "description": "작은 숫자부터 표시합니다."
+            },
+            {
+              "name": "project",
+              "label": "참여 내용 (선택)",
+              "type": "string"
+            },
+            {
+              "name": "profile_url",
+              "label": "프로필 링크 (선택)",
+              "type": "string",
+              "pattern": {
+                "regex": "^(?:https?://[^\\s]+)?$",
+                "message": "http:// 또는 https://로 시작하는 주소를 입력해 주세요."
+              }
+            },
+            {
+              "name": "note",
+              "label": "분류 안내 (선택)",
+              "type": "text"
+            },
+            {
+              "name": "name_en",
+              "label": "이름 · 영문 (선택)",
+              "type": "string"
+            },
+            {
+              "name": "role_en",
+              "label": "역할 · 영문 (선택)",
+              "type": "string"
+            },
+            {
+              "name": "section_en",
+              "label": "구분 · 영문 (선택)",
+              "type": "string"
+            },
+            {
+              "name": "category_en",
+              "label": "분류 · 영문 (선택)",
+              "type": "string"
+            },
+            {
+              "name": "project_en",
+              "label": "참여 내용 · 영문 (선택)",
+              "type": "string"
+            },
+            {
+              "name": "note_en",
+              "label": "분류 안내 · 영문 (선택)",
+              "type": "text"
+            },
+            {
+              "name": "start_year",
+              "type": "string",
+              "hidden": true,
+              "readonly": true
+            },
+            {
+              "name": "end_year",
+              "type": "string",
+              "hidden": true,
+              "readonly": true
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "hidden": true,
+              "readonly": true
+            },
+            {
+              "name": "origin_key",
+              "type": "string",
+              "hidden": true,
+              "readonly": true
+            }
+          ]
+        },
+        {
+          "name": "source_sha256",
+          "type": "string",
+          "hidden": true,
+          "readonly": true
+        }
+      ]
+    },
+    {
+      "name": "education",
+      "label": "특강·워크숍 · 사본",
+      "type": "file",
+      "path": "cms-sandbox/content/education.json",
+      "format": "json",
+      "fields": [
+        {
+          "name": "records",
+          "label": "특강·워크숍 목록",
+          "type": "object",
+          "description": "항목을 펼쳐 편집하고 Save를 누르세요. Save는 사본 저장이며 공개 게시는 아닙니다.",
+          "list": {
+            "min": 0,
+            "max": 500,
+            "collapsible": {
+              "collapsed": true,
+              "summary": "{date} · {title}"
+            }
+          },
+          "fields": [
+            {
+              "name": "title",
+              "label": "제목",
+              "type": "string",
+              "required": true,
+              "pattern": {
+                "regex": "\\S",
+                "message": "공백이 아닌 내용을 입력해 주세요."
+              }
+            },
+            {
+              "name": "date",
+              "label": "날짜",
+              "type": "string",
+              "required": true,
+              "pattern": {
+                "regex": "^[1-9][0-9]{3}(?:-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01]))?$",
+                "message": "2026-10-29 또는 2026 형식으로 입력해 주세요."
+              },
+              "description": "예: 2026-10-29. 연도만 확인되면 2026처럼 입력합니다."
+            },
+            {
+              "name": "type",
+              "label": "유형",
+              "type": "select",
+              "required": true,
+              "options": {
+                "values": [
+                  "특강",
+                  "워크숍",
+                  "세미나"
+                ]
+              }
+            },
+            {
+              "name": "speaker",
+              "label": "강연자·진행자 (선택)",
+              "type": "string"
+            },
+            {
+              "name": "description",
+              "label": "소개 (선택)",
+              "type": "text"
+            },
+            {
+              "name": "materials",
+              "label": "포스터·자료 (선택)",
+              "type": "file",
+              "options": {
+                "media": "education_trial_media",
+                "extensions": [
+                  "jpg",
+                  "jpeg",
+                  "png",
+                  "webp",
+                  "pdf"
+                ],
+                "rename": false
+              },
+              "description": "특강·워크숍 사본 자료에서 선택합니다. 3 MB가 넘는 파일은 자료 업로드 안내의 별도 경로를 사용하세요."
+            },
+            {
+              "name": "title_en",
+              "label": "제목 · 영문 (선택)",
+              "type": "string"
+            },
+            {
+              "name": "type_en",
+              "label": "유형 · 영문 (선택)",
+              "type": "string"
+            },
+            {
+              "name": "speaker_en",
+              "label": "강연자·진행자 · 영문 (선택)",
+              "type": "string"
+            },
+            {
+              "name": "description_en",
+              "label": "소개 · 영문 (선택)",
+              "type": "text"
+            },
+            {
+              "name": "slug",
+              "type": "string",
+              "hidden": true,
+              "readonly": true
+            },
+            {
+              "name": "origin_key",
+              "type": "string",
+              "hidden": true,
+              "readonly": true
+            }
+          ]
+        },
+        {
+          "name": "source_sha256",
+          "type": "string",
+          "hidden": true,
+          "readonly": true
+        }
+      ]
+    },
+    {
+      "name": "research",
+      "label": "연구 프로젝트 · 사본",
+      "type": "file",
+      "path": "cms-sandbox/content/research.json",
+      "format": "json",
+      "fields": [
+        {
+          "name": "records",
+          "label": "연구 프로젝트 목록",
+          "type": "object",
+          "description": "항목을 펼쳐 편집하고 Save를 누르세요. Save는 사본 저장이며 공개 게시는 아닙니다.",
+          "list": {
+            "min": 0,
+            "max": 500,
+            "collapsible": {
+              "collapsed": true,
+              "summary": "{title}"
+            }
+          },
+          "fields": [
+            {
+              "name": "title",
+              "label": "프로젝트명",
+              "type": "string",
+              "required": true,
+              "pattern": {
+                "regex": "\\S",
+                "message": "공백이 아닌 내용을 입력해 주세요."
+              }
+            },
+            {
+              "name": "project_group",
+              "label": "프로젝트 묶음",
+              "type": "string",
+              "required": true,
+              "pattern": {
+                "regex": "\\S",
+                "message": "공백이 아닌 내용을 입력해 주세요."
+              }
+            },
+            {
+              "name": "status",
+              "label": "진행 상태 (선택)",
+              "type": "string"
+            },
+            {
+              "name": "description",
+              "label": "소개 (선택)",
+              "type": "text"
+            },
+            {
+              "name": "url",
+              "label": "프로젝트 연결 주소 (선택)",
+              "type": "string",
+              "pattern": {
+                "regex": "^(?:https?://[^\\s]+)?$",
+                "message": "http:// 또는 https://로 시작하는 주소를 입력해 주세요."
+              }
+            },
+            {
+              "name": "order",
+              "label": "표시 순서",
+              "type": "string",
+              "pattern": {
+                "regex": "^[0-9]{0,4}$",
+                "message": "0~9999 사이의 정수로 입력해 주세요."
+              },
+              "description": "작은 숫자부터 표시합니다."
+            },
+            {
+              "name": "title_en",
+              "label": "프로젝트명 · 영문 (선택)",
+              "type": "string"
+            },
+            {
+              "name": "project_group_en",
+              "label": "프로젝트 묶음 · 영문 (선택)",
+              "type": "string"
+            },
+            {
+              "name": "description_en",
+              "label": "소개 · 영문 (선택)",
+              "type": "text"
+            },
+            {
+              "name": "origin_key",
+              "type": "string",
+              "hidden": true,
+              "readonly": true
+            }
+          ]
+        },
+        {
+          "name": "source_sha256",
+          "type": "string",
+          "hidden": true,
+          "readonly": true
         }
       ]
     },
