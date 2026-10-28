@@ -107,7 +107,11 @@ export class LocalPublicationCopy {
         if (!allowed(path)) throw failure('허용되지 않은 파일 변경입니다.');
         if (bytes === null) this.git(['update-index', '--index-info'], { env, input: `0 ${'0'.repeat(40)}\t${path}\n` });
         else {
-          const blob = this.git(['hash-object', '-w', '--stdin'], { input: bytes, encoding: 'utf8' }).trim();
+          // Spool large media instead of piping megabytes through a synchronous child stdin.
+          const spool = join(this.directory, `copy-blob-${randomUUID()}`);
+          let blob;
+          try { await writeFile(spool, bytes); blob = this.git(['hash-object', '-w', '--', spool], { encoding: 'utf8' }).trim(); }
+          finally { await rm(spool, { force: true }); }
           this.git(['update-index', '--add', '--cacheinfo', '100644', blob, path], { env });
         }
       }
