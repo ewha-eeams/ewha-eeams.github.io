@@ -227,11 +227,11 @@ export function createReviewServer({ root, service, pageNotice = '', management 
       const file = path === '/' ? 'cms-sandbox/preview/review.html' : path.slice(1);
       if ((!file.startsWith('cms-sandbox/preview/') && !file.startsWith('assets/')) || /(?:review-server|management-service|publication-copy|publication-remote|git-snapshot-reader|jszip\.min\.cjs)/.test(file) || !/\.(?:html|mjs|js|css|json|png|jpg|webp)$/.test(file)) return send(404, '{}');
       let bytes = await readFile(join(root, file));
-      if (management && file === 'cms-sandbox/preview/index.html') bytes = Buffer.from(bytes.toString('utf8').replace('<body>', '<body data-preview-source="manager">'));
+      if (management && file === 'cms-sandbox/preview/index.html') bytes = Buffer.from(bytes.toString('utf8').replace(/<body\b([^>]*)>/i, '<body$1 data-preview-source="manager">'));
       if (management && file === 'cms-sandbox/preview/review.html') bytes = Buffer.from(bytes.toString('utf8').replace('id="manager-home" href="/manage" hidden', 'id="manager-home" href="/manage"'));
       if (pageNotice && file === 'cms-sandbox/preview/review.html') {
         const notice = pageNotice.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-        bytes = Buffer.from(bytes.toString('utf8').replace('<body>', `<body><div role="note" style="position:sticky;top:0;z-index:20;padding:12px;text-align:center;background:#fff1c9;color:#624708;font:14px system-ui">${notice}</div>`));
+        bytes = Buffer.from(bytes.toString('utf8').replace(/<body\b([^>]*)>/i, `<body$1><div role="note" style="position:sticky;top:0;z-index:20;padding:12px;text-align:center;background:#fff1c9;color:#624708;font:14px system-ui">${notice}</div>`));
       }
       return send(200, bytes, mime(file));
     } catch (error) { send(error.code === 'STALE_REVIEW' || error.code === 'EXPIRED_REVIEW' ? 409 : error.code === 'ENOENT' ? 404 : 400, JSON.stringify({ code: error.code || 'REVIEW_ERROR', message: error.message })); }

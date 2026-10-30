@@ -7,14 +7,14 @@ function frame() {
   const url=new URL('content-'+snapshot.kind+'.html',import.meta.url);
   url.search=new URLSearchParams({kind:snapshot.kind,snapshot:snapshot.commit});
   if(snapshot.kind==='research')url.hash='research';
-  $('content-frame').src=url.href;$('content-frame').hidden=false;
+  $('content-frame').src=url.href;$('content-frame').hidden=false; $('content-standalone').href=url.href; $('content-standalone').hidden=false; document.title=contentTypes[snapshot.kind].label+' 미리보기 | EEAMS 관리';
 }
 async function refresh() {
   if(loading)return;loading=true;const kind=$('kind').value;
-  $('reload').disabled=true;$('kind').disabled=true;$('error').hidden=true;$('content-frame').hidden=true;
+  $('reload').disabled=true;$('kind').disabled=true;$('error').hidden=true;$('content-frame').hidden=true; $('content-standalone').hidden=true;
   $('status').textContent='저장된 자료를 확인하고 있습니다.';
   $('title').textContent=contentTypes[kind].label+' 미리보기';
-  $('edit').href=cmsRoot+'/file/'+kind;
+  $('edit').href=cmsRoot+'/file/'+kind; $('edit').textContent=contentTypes[kind].label+' 편집 ↗'; document.querySelector('[data-manager-return]').href='/manage#'+kind;
   try {
     const response=await fetch('/api/content?'+new URLSearchParams({kind}),{cache:'no-store',credentials:'omit',signal:AbortSignal.timeout(30000)});
     const data=await response.json();if(!response.ok)throw Error(data.message||'저장된 자료를 읽지 못했습니다.');

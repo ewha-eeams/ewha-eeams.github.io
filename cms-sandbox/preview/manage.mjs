@@ -14,7 +14,7 @@ async function refresh() {
     const status = await response.json();
     if (status.app !== 'eeams-cms-manager' || status.schema !== 1 || !Number.isSafeInteger(status.concerts) || !Number.isSafeInteger(status.changes)) throw new Error('관리 화면 연결을 확인해 주세요.');
     $('summary').textContent = `저장된 공연 ${status.concerts}건 · 공개 전 변경 ${status.changes}건`;
-    $('next-step').textContent = status.changes ? '공연 미리보기에서 확인한 뒤 변경 내용 확인으로 진행하세요.' : '공연에는 게시할 변경이 없습니다. 다른 자료는 아래의 미리보기에서 확인하세요.';
+    $('next-step').textContent = status.changes ? '공연 미리보기에서 확인한 뒤 변경 내용 확인으로 진행하세요.' : '공연의 미반영 변경이 없습니다. 다른 자료는 각 미리보기에서 확인하세요.';
     $('publication-note').textContent = status.mode === 'publication-enabled' ? '실제 게시 연결이 열려 있습니다. 확인한 공연만 별도로 게시합니다.' : '현재는 미리보기·변경 확인 모드입니다. 실제 게시 연결은 닫혀 있습니다.';
   } catch (error) {
     $('summary').textContent = '최신 저장 상태를 확인하지 못했습니다.';
