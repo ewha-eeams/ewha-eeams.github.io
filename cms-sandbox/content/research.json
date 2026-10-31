@@ -4,7 +4,7 @@
       "title": "Audio Curve Lab",
       "project_group": "Curve Lab",
       "status": "Prototype",
-      "description": "재생 속도, 피치, 패닝의 변화를 시간 축 위에서 곡선으로 설계하는 모듈",
+      "description": "재생 속도·피치·패닝의 시간에 따른 변화를 곡선으로 설계하는 모듈",
       "url": "https://hyunsukjun.github.io/audio-curve-lab/",
       "order": "1",
       "title_en": "Audio Curve Lab",
