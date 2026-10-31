@@ -19,9 +19,9 @@ async function showResult(report,id) {
   for(const text of [`사본에 반영된 ${contentTypes[kind].label} ${report.records}개 항목`,'반영한 자료의 남은 변경 0건',`다른 자료 보존: ${report.preservedKinds.map(k=>contentTypes[k].label).join(' · ')}`]){const li=document.createElement('li');li.textContent=text;$('result-summary').append(li);}
   $('report').href='/api/content-copy/report?'+new URLSearchParams({id});$('result').hidden=false;$('prepared').hidden=true;$('prepare').hidden=true;
   $('status').textContent='사본 검증 완료 · 실제 홈페이지와 CMS 입력 자료는 변경되지 않았습니다.';
-  $('reload').textContent='결과 다시 보기';resultId=id;history.replaceState(null,'','?'+new URLSearchParams({kind,result:id}));
+  $('reload').textContent='결과 다시 보기';resultId=id;history.replaceState(null,'','?'+new URLSearchParams({kind,result:id,...(actualId?{publication:actualId}:{})}));
   $('actual-actions').hidden=!capabilities?.enabled;
-  if(actualId && capabilities?.enabled)await checkActual();
+  if(actualId && capabilities?.enabled){$('check-actual').hidden=false;await checkActual();}
 }
 async function load() {
   if(busy)return;busy=true;$('reload').disabled=true;$('prepare').disabled=true;$('error').hidden=true;
@@ -66,6 +66,7 @@ async function checkActual() {
     $('copy-result-note').textContent='아래 화면은 게시 전에 검증한 사본입니다. 실제 게시 상태는 하단에서 확인할 수 있습니다.';
     $('actual-status').textContent='공개 자료와 CMS 기준을 함께 갱신했습니다. 홈페이지 배포가 완료되면 공개 화면에서 확인할 수 있습니다.';
     $('prepare-actual').hidden=true;$('actual-candidate').hidden=true;$('check-actual').hidden=true;$('public-result').hidden=false;
+    $('public-result').href=kind==='people'?'https://ewha-eeams.github.io/people.html':kind==='education'?'https://ewha-eeams.github.io/education.html':'https://ewha-eeams.github.io/#research';
     history.replaceState(null,'','?'+new URLSearchParams({kind,result:resultId,publication:actualId}));
   } else {
     $('actual-status').textContent=status.status==='not-published'?'아직 공개 반영되지 않았습니다.':'저장본이 달라졌습니다. 최신 내용을 다시 확인해 주세요.';
@@ -78,6 +79,7 @@ $('prepare-actual').addEventListener('click',async()=>{
     actualPrepared=await request('/api/content-publication/prepare',{copyId:resultId});
     if(actualPrepared.kind!==kind||actualPrepared.requiresConfirmation!==true)throw Error('공개 반영할 자료를 다시 확인해 주세요.');
     actualId=actualPrepared.id;$('confirm-actual').checked=false;$('apply-actual').disabled=true;
+    history.replaceState(null,'','?'+new URLSearchParams({kind,result:resultId,publication:actualId}));
     $('actual-scope').textContent=`${contentTypes[kind].label} ${actualPrepared.records}개 항목 중 검토한 변경 ${actualPrepared.changes.length}건을 공개하고, 이 자료의 CMS 기준을 함께 갱신합니다.`;
     $('actual-files').replaceChildren();
     for(const [label,files]of [['공개',actualPrepared.publicFiles],['CMS 기준 갱신',actualPrepared.cmsFiles]])for(const path of files){const li=document.createElement('li');li.textContent=label+': '+path;$('actual-files').append(li);}

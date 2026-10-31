@@ -119,6 +119,7 @@ export function createContentCopyService({reader,sourceRepository,artifactRoot})
     await copy.store.verify();await copy.check(report);return {folder,copy,report};
   };
   return {
+    isBusy() {return active.size>0;},
     async prepare(kind,expected) {
       if(!Object.hasOwn(contentTypes,kind))throw fail('관리할 자료 종류를 확인해 주세요.');
       const refs=await reader.refs();assertCurrent(expected,refs);
