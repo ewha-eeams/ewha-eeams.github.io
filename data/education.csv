@@ -1,36 +1,36 @@
 date,slug,type,type_en,title,title_en,speaker,speaker_en,description,description_en,materials
-2026-08-10,workshop1,워크숍,Workshop,EEAMS Summer Workshop 2026,,"전현석, 장준호","Hyunsuk Jun, Junho Jang","WORKSHOP I – 라이브 패치 작성 Max를 활용해 실시간으로 소리를 생성하고 제어하며 라이브 패치의 기본 구조와 활용 방법을 익히는 실습형 워크숍입니다.
+"2026-08-10","workshop1","워크숍","Workshop","EEAMS Summer Workshop 2026","","전현석, 장준호","Hyunsuk Jun, Junho Jang","WORKSHOP I – 라이브 패치 작성 Max를 활용해 실시간으로 소리를 생성하고 제어하며 라이브 패치의 기본 구조와 활용 방법을 익히는 실습형 워크숍입니다.
 WORKSHOP II – 음향합성 Max를 활용해 다양한 음향합성 원리를 이해하고 직접 소리를 설계하며 전자음악 창작에 적용하는 실습형 워크숍입니다.
 ","WORKSHOP I – Live Patching A hands-on workshop exploring the fundamentals of live patching and real-time sound generation and control using Max.
 WORKSHOP II – Sound Synthesis A hands-on workshop exploring sound synthesis techniques in Max, from designing sounds to applying them in electronic music creation.
-",assets/media/education/2026/2026-08-10-workshop1-poster.jpg
-2026-06-17,lecture1,특강,Special Lecture,뇌 데이터를 활용한 듣는 음악에서 경험하는 음악으로,From Listening to Experiencing Music: Using Brain Data,이용범,,"작품 <영혼의 비밀>을 중심으로 뇌 데이터와 실시간 시스템, 전자음향 및 상호작용 기술이 음악 창작과 공연에서 구현되는 과정을 살펴보는 작곡과 초청 특강.
+","assets/media/education/2026/2026-08-10-workshop1-poster.jpg"
+"2026-06-17","lecture1","특강","Special Lecture","뇌 데이터를 활용한 듣는 음악에서 경험하는 음악으로","From Listening to Experiencing Music: Using Brain Data","이용범","","작품 <영혼의 비밀>을 중심으로 뇌 데이터와 실시간 시스템, 전자음향 및 상호작용 기술이 음악 창작과 공연에서 구현되는 과정을 살펴보는 작곡과 초청 특강.
 17:00 · 이화여자대학교 음악관 212호","A composition department lecture examining how brain data, real-time systems, electroacoustics, and interaction technology are realized in music creation and performance through the work The Secret of the Soul.
-17:00 · Room 212, Music Building, Ewha Womans University",assets/media/education/2026/2026-06-17-lecture1-poster.jpg
-2025-12-16,workshop1,워크숍,Workshop,AI-assisted Music Producing,,류호석,,"인공지능을 활용한 뮤직 프로듀싱과 SUNO 기반 음악 제작 워크숍.
+17:00 · Room 212, Music Building, Ewha Womans University","assets/media/education/2026/2026-06-17-lecture1-poster.jpg"
+"2025-12-16","workshop1","워크숍","Workshop","AI-assisted Music Producing","","류호석","","인공지능을 활용한 뮤직 프로듀싱과 SUNO 기반 음악 제작 워크숍.
 15:30–17:00 · 이화여자대학교 음악관 212호 EEAMS","A workshop on AI-assisted music producing and music creation with SUNO.
-15:30–17:00 · EEAMS, Room 212, Music Building, Ewha Womans University",assets/media/education/2025/2025-12-16-workshop1-poster.jpg
-2025-12-03,lecture8,특강,Special Lecture,Annesley Black 초청 세미나: Permeable Boundaries,Annesley Black: Permeable Boundaries,Annesley Black,,"Permeable Boundaries — Transformation and Self-Referentiality in Annesley Black’s Compositions.
+15:30–17:00 · EEAMS, Room 212, Music Building, Ewha Womans University","assets/media/education/2025/2025-12-16-workshop1-poster.jpg"
+"2025-12-03","lecture8","특강","Special Lecture","Annesley Black 초청 세미나: Permeable Boundaries","Annesley Black: Permeable Boundaries","Annesley Black","","Permeable Boundaries — Transformation and Self-Referentiality in Annesley Black’s Compositions.
 17:00 · 이화여자대학교 음악관 국악연주홀","Permeable Boundaries — Transformation and Self-Referentiality in Annesley Black’s Compositions.
-17:00 · Korean Music Recital Hall, Music Building, Ewha Womans University",assets/media/education/2025/2025-12-03-lecture8-poster.jpg
-2025-11-11,lecture7,특강,Special Lecture,작곡가와 AI: 그만두거나 살아남거나,Composers and AI: Quit or Survive,오근혜,Oh Geun Hye,"AI와 예술의 관계, 창작자의 역할과 진로를 살펴보는 미디어뮤직 특강.
+17:00 · Korean Music Recital Hall, Music Building, Ewha Womans University","assets/media/education/2025/2025-12-03-lecture8-poster.jpg"
+"2025-11-11","lecture7","특강","Special Lecture","작곡가와 AI: 그만두거나 살아남거나","Composers and AI: Quit or Survive","오근혜","Oh Geun Hye","AI와 예술의 관계, 창작자의 역할과 진로를 살펴보는 미디어뮤직 특강.
 17:30 · 이화여자대학교 음악관 212호 EEAMS","A media music lecture on AI and art, the role of composers, and creative careers.
-17:30 · EEAMS, Room 212, Music Building, Ewha Womans University",assets/media/education/2025/2025-11-11-lecture7-poster.jpg
-2025-10-28,lecture6,특강,Special Lecture,"예술, 살아서 꿈틀거리기: 질서에서 몸으로, 그리고 존재로","Art, Alive and Moving: From Order to the Body, and to Being",박정은,,"작곡가 박정은의 진로탐색 특강.
+17:30 · EEAMS, Room 212, Music Building, Ewha Womans University","assets/media/education/2025/2025-11-11-lecture7-poster.jpg"
+"2025-10-28","lecture6","특강","Special Lecture","예술, 살아서 꿈틀거리기: 질서에서 몸으로, 그리고 존재로","Art, Alive and Moving: From Order to the Body, and to Being","박정은","","작곡가 박정은의 진로탐색 특강.
 17:30 · 이화여자대학교 음악관 212호","A career exploration lecture by composer 박정은.
-17:30 · Room 212, Music Building, Ewha Womans University",assets/media/education/2025/2025-10-28-lecture6-poster.jpg
-2025-08-26,lecture5,특강,Special Lecture,음악으로 탐색하는 직업 이야기: feat. 게임 음악 하는 사람들,Exploring Careers through Music: People Making Game Music,오근혜,Oh Geun Hye,"게임·영화·드라마의 실제 사례를 통해 음악 산업의 직무와 진로를 살펴보는 미디어뮤직 여름특강.
+17:30 · Room 212, Music Building, Ewha Womans University","assets/media/education/2025/2025-10-28-lecture6-poster.jpg"
+"2025-08-26","lecture5","특강","Special Lecture","음악으로 탐색하는 직업 이야기: feat. 게임 음악 하는 사람들","Exploring Careers through Music: People Making Game Music","오근혜","Oh Geun Hye","게임·영화·드라마의 실제 사례를 통해 음악 산업의 직무와 진로를 살펴보는 미디어뮤직 여름특강.
 13:30 · 이화여자대학교 음악관 212호 EEAMS","A summer media music lecture exploring music industry roles and careers through examples from games, film, and television.
-13:30 · EEAMS, Room 212, Music Building, Ewha Womans University",assets/media/education/2025/2025-08-26-lecture5-poster.jpg
-2025-08-05,lecture4,특강,Special Lecture,곡은 어떻게 시작되는가: 생각이 음악이 되기까지,How Does a Piece Begin? From Thought to Music,이수연,,"작곡가 이수연의 미디어뮤직 여름특강.
+13:30 · EEAMS, Room 212, Music Building, Ewha Womans University","assets/media/education/2025/2025-08-26-lecture5-poster.jpg"
+"2025-08-05","lecture4","특강","Special Lecture","곡은 어떻게 시작되는가: 생각이 음악이 되기까지","How Does a Piece Begin? From Thought to Music","이수연","","작곡가 이수연의 미디어뮤직 여름특강.
 16:00 · 이화여자대학교 음악관 212호 EEAMS","A summer media music lecture by composer 이수연.
-16:00 · EEAMS, Room 212, Music Building, Ewha Womans University",assets/media/education/2025/2025-summer-lectures-poster.jpg
-2025-07-29,lecture3,특강,Special Lecture,소리로 세상을 전달하다: 사운드·공간·융합예술의 세계,"Communicating the World through Sound: Sound, Space, and Interdisciplinary Arts",도하나,Hana Do,"사운드와 공간, 멀티미디어의 협업 사례를 통해 융합예술의 창작 세계를 탐색하는 미디어뮤직 여름특강.
+16:00 · EEAMS, Room 212, Music Building, Ewha Womans University","assets/media/education/2025/2025-summer-lectures-poster.jpg"
+"2025-07-29","lecture3","특강","Special Lecture","소리로 세상을 전달하다: 사운드·공간·융합예술의 세계","Communicating the World through Sound: Sound, Space, and Interdisciplinary Arts","도하나","Hana Do","사운드와 공간, 멀티미디어의 협업 사례를 통해 융합예술의 창작 세계를 탐색하는 미디어뮤직 여름특강.
 16:00 · 이화여자대학교 음악관 212호 EEAMS","A summer media music lecture exploring interdisciplinary creation through sound, space, and multimedia collaboration.
-16:00 · EEAMS, Room 212, Music Building, Ewha Womans University",assets/media/education/2025/2025-07-29-lecture3-poster.jpg
-2025-07-22,lecture2,특강,Special Lecture,영화음악 제작과정: 장·단편영화 그리고 다큐를 중심으로,"Film Music Production: Feature Films, Short Films, and Documentaries",임민주,,"음악 콘셉트 설정부터 작곡, 녹음과 후반 작업까지 영화음악 제작과정을 살펴보는 미디어뮤직 여름특강.
+16:00 · EEAMS, Room 212, Music Building, Ewha Womans University","assets/media/education/2025/2025-07-29-lecture3-poster.jpg"
+"2025-07-22","lecture2","특강","Special Lecture","영화음악 제작과정: 장·단편영화 그리고 다큐를 중심으로","Film Music Production: Feature Films, Short Films, and Documentaries","임민주","","음악 콘셉트 설정부터 작곡, 녹음과 후반 작업까지 영화음악 제작과정을 살펴보는 미디어뮤직 여름특강.
 16:00 · 이화여자대학교 음악관 212호 EEAMS","A summer media music lecture on film scoring, from musical concepts and composition to recording and post-production.
-16:00 · EEAMS, Room 212, Music Building, Ewha Womans University",assets/media/education/2025/2025-07-22-lecture2-poster.jpg
-2025-06-11,lecture1,특강,Special Lecture,장준호의 Audio-Visualization 그리고 작곡가로서의 삶,Junho Jang: Audio-Visualization and Life as a Composer,장준호,Junho Jang,"새로운 소리를 탐구하고 작품에 활용하는 창작 과정과 작곡가의 삶을 다루는 커리어 세미나.
+16:00 · EEAMS, Room 212, Music Building, Ewha Womans University","assets/media/education/2025/2025-07-22-lecture2-poster.jpg"
+"2025-06-11","lecture1","특강","Special Lecture","장준호의 Audio-Visualization 그리고 작곡가로서의 삶","Junho Jang: Audio-Visualization and Life as a Composer","장준호","Junho Jang","새로운 소리를 탐구하고 작품에 활용하는 창작 과정과 작곡가로서의 삶을 살펴보는 커리어 세미나.
 18:00 · 이화여자대학교 음악관 212호 EEAMS","A career seminar on exploring new sounds, integrating them into compositions, and life as a composer.
-18:00 · EEAMS, Room 212, Music Building, Ewha Womans University",assets/media/education/2025/2025-06-11-lecture1-poster.jpg
+18:00 · EEAMS, Room 212, Music Building, Ewha Womans University","assets/media/education/2025/2025-06-11-lecture1-poster.jpg"
