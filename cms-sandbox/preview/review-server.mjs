@@ -11,6 +11,7 @@ import { createLocalPublicationCopy, LocalPublicationCopy } from './publication-
 import { GitSnapshotReader } from './git-snapshot-reader.mjs';
 import { ActualPublisher } from './publication-remote.mjs';
 import { createManagementService } from './management-service.mjs';
+import { createContentCopyService } from './content-copy.mjs';
 import { execFileSync } from 'node:child_process';
 
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -178,7 +179,7 @@ const mime = path => path.endsWith('.html') ? 'text/html; charset=utf-8' : /\.(m
 const previewPathAllowed = path => ['archive.html', 'media.html', 'data/archive.csv'].includes(path) || /^assets\/(?:[a-zA-Z0-9_.-]+\.(?:css|js|png|jpg|webp)|media\/(?:concerts|home)\/[a-zA-Z0-9_./-]+\.(?:jpg|png|webp|pdf))$/.test(path);
 export function trustedMutation(headers, origin) { return headers.origin === origin && headers['content-type']?.split(';')[0] === 'application/json' && headers['x-eeams-review'] === '1'; }
 
-export function createReviewServer({ root, service, pageNotice = '', management = null }) {
+export function createReviewServer({ root, service, pageNotice = '', management = null, contentCopy = null }) {
   return http.createServer(async (req, res) => {
     const host = req.headers.host || '';
     const send = (status, body, type = 'application/json; charset=utf-8') => { res.writeHead(status, { 'Content-Type': type, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(req.method === 'HEAD' ? undefined : body); };
@@ -190,6 +191,11 @@ export function createReviewServer({ root, service, pageNotice = '', management 
         if (!trustedMutation(req.headers, `http://${host}`)) return send(403, JSON.stringify({ message: '이 컴퓨터의 변경 확인 화면에서 진행해 주세요.' }));
         let body = ''; for await (const chunk of req) { body += chunk; if (Buffer.byteLength(body) > 16384) throw new Error('요청 크기를 확인해 주세요.'); }
         const data = JSON.parse(body);
+        if(contentCopy && path === '/api/content-copy/prepare') return send(200,JSON.stringify(await contentCopy.prepare(data.kind,{baseCommit:data.baseCommit,draftCommit:data.draftCommit})));
+        if(contentCopy && path === '/api/content-copy/apply') {
+          if(data.confirmed!==true)throw new Error('사본에 반영할 변경을 먼저 확인해 주세요.');
+          return send(200,JSON.stringify(await contentCopy.apply(data.id,data.digest)));
+        }
         const result = path === '/api/prepare' ? await service.prepare(data.reviewId, data.selectedIds) : path === '/api/rehearse' ? await service.rehearse(data.planId, data.digest) : path === '/api/validate-publication' ? await service.validatePublication(data.planId, data.digest) : path === '/api/publication/prepare' ? await service.prepareActualPublication(data.planId, data.digest) : path === '/api/publication/apply' ? await service.applyActualPublication(data.publicationId, data.seal, data.confirmed) : null;
         return result ? send(200, JSON.stringify(result)) : send(404, '{}');
       }
@@ -202,6 +208,12 @@ export function createReviewServer({ root, service, pageNotice = '', management 
       if (management && path === '/api/manage/status') return send(200, JSON.stringify(await management.status()));
       if (management && path === '/api/saved-preview') return send(200, JSON.stringify(await management.preview()));
       if (management && path === '/api/content') return send(200, JSON.stringify(await management.content(url.searchParams.get('kind'))));
+      if(contentCopy && path === '/api/content-copy/report') return send(200,JSON.stringify(await contentCopy.report(url.searchParams.get('id'))));
+      if(contentCopy && path === '/api/content-copy/snapshot') return send(200,JSON.stringify(await contentCopy.snapshot(url.searchParams.get('id'))));
+      if(contentCopy && path === '/api/content-copy/media') {
+        const file=await contentCopy.media(url.searchParams.get('id'),url.searchParams.get('kind'),url.searchParams.get('commit'),url.searchParams.get('path'));
+        return send(200,file.bytes,file.mime);
+      }
       if (management && path === '/api/content-media') {
         const file = await management.contentMedia(url.searchParams.get('kind'), url.searchParams.get('commit'), url.searchParams.get('path'));
         return send(200, file.bytes, file.mime);
@@ -225,7 +237,7 @@ export function createReviewServer({ root, service, pageNotice = '', management 
         return send(200, bytes, mime(file));
       }
       const file = path === '/' ? 'cms-sandbox/preview/review.html' : path.slice(1);
-      if ((!file.startsWith('cms-sandbox/preview/') && !file.startsWith('assets/')) || /(?:review-server|management-service|publication-copy|publication-remote|git-snapshot-reader|jszip\.min\.cjs)/.test(file) || !/\.(?:html|mjs|js|css|json|png|jpg|webp)$/.test(file)) return send(404, '{}');
+      if ((!file.startsWith('cms-sandbox/preview/') && !file.startsWith('assets/')) || /(?:review-server|management-service|publication-copy|publication-remote|git-snapshot-reader|content-copy\.mjs|jszip\.min\.cjs)/.test(file) || !/\.(?:html|mjs|js|css|json|png|jpg|webp)$/.test(file)) return send(404, '{}');
       let bytes = await readFile(join(root, file));
       if (management && file === 'cms-sandbox/preview/index.html') bytes = Buffer.from(bytes.toString('utf8').replace(/<body\b([^>]*)>/i, '<body$1 data-preview-source="manager">'));
       if (management && file === 'cms-sandbox/preview/review.html') bytes = Buffer.from(bytes.toString('utf8').replace('id="manager-home" href="/manage" hidden', 'id="manager-home" href="/manage"'));
@@ -246,5 +258,6 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   const publisher = enabled ? new ActualPublisher({ artifactRoot, sourceRepository: root, reader, identity }) : null;
   const service = createReviewService({ reader, artifactRoot, sourceRepository: root, publisher });
   const management = createManagementService({ reader, publicationEnabled: enabled });
-  createReviewServer({ root, service, management }).listen(8921, '127.0.0.1', () => console.log(`EEAMS CMS manager ready at http://127.0.0.1:8921/manage — publication ${enabled ? 'enabled for reviewed content' : 'disabled'}.`));
+  const contentCopy = createContentCopyService({reader,sourceRepository:root,artifactRoot});
+  createReviewServer({ root, service, management, contentCopy }).listen(8921, '127.0.0.1', () => console.log(`EEAMS CMS manager ready at http://127.0.0.1:8921/manage — publication ${enabled ? 'enabled for reviewed content' : 'disabled'}.`));
 }
