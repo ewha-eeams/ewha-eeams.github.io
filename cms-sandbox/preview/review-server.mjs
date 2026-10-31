@@ -12,6 +12,7 @@ import { GitSnapshotReader } from './git-snapshot-reader.mjs';
 import { ActualPublisher } from './publication-remote.mjs';
 import { createManagementService } from './management-service.mjs';
 import { createContentCopyService } from './content-copy.mjs';
+import { ActualContentPublisher } from './content-remote.mjs';
 import { execFileSync } from 'node:child_process';
 
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -179,7 +180,7 @@ const mime = path => path.endsWith('.html') ? 'text/html; charset=utf-8' : /\.(m
 const previewPathAllowed = path => ['archive.html', 'media.html', 'data/archive.csv'].includes(path) || /^assets\/(?:[a-zA-Z0-9_.-]+\.(?:css|js|png|jpg|webp)|media\/(?:concerts|home)\/[a-zA-Z0-9_./-]+\.(?:jpg|png|webp|pdf))$/.test(path);
 export function trustedMutation(headers, origin) { return headers.origin === origin && headers['content-type']?.split(';')[0] === 'application/json' && headers['x-eeams-review'] === '1'; }
 
-export function createReviewServer({ root, service, pageNotice = '', management = null, contentCopy = null }) {
+export function createReviewServer({ root, service, pageNotice = '', management = null, contentCopy = null, contentPublisher = null }) {
   return http.createServer(async (req, res) => {
     const host = req.headers.host || '';
     const send = (status, body, type = 'application/json; charset=utf-8') => { res.writeHead(status, { 'Content-Type': type, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(req.method === 'HEAD' ? undefined : body); };
@@ -191,6 +192,15 @@ export function createReviewServer({ root, service, pageNotice = '', management 
         if (!trustedMutation(req.headers, `http://${host}`)) return send(403, JSON.stringify({ message: '이 컴퓨터의 변경 확인 화면에서 진행해 주세요.' }));
         let body = ''; for await (const chunk of req) { body += chunk; if (Buffer.byteLength(body) > 16384) throw new Error('요청 크기를 확인해 주세요.'); }
         const data = JSON.parse(body);
+        if(path.startsWith('/api/content-publication/')) {
+          if(!contentPublisher)return send(403,JSON.stringify({code:'PUBLICATION_DISABLED',message:'실제 공개 반영은 꺼져 있습니다. 사본 검증은 계속 사용할 수 있습니다.'}));
+          if(path === '/api/content-publication/prepare') {
+            if(!contentCopy)throw new Error('같은 내용의 사본 검증을 먼저 완료해 주세요.');
+            return send(200,JSON.stringify(await contentPublisher.prepare(await contentCopy.proof(data.copyId))));
+          }
+          if(path === '/api/content-publication/apply')return send(200,JSON.stringify(await contentPublisher.apply({id:data.id,seal:data.seal,confirmed:data.confirmed})));
+          return send(404,'{}');
+        }
         if(contentCopy && path === '/api/content-copy/prepare') return send(200,JSON.stringify(await contentCopy.prepare(data.kind,{baseCommit:data.baseCommit,draftCommit:data.draftCommit})));
         if(contentCopy && path === '/api/content-copy/apply') {
           if(data.confirmed!==true)throw new Error('사본에 반영할 변경을 먼저 확인해 주세요.');
@@ -208,6 +218,11 @@ export function createReviewServer({ root, service, pageNotice = '', management 
       if (management && path === '/api/manage/status') return send(200, JSON.stringify(await management.status()));
       if (management && path === '/api/saved-preview') return send(200, JSON.stringify(await management.preview()));
       if (management && path === '/api/content') return send(200, JSON.stringify(await management.content(url.searchParams.get('kind'))));
+      if(path === '/api/content-publication/capabilities')return send(200,JSON.stringify({schema:1,connectionReady:true,enabled:!!contentPublisher,kinds:['people','education','research'],requiresMatchingCopyProof:true}));
+      if(path === '/api/content-publication/status') {
+        if(!contentPublisher)return send(403,JSON.stringify({code:'PUBLICATION_DISABLED',message:'실제 공개 반영은 꺼져 있습니다.'}));
+        return send(200,JSON.stringify(await contentPublisher.status(url.searchParams.get('id'))));
+      }
       if(contentCopy && path === '/api/content-copy/report') return send(200,JSON.stringify(await contentCopy.report(url.searchParams.get('id'))));
       if(contentCopy && path === '/api/content-copy/snapshot') return send(200,JSON.stringify(await contentCopy.snapshot(url.searchParams.get('id'))));
       if(contentCopy && path === '/api/content-copy/media') {
@@ -237,11 +252,11 @@ export function createReviewServer({ root, service, pageNotice = '', management 
         return send(200, bytes, mime(file));
       }
       const file = path === '/' ? 'cms-sandbox/preview/review.html' : path.slice(1);
-      if ((!file.startsWith('cms-sandbox/preview/') && !file.startsWith('assets/')) || /(?:review-server|management-service|publication-copy|publication-remote|git-snapshot-reader|content-copy\.mjs|jszip\.min\.cjs)/.test(file) || !/\.(?:html|mjs|js|css|json|png|jpg|webp)$/.test(file)) return send(404, '{}');
+      if ((!file.startsWith('cms-sandbox/preview/') && !file.startsWith('assets/')) || /(?:review-server|management-service|publication-copy|publication-remote|git-snapshot-reader|content-(?:copy|remote)\.mjs|jszip\.min\.cjs)/.test(file) || !/\.(?:html|mjs|js|css|json|png|jpg|webp)$/.test(file)) return send(404, '{}');
       let bytes = await readFile(join(root, file));
       if (management && file === 'cms-sandbox/preview/index.html') bytes = Buffer.from(bytes.toString('utf8').replace(/<body\b([^>]*)>/i, '<body$1 data-preview-source="manager">'));
       if (management && file === 'cms-sandbox/preview/review.html') bytes = Buffer.from(bytes.toString('utf8').replace('id="manager-home" href="/manage" hidden', 'id="manager-home" href="/manage"'));
-      if (pageNotice && file === 'cms-sandbox/preview/review.html') {
+      if (pageNotice && ['cms-sandbox/preview/review.html','cms-sandbox/preview/content-review.html'].includes(file)) {
         const notice = pageNotice.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
         bytes = Buffer.from(bytes.toString('utf8').replace(/<body\b([^>]*)>/i, `<body$1><div role="note" style="position:sticky;top:0;z-index:20;padding:12px;text-align:center;background:#fff1c9;color:#624708;font:14px system-ui">${notice}</div>`));
       }
@@ -254,10 +269,12 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   const artifactRoot = join(root, 'cms-sandbox/rehearsals');
   const reader = new GitSnapshotReader({ directory: join(artifactRoot, '.read-cache.git'), sourceRepository: root });
   const enabled = process.argv.includes('--allow-publication');
-  const identity = enabled ? Object.fromEntries(['name', 'email'].map(key => [key, execFileSync('git', ['config', `user.${key}`], { cwd: root, encoding: 'utf8' }).trim()])) : null;
+  const contentEnabled = process.argv.includes('--allow-content-publication');
+  const identity = enabled || contentEnabled ? Object.fromEntries(['name', 'email'].map(key => [key, execFileSync('git', ['config', `user.${key}`], { cwd: root, encoding: 'utf8' }).trim()])) : null;
   const publisher = enabled ? new ActualPublisher({ artifactRoot, sourceRepository: root, reader, identity }) : null;
   const service = createReviewService({ reader, artifactRoot, sourceRepository: root, publisher });
-  const management = createManagementService({ reader, publicationEnabled: enabled });
+  const management = createManagementService({ reader, publicationEnabled: enabled, contentPublicationEnabled: contentEnabled });
   const contentCopy = createContentCopyService({reader,sourceRepository:root,artifactRoot});
-  createReviewServer({ root, service, management, contentCopy }).listen(8921, '127.0.0.1', () => console.log(`EEAMS CMS manager ready at http://127.0.0.1:8921/manage — publication ${enabled ? 'enabled for reviewed content' : 'disabled'}.`));
+  const contentPublisher = contentEnabled ? new ActualContentPublisher({artifactRoot,sourceRepository:root,reader,identity}) : null;
+  createReviewServer({ root, service, management, contentCopy, contentPublisher }).listen(8921, '127.0.0.1', () => console.log(`EEAMS CMS manager ready at http://127.0.0.1:8921/manage — concerts ${enabled ? 'enabled' : 'disabled'}, other content ${contentEnabled ? 'enabled' : 'disabled'}.`));
 }

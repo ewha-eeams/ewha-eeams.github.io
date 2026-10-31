@@ -144,6 +144,14 @@ export function createContentCopyService({reader,sourceRepository,artifactRoot})
       }finally{active.delete(id);}
     },
     async report(id) {return (await find(id)).report;},
+    async proof(id) {
+      const {copy,report}=await find(id);
+      const plan=prepareContentPlan(copy.read(report.kind,{baseCommit:report.previousPublicCommit,draftCommit:report.previousCmsCommit}));
+      const digest=hash(JSON.stringify(plan));
+      if(digest!==report.digest)throw fail('사본에서 확인한 변경 내용과 다릅니다.');
+      assertCurrent(plan,await reader.refs());
+      return {id,plan,digest,proof:{directory:copy.store.directory,report}};
+    },
     async snapshot(id) {const{copy,report}=await find(id);return {...copy.snapshot(report.kind,{baseCommit:report.publicCommit,draftCommit:report.cmsCommit}),copyId:id};},
     async media(id,kind,commit,path) {
       const{copy,report}=await find(id),snapshot=copy.snapshot(report.kind,{baseCommit:report.publicCommit,draftCommit:report.cmsCommit});

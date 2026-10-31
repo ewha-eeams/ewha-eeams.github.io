@@ -5,7 +5,7 @@ import { parseCsv } from './csv-parser.mjs';
 import { contentTypes, parseContentCsv, compileContent } from './content-model.mjs';
 
 // Read-only operations over the same fixed repository reader used for review.
-export function createManagementService({ reader, publicationEnabled = false }) {
+export function createManagementService({ reader, publicationEnabled = false, contentPublicationEnabled = false }) {
   const snapshots = new Map();
   let loading;
   const contentSnapshots = new Map(), contentLoading = new Map();
@@ -47,7 +47,7 @@ export function createManagementService({ reader, publicationEnabled = false }) 
     return loading;
   }
   return {
-    health() { return { app: 'eeams-cms-manager', schema: 1, mode: publicationEnabled ? 'publication-enabled' : 'review-only' }; },
+    health() { return { app: 'eeams-cms-manager', schema: 1, mode: publicationEnabled || contentPublicationEnabled ? 'publication-enabled' : 'review-only', publication: {concerts:publicationEnabled,additionalContent:contentPublicationEnabled} }; },
     async status() {
       const { refs, review, snapshot } = await saved();
       return { ...this.health(), concerts: snapshot.entries.length, works: snapshot.rows.length,
