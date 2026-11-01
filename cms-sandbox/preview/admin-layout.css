@@ -86,3 +86,25 @@ body.admin-page{background:#f5f7f8;color:var(--ink);-webkit-font-smoothing:antia
 .upload-help{max-width:680px}.upload-help summary{cursor:pointer;min-height:44px;padding:10px 0}.upload-help p{margin:5px 0 9px;line-height:1.65}.upload-help a{display:inline-flex;min-height:40px;align-items:center}
 @media(max-width:1000px){.manager-simple .content-identity{grid-column:auto}.manager-simple .content-row{gap:10px 20px}}
 @media(max-width:760px){.manager-simple .content-row{grid-template-columns:1fr;padding:20px}.manager-simple .row-actions{grid-column:1;grid-row:auto}.manager-simple .content-identity h2{font-size:18px}.manager-simple .content-identity p{font-size:13px}.manager-instructions>p:first-child{font-size:14px}.manager-simple .row-actions .button{padding:10px 12px;font-size:13px}.manager-help{gap:8px 22px;margin-top:16px}}
+
+/* Publication: one preparation action, one explicit final publication action. */
+.publication-page.has-admin-shell>header{min-height:86px;padding-top:18px;padding-bottom:18px}
+.publication-page.has-admin-shell>main{max-width:1480px}
+.publication-steps{display:flex;gap:20px;list-style:none;padding:0;margin:0 0 20px;color:var(--muted);font-size:14px}
+.publication-steps li{display:flex;align-items:center;gap:7px}.publication-steps li:not(:last-child)::after{content:'→';color:#8b9c97;margin-left:12px}
+.publication-page .section-heading{margin-top:24px}.publication-page #status{color:var(--muted);margin:14px 0}
+.publication-start{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:20px 0}.publication-start>p{margin:0;font-size:14px}
+.publication-page #progress{font-size:14px;color:#235c7e}.publication-page #progress:empty{display:none}
+.publication-ready,.publication-complete{margin:24px 0 0;padding:24px;background:white;border:1px solid var(--line);border-radius:8px}
+.publication-page .publication-ready h2,.publication-page .publication-complete h2{font-size:21px;margin:0 0 14px}
+.publication-ready #ready-items{padding-left:22px;margin:16px 0}.publication-ready #ready-items li{padding:4px 0;font-weight:600}
+.publication-page .confirm{display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin:22px 0 14px;font-size:15px}
+.publication-page .confirm input{width:20px;height:20px;flex-shrink:0;margin:3px 0 0;accent-color:var(--blue)}
+.publication-page #ready-details{margin:16px 0 0;color:var(--muted);font-size:13px}.publication-page #ready-details summary{cursor:pointer;min-height:38px;padding:8px 0}
+.publication-page #ready-details a{display:inline-flex;min-height:40px;align-items:center;margin-right:22px}.publication-page #ready-files{padding-left:20px;overflow-wrap:anywhere}
+.publication-error{padding:14px 18px;background:#fff3ec;border-left:3px solid #ae5c32;margin:18px 0}.publication-page .publication-error #error{margin:0;border:0;background:none;padding:0;color:#8f4026;font-size:15px}
+.publication-error details{font-size:13px;margin-top:8px;color:var(--muted)}.publication-error summary{cursor:pointer;min-height:32px;padding:4px 0}.publication-error p{overflow-wrap:anywhere}
+.publication-changes{margin-top:16px}.publication-changes>summary{cursor:pointer;font-size:15px;min-height:42px;padding:8px 0}
+.publication-complete{background:#eef7f4;border-color:#bedacf}.publication-complete>a{margin:10px 10px 0 0}
+.publication-page .entry details summary{min-height:40px;padding-top:6px;padding-bottom:10px}.publication-page .entry-heading label{min-height:44px}.publication-page .entry-heading>a{min-height:40px;display:inline-flex;align-items:center;flex-shrink:0}
+@media(max-width:760px){.publication-steps{gap:8px;flex-wrap:wrap;font-size:12px}.publication-steps li{gap:5px}.publication-steps li:not(:last-child)::after{margin-left:4px}.publication-page .section-heading{flex-wrap:wrap}.publication-ready,.publication-complete{padding:20px 16px}.publication-page .publication-ready h2,.publication-page .publication-complete h2{font-size:19px}.publication-page .confirm{font-size:14px}.publication-start{gap:12px}.publication-start>p{font-size:13px}}
