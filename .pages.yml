@@ -184,7 +184,7 @@
           "name": "program_book",
           "label": "프로그램북 PDF (선택)",
           "type": "file",
-          "description": "3 MB를 넘는 PDF는 왼쪽의 자료 업로드 안내에서 원본을 올린 뒤 Select로 선택하세요. 연결 후 Save를 누릅니다.",
+          "description": "PDF는 파일당 5MB 이하로 준비하세요. 3~5MB 파일은 자료 업로드 안내에서 올린 뒤 Select로 선택하고 Save를 누릅니다.",
           "options": {
             "media": "concert_trial_media",
             "extensions": [
@@ -400,7 +400,7 @@
           "name": "program_book",
           "label": "프로그램북 PDF (선택)",
           "type": "file",
-          "description": "3 MB를 넘는 PDF는 왼쪽의 자료 업로드 안내에서 원본을 올린 뒤 Select로 선택하세요. 연결 후 Save를 누릅니다.",
+          "description": "PDF는 파일당 5MB 이하로 준비하세요. 3~5MB 파일은 자료 업로드 안내에서 올린 뒤 Select로 선택하고 Save를 누릅니다.",
           "options": {
             "media": "concert_trial_media",
             "extensions": [
@@ -708,7 +708,7 @@
                 ],
                 "rename": false
               },
-              "description": "특강·워크숍 사본 자료에서 선택합니다. 3 MB가 넘는 파일은 자료 업로드 안내의 별도 경로를 사용하세요."
+              "description": "파일당 5MB 이하 자료를 선택합니다. 3~5MB 파일은 자료 업로드 안내의 별도 경로를 사용하세요."
             },
             {
               "name": "title_en",

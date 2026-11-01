@@ -4,7 +4,7 @@ import { readFile, writeFile, mkdir, rename } from 'node:fs/promises';
 import { join } from 'node:path';
 import { contentTypes, parseContentCsv, contentCsv, compileContent, originKey } from './content-model.mjs';
 import { createLocalPublicationCopy, LocalPublicationCopy } from './publication-copy.mjs';
-import { assertCurrent } from './review-model.mjs';
+import { assertCurrent, assertNewAttachmentSize } from './review-model.mjs';
 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const blobHash = bytes => createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
@@ -36,6 +36,7 @@ export function prepareContentPlan({ kind, form, sourceCsv, baseTree, draftTree,
     const role=/-poster\.(?:jpe?g|png|pdf)$/i.test(sourcePath)?'-poster':'';
     const target='assets/media/education/cms/'+file.sha+role+'.'+sourcePath.split('.').pop().toLowerCase(), collision=baseFiles.get(target);
     if (collision && (collision.mode!=='100644'||collision.sha!==file.sha||collision.size!==file.size)) throw fail('첨부 자료의 새 주소가 기존 파일과 겹칩니다.');
+    if (!collision) assertNewAttachmentSize(file.size);
     if (!operations.some(op=>op.path===target)) operations.push({path:target,sourcePath,sha:file.sha,size:file.size,action:collision?'reuse':'add'});
     row.materials=target;
   });

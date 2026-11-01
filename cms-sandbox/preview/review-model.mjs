@@ -1,6 +1,11 @@
 import { compileSnapshot } from './preview-model.mjs';
 import { groupRows, rowsFor, mergeConcert, serializeCsv, concertFields, workFields } from './concert-model.mjs';
 
+export const newAttachmentLimit = 5 * 1024 * 1024;
+export function assertNewAttachmentSize(size) {
+  if (!Number.isSafeInteger(size) || size < 1 || size > newAttachmentLimit) throw new Error('새 첨부 자료는 파일당 5 MB 이하로 준비해 주세요.');
+}
+
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const labels = { title: '공연명', title_en: '공연명 · 영문', venue: '장소', venue_en: '장소 · 영문' };
 const pick = (object, keys) => Object.fromEntries(keys.map(k => [k, object[k] || '']));
@@ -74,7 +79,7 @@ export function preparePlan(review, selectedIds) {
     const previous = [entry.beforeMedia.poster, entry.beforeMedia.pdf, ...entry.beforeMedia.photos].filter(Boolean);
     for (const [path, source] of desired) {
       const before = previous.find(p => p.path === path);
-      if (before?.sha !== source.sha) operations.push({ action: before ? 'replace' : 'add', path, sourcePath: source.path, sourceCommit: review.draftCommit, sha: source.sha, size: source.size });
+      if (before?.sha !== source.sha) { assertNewAttachmentSize(source.size); operations.push({ action: before ? 'replace' : 'add', path, sourcePath: source.path, sourceCommit: review.draftCommit, sha: source.sha, size: source.size }); }
     }
     for (const before of previous) if (!desired.has(before.path)) operations.push({ action: 'delete', path: before.path, beforeSha: before.sha });
   }
