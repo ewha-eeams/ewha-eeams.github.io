@@ -83,7 +83,7 @@ export function createReviewService({ reader = new GitHubReader(), artifactRoot,
       const bytes = await reader.bytes(refs.baseCommit, 'data/archive.csv');
       const source = { sha256: sha256(bytes), rows: parseCsv(bytes.toString('utf8')) };
       const paths = draftTree.filter(f => f.type === 'blob' && /^cms-sandbox\/(?:forms|drafts)\/[^/]+\.json$/.test(f.path));
-      if (paths.length > 200 || paths.some(p => p.size > 1024 * 1024)) throw new Error('공연 사본의 개수 또는 크기를 확인해 주세요.');
+      if (paths.length > 200 || paths.some(p => p.size > 1024 * 1024)) throw new Error('공연 목록의 개수 또는 크기를 확인해 주세요.');
       const files = [];
       for (let i = 0; i < paths.length; i += 8) files.push(...await Promise.all(paths.slice(i, i + 8).map(async f => ({ path: f.path, data: JSON.parse((await reader.bytes(refs.draftCommit, f.path)).toString('utf8')) }))));
       const review = buildReview({ source, files, baseTree, draftTree, ...refs, baseCsv: bytes.toString('utf8') });
@@ -136,10 +136,10 @@ export function createReviewService({ reader = new GitHubReader(), artifactRoot,
     async validatePublication(id, digest) {
       const { plan, digest: expected } = requireLive(plans, id);
       if (expected !== digest || sha256(JSON.stringify(plan)) !== digest) throw new Error('확인한 변경 내용과 요청이 다릅니다.');
-      if (!sourceRepository) throw new Error('이 컴퓨터의 사본 게시 검증을 준비해 주세요.');
+      if (!sourceRepository) throw new Error('이 컴퓨터의 반영 준비 연결을 확인해 주세요.');
       assertCurrent(plan, await reader.refs());
       const result = await this.findResult(id), key = `publication-${id}`;
-      if (active.has(key)) throw new Error('같은 사본 검증을 처리하고 있습니다. 잠시 기다려 주세요.');
+      if (active.has(key)) throw new Error('같은 반영 준비를 처리하고 있습니다. 잠시 기다려 주세요.');
       active.add(key);
       try {
         const directory = join(result.directory, 'publication-copy.git');
@@ -155,13 +155,13 @@ export function createReviewService({ reader = new GitHubReader(), artifactRoot,
       } finally { active.delete(key); }
     },
     async prepareActualPublication(id, digest) {
-      if (!publisher) throw new Error('실제 게시 연결이 열려 있지 않습니다. 사본 확인은 계속 사용할 수 있습니다.');
+      if (!publisher) throw new Error('실제 게시 연결이 열려 있지 않습니다. 게시 전 확인은 계속 사용할 수 있습니다.');
       const { plan, digest: expected } = requireLive(plans, id);
       if (expected !== digest) throw new Error('확인한 게시 내용이 다릅니다.');
       assertCurrent(plan, await reader.refs());
       const result = await this.findResult(id);
       const proof = JSON.parse(await readFile(join(result.directory, 'publication-check.json'), 'utf8'));
-      if (proof.digest !== digest || proof.baseCommit !== plan.baseCommit || proof.draftCommit !== plan.draftCommit || proof.selectedUnchanged !== plan.mapping.length) throw new Error('같은 내용으로 사본 게시·CMS 동기화를 먼저 확인해 주세요.');
+      if (proof.digest !== digest || proof.baseCommit !== plan.baseCommit || proof.draftCommit !== plan.draftCommit || proof.selectedUnchanged !== plan.mapping.length) throw new Error('같은 내용으로 반영 준비를 다시 진행해 주세요.');
       const key = `actual-prepare-${id}`; if (active.has(key)) throw new Error('게시 연결을 확인하는 중입니다.');
       active.add(key);
       try { return await publisher.prepare({ id, plan, digest }); } finally { active.delete(key); }
@@ -194,9 +194,9 @@ export function createReviewServer({ root, service, pageNotice = '', management 
         let body = ''; for await (const chunk of req) { body += chunk; if (Buffer.byteLength(body) > 16384) throw new Error('요청 크기를 확인해 주세요.'); }
         const data = JSON.parse(body);
         if(path.startsWith('/api/content-publication/')) {
-          if(!contentPublisher)return send(403,JSON.stringify({code:'PUBLICATION_DISABLED',message:'실제 공개 반영은 꺼져 있습니다. 사본 검증은 계속 사용할 수 있습니다.'}));
+          if(!contentPublisher)return send(403,JSON.stringify({code:'PUBLICATION_DISABLED',message:'홈페이지 반영 기능이 닫혀 있습니다. 게시 전 확인은 계속 사용할 수 있습니다.'}));
           if(path === '/api/content-publication/prepare') {
-            if(!contentCopy)throw new Error('같은 내용의 사본 검증을 먼저 완료해 주세요.');
+            if(!contentCopy)throw new Error('같은 내용의 반영 준비를 먼저 완료해 주세요.');
             return send(200,JSON.stringify(await contentPublisher.prepare(await contentCopy.proof(data.copyId))));
           }
           if(path === '/api/content-publication/apply')return send(200,JSON.stringify(await contentPublisher.apply({id:data.id,seal:data.seal,confirmed:data.confirmed})));
@@ -204,7 +204,7 @@ export function createReviewServer({ root, service, pageNotice = '', management 
         }
         if(contentCopy && path === '/api/content-copy/prepare') return send(200,JSON.stringify(await contentCopy.prepare(data.kind,{baseCommit:data.baseCommit,draftCommit:data.draftCommit})));
         if(contentCopy && path === '/api/content-copy/apply') {
-          if(data.confirmed!==true)throw new Error('사본에 반영할 변경을 먼저 확인해 주세요.');
+          if(data.confirmed!==true)throw new Error('게시 전 확인할 변경 내용을 먼저 선택해 주세요.');
           return send(200,JSON.stringify(await contentCopy.apply(data.id,data.digest)));
         }
         const result = path === '/api/prepare' ? await service.prepare(data.reviewId, data.selectedIds) : path === '/api/rehearse' ? await service.rehearse(data.planId, data.digest) : path === '/api/validate-publication' ? await service.validatePublication(data.planId, data.digest) : path === '/api/publication/prepare' ? await service.prepareActualPublication(data.planId, data.digest) : path === '/api/publication/apply' ? await service.applyActualPublication(data.publicationId, data.seal, data.confirmed) : null;
@@ -249,7 +249,7 @@ export function createReviewServer({ root, service, pageNotice = '', management 
         if (!previewPathAllowed(file)) return send(404, '{}');
         const local = result.receipt.files.some(f => f.path === file);
         let bytes = local ? await readFile(join(result.directory, file)) : await service.reader.bytes(result.receipt.baseCommit, file);
-        if (file.endsWith('.html')) bytes = Buffer.from(bytes.toString('utf8').replace('<head>', '<head><meta name="robots" content="noindex,nofollow">').replace(/<title>.*?<\/title>/, '<title>사본 반영 결과 | EEAMS</title>').replace(/href="index.html(#[^"]*)?"/g, 'href="https://ewha-eeams.github.io/index.html$1" target="_blank" rel="noopener noreferrer"').replace('<main', '<div style="padding:10px;text-align:center;background:#eaf2f8;color:#175c87;font:13px system-ui">사본 반영 시험 · 운영 홈페이지는 유지됩니다. <a href="/cms-sandbox/preview/review.html">변경 확인으로 돌아가기</a></div><main'));
+        if (file.endsWith('.html')) bytes = Buffer.from(bytes.toString('utf8').replace('<head>', '<head><meta name="robots" content="noindex,nofollow">').replace(/<title>.*?<\/title>/, '<title>게시 전 화면 | EEAMS</title>').replace(/href="index.html(#[^"]*)?"/g, 'href="https://ewha-eeams.github.io/index.html$1" target="_blank" rel="noopener noreferrer"').replace('<main', '<div style="padding:10px;text-align:center;background:#eaf2f8;color:#175c87;font:13px system-ui">게시 전 화면 · 아직 홈페이지에 반영하지 않았습니다. <a href="/cms-sandbox/preview/review.html">반영 화면으로 돌아가기</a></div><main'));
         return send(200, bytes, mime(file));
       }
       const file = path === '/' ? 'cms-sandbox/preview/review.html' : path.slice(1);

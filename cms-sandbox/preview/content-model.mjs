@@ -31,7 +31,7 @@ const plain=value=>value==null?'':typeof value==='string'&&value.length<=30000?v
 function link(value) { if(!value)return; let url;try{url=new URL(value);}catch{throw Error('http:// 또는 https://로 시작하는 링크를 입력해 주세요.');}if(!['https:','http:'].includes(url.protocol)||url.username||url.password)throw Error('로그인 정보가 없는 웹 링크를 입력해 주세요.'); }
 export function compileContent({kind,form,sourceRows,sourceHash,commit,baseCommit,tree}) {
   const definition=contentTypes[kind];
-  if(!definition||!form||form.source_sha256!==sourceHash) throw Error('공개 자료의 기준이 달라졌습니다. 사본을 먼저 확인해 주세요.');
+  if(!definition||!form||form.source_sha256!==sourceHash) throw Error('공개 자료의 기준이 달라졌습니다. 저장한 내용을 다시 확인해 주세요.');
   if(!/^[0-9a-f]{40}$/.test(commit||'')||!/^[0-9a-f]{40}$/.test(baseCommit||'')) throw Error('저장본을 확인하지 못했습니다.');
   if(!Array.isArray(form.records)||form.records.length>500) throw Error('목록은 500개 항목 이내로 입력해 주세요.');
   const origins=new Map(sourceRows.map((row,i)=>[originKey(kind,i),row])), seen=new Set(), resources={}, changes=[];
@@ -59,7 +59,7 @@ export function compileContent({kind,form,sourceRows,sourceHash,commit,baseCommi
       if(!existing&&row.slug)throw Error('새 자료의 주소는 공개 반영 단계에서 정합니다.');
       const media=row.materials.replace(/^\//,'');
       if(media) {
-        if(!media.startsWith('cms-sandbox/media/education/')||/[\\?#%\x00-\x1f]/.test(media)||media.split('/').some(p=>p==='.'||p==='..')||!/[.](?:jpg|jpeg|png|webp|pdf)$/i.test(media))throw Error('특강·워크숍 사본에서 첨부 자료를 선택해 주세요.');
+        if(!media.startsWith('cms-sandbox/media/education/')||/[\\?#%\x00-\x1f]/.test(media)||media.split('/').some(p=>p==='.'||p==='..')||!/[.](?:jpg|jpeg|png|webp|pdf)$/i.test(media))throw Error('특강·워크숍 첨부 자료에서 선택해 주세요.');
         const file=blobs.get(media);
         if(!file||file.mode!=='100644'||file.size>20*1024*1024)throw Error('첨부 자료가 없거나 20 MB 한도를 넘었습니다.');
         const ext=media.split('.').pop().toLowerCase();

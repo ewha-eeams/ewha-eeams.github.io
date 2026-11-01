@@ -20,19 +20,19 @@ const syncPath = allowedCmsSyncPath;
 
 /** Advance the baseline, retaining all unselected editor content and uploaded media paths. */
 export function synchronizeCms({ review, plan, files, config, buildInfo, publicCommit, digest, publicationRecord = false }) {
-  if (!shaPattern.test(publicCommit)) throw failure('사본 게시 저장본을 확인해 주세요.');
+  if (!shaPattern.test(publicCommit)) throw failure('게시 전 확인용 저장본을 확인해 주세요.');
   if (JSON.stringify(preparePlan(review, plan.selectedIds)) !== JSON.stringify(plan)) throw failure('확인한 반영 범위가 달라졌습니다.');
   const hash = sha256(Buffer.from(plan.csv)), selected = new Map(plan.mapping.map(m => [m.cms_id, m]));
   const patches = new Map(), transformed = [], preserved = [];
   for (const file of files) {
-    if (!formPath(file.path)) throw failure('공연 사본의 경로를 확인해 주세요.');
+    if (!formPath(file.path)) throw failure('공연 편집 자료의 경로를 확인해 주세요.');
     const data = structuredClone(file.data), mapping = selected.get(data.cms_id);
     data.source_sha256 = hash;
     let path = file.path;
     if (mapping) {
       path = `cms-sandbox/forms/${mapping.publicId}.json`;
       if (path !== file.path) {
-        if (files.some(f => f.path === path)) throw failure('게시 후 공연 주소가 기존 사본과 겹칩니다.');
+        if (files.some(f => f.path === path)) throw failure('게시 후 공연 주소가 기존 편집 자료와 겹칩니다.');
         patches.set(file.path, null);
       }
       data.origin_id = mapping.publicId;
@@ -47,7 +47,7 @@ export function synchronizeCms({ review, plan, files, config, buildInfo, publicC
     }
     patches.set(path, json(data));
   }
-  if (transformed.length !== selected.size) throw failure('반영할 공연 사본 일부가 없습니다.');
+  if (transformed.length !== selected.size) throw failure('반영할 공연의 편집 자료 일부가 없습니다.');
   const nextConfig = structuredClone(config);
   for (const name of ['concerts', 'concert_drafts']) {
     const collection = nextConfig.content?.find(c => c.name === name);
@@ -81,9 +81,9 @@ export class LocalPublicationCopy {
   }
   async verify() {
     const data = JSON.parse(await readFile(join(this.directory, marker), 'utf8'));
-    if (data.schema !== 1 || data.copyOnly !== true || data.productionPublished !== false || data.directory !== await realpath(this.directory) || this.git(['rev-parse', '--is-bare-repository'], { encoding: 'utf8' }).trim() !== 'true' || this.git(['remote'], { encoding: 'utf8' }).trim()) throw failure('외부 연결이 없는 전용 사본에서만 시험할 수 있습니다.');
+    if (data.schema !== 1 || data.copyOnly !== true || data.productionPublished !== false || data.directory !== await realpath(this.directory) || this.git(['rev-parse', '--is-bare-repository'], { encoding: 'utf8' }).trim() !== 'true' || this.git(['remote'], { encoding: 'utf8' }).trim()) throw failure('외부 연결이 없는 전용 시험 환경에서만 확인할 수 있습니다.');
     const names = this.git(['for-each-ref', '--format=%(refname)', 'refs/heads'], { encoding: 'utf8' }).trim().split('\n').filter(Boolean);
-    if (names.length !== 2 || names.some(r => !Object.values(refs).includes(r))) throw failure('사본 게시 대상이 아닌 저장소입니다.');
+    if (names.length !== 2 || names.some(r => !Object.values(refs).includes(r))) throw failure('전용 시험 대상이 아닌 저장소입니다.');
   }
   current() { return Object.fromEntries(Object.entries(refs).map(([key, ref]) => [key, this.git(['rev-parse', '--verify', ref], { encoding: 'utf8' }).trim()])); }
   tree(commit) {
@@ -132,7 +132,7 @@ export class LocalPublicationCopy {
     const journalPath = join(this.directory, 'publication-result.json');
     let journal;
     try { journal = JSON.parse(await readFile(journalPath, 'utf8')); } catch (e) { if (e.code !== 'ENOENT') throw e; }
-    if (journal && journal.digest !== digest) throw failure('다른 검증에 사용한 사본입니다. 새 사본에서 다시 확인해 주세요.');
+    if (journal && journal.digest !== digest) throw failure('다른 반영 준비에 사용한 시험 환경입니다. 새 확인 환경에서 다시 진행해 주세요.');
     const current = this.current();
     if (journal && current.baseCommit === journal.publicCommit && current.draftCommit === journal.cmsCommit) {
       await this.checkResult(journal);
@@ -141,7 +141,7 @@ export class LocalPublicationCopy {
     assertCurrent(plan, current);
     if (!journal) {
       const { review, files } = this.review(current);
-      if (JSON.stringify(preparePlan(review, plan.selectedIds)) !== JSON.stringify(plan)) throw failure('준비한 자료와 사본 내용이 다릅니다.');
+      if (JSON.stringify(preparePlan(review, plan.selectedIds)) !== JSON.stringify(plan)) throw failure('준비한 자료와 확인용 자료의 내용이 다릅니다.');
       const publicPatches = new Map();
       for (const op of plan.operations) {
         if (op.path === 'data/archive.csv') publicPatches.set(op.path, Buffer.from(plan.csv));
@@ -178,23 +178,23 @@ export class LocalPublicationCopy {
     // Git locks and checks BOTH old refs before moving either one.
     try {
       this.git(['update-ref', '--stdin'], { input: `start\nupdate ${refs.baseCommit} ${journal.publicCommit} ${plan.baseCommit}\nupdate ${refs.draftCommit} ${journal.cmsCommit} ${plan.draftCommit}\nprepare\ncommit\n`, encoding: 'utf8' });
-    } catch { throw failure('게시 사본 또는 CMS 사본이 바뀌었습니다. 어느 쪽도 이번 변경으로 반영하지 않았습니다.', 'STALE_REVIEW'); }
+    } catch { throw failure('게시 전 확인 자료가 바뀌었습니다. 어느 쪽도 이번 변경으로 반영하지 않았습니다.', 'STALE_REVIEW'); }
     await fault('after-transaction', this, journal);
     return { ...journal, repeated: false };
   }
   async checkResult(result) {
-    if (result.schema !== 1 || result.copyOnly !== true || result.productionPublished !== false || ![result.publicCommit, result.cmsCommit, result.baseCommit, result.draftCommit].every(s => shaPattern.test(s || ''))) throw failure('사본 검증 기록을 확인해 주세요.');
-    if (this.git(['rev-parse', `${result.publicCommit}^`], { encoding: 'utf8' }).trim() !== result.baseCommit || this.git(['rev-parse', `${result.cmsCommit}^`], { encoding: 'utf8' }).trim() !== result.draftCommit) throw failure('사본 변경 이력을 확인해 주세요.');
+    if (result.schema !== 1 || result.copyOnly !== true || result.productionPublished !== false || ![result.publicCommit, result.cmsCommit, result.baseCommit, result.draftCommit].every(s => shaPattern.test(s || ''))) throw failure('반영 준비의 확인 기록을 확인해 주세요.');
+    if (this.git(['rev-parse', `${result.publicCommit}^`], { encoding: 'utf8' }).trim() !== result.baseCommit || this.git(['rev-parse', `${result.cmsCommit}^`], { encoding: 'utf8' }).trim() !== result.draftCommit) throw failure('반영 준비의 변경 이력을 확인해 주세요.');
     const ledger = JSON.parse(this.bytes(result.cmsCommit, `cms-sandbox/publications/${result.digest}.json`));
     if (ledger.digest !== result.digest || ledger.publicCommit !== result.publicCommit) throw failure('CMS 동기화 기록이 다릅니다.');
-    if (sha256(this.bytes(result.publicCommit, 'data/archive.csv')) !== result.source_sha256) throw failure('게시 사본 자료가 다릅니다.');
+    if (sha256(this.bytes(result.publicCommit, 'data/archive.csv')) !== result.source_sha256) throw failure('게시 전 확인용 자료가 다릅니다.');
   }
 }
 
 export async function createLocalPublicationCopy({ directory, sourceRepository, baseCommit, draftCommit, identity }) {
   if (![baseCommit, draftCommit].every(s => shaPattern.test(s || ''))) throw failure('복사할 저장본을 확인해 주세요.');
   const source = await realpath(sourceRepository), target = resolve(directory);
-  if (target === source || source.startsWith(target + '/')) throw failure('원본과 분리된 새 사본이 필요합니다.');
+  if (target === source || source.startsWith(target + '/')) throw failure('원본과 분리된 새 시험 환경이 필요합니다.');
   // A fresh directory and no remote make a mistaken production write impossible here.
   await mkdir(target);
   const store = new LocalPublicationCopy(target, { identity });

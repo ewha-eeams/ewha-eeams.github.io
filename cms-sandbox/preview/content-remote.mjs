@@ -107,7 +107,7 @@ export class ActualContentPublisher extends ActualPublisher {
     this.active.add(id);
     try {
       // proof is loaded by the server from a completed local copy, never from HTTP JSON.
-      if (!proof?.directory || !proof.report) throw fail('같은 내용의 사본 게시·동기화를 먼저 확인해 주세요.');
+      if (!proof?.directory || !proof.report) throw fail('같은 내용으로 반영 준비를 먼저 진행해 주세요.');
       const verified = new LocalPublicationCopy(proof.directory);
       await validateContentPair(verified, proof.report, plan, digest, 'copy');
       assertCurrent({ baseCommit: proof.report.publicCommit, draftCommit: proof.report.cmsCommit }, verified.current());

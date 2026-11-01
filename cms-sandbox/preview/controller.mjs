@@ -1,4 +1,4 @@
-import { branch, repository, rawUrl, compileSnapshot, storageKey } from './preview-model.mjs';
+import { branch, repository, rawUrl, compileSnapshot, storageKey, selectPreviewRecord } from './preview-model.mjs';
 const $ = id => document.getElementById(id);
 const select = $('concert'), frame = $('site-preview');
 let snapshot;
@@ -42,7 +42,7 @@ async function refresh() {
     const treeResponse = await (await get(`${api}/git/trees/${commit}?recursive=1`)).json();
     if (treeResponse.truncated || !Array.isArray(treeResponse.tree)) throw new Error('자료 목록 일부가 누락됐습니다. 다시 불러와 주세요.');
     const paths = treeResponse.tree.filter(f => f.type === 'blob' && /^cms-sandbox\/(?:forms|drafts)\/[^/]+\.json$/.test(f.path));
-    if (paths.length > 200) throw new Error('공연 사본이 많아 이번 미리보기 범위를 넘었습니다.');
+    if (paths.length > 200) throw new Error('공연이 많아 이번 미리보기 범위를 넘었습니다.');
     const [source, ...files] = await Promise.all([
       get(new URL('source.json', import.meta.url)).then(r => r.json()),
       ...paths.map(async ({ path }) => ({ path, data: await (await get(rawUrl(commit, path))).json() })),
@@ -51,17 +51,18 @@ async function refresh() {
     }
     localStorage.setItem(storageKey(commit), JSON.stringify(snapshot));
     select.replaceChildren();
-    for (const [label, existing] of [['기존 공연 사본', true], ['새 공연 초안', false]]) {
+    const changedIds = new Set(snapshot.changedRecordIds || []);
+    for (const [label, existing] of [['기존 공연', true], ['새 공연', false]]) {
       const group = document.createElement('optgroup'); group.label = label;
       for (const entry of snapshot.entries.filter(e => e.existing === existing)) {
-        const option = document.createElement('option'); option.value = entry.recordId; option.textContent = `${entry.date} · ${entry.title}`; group.append(option);
+        const option = document.createElement('option'); option.value = entry.recordId; option.textContent = `${entry.date} · ${entry.title}${changedIds.has(entry.recordId) ? ' · 반영 전 수정' : ''}`; group.append(option);
       }
       if (group.children.length) select.append(group);
     }
-    if (snapshot.entries.some(e => e.recordId === selected)) select.value = selected;
+    select.value = selectPreviewRecord(snapshot, selected);
     for (const message of snapshot.warnings) { const li = document.createElement('li'); li.textContent = message; $('warnings').append(li); }
     $('warnings').hidden = !snapshot.warnings.length;
-    $('status').textContent = `저장된 공연 ${snapshot.entries.length}건 · 미리보기`;
+    $('status').textContent = changedIds.size > 1 ? `반영 전 수정이 있는 공연 ${changedIds.size}건 · 목록에서 공연을 선택해 확인하세요.` : `저장된 공연 ${snapshot.entries.length}건 · 미리보기`;
     select.disabled = false; showSelected();
   } catch (error) {
     $('errors').textContent = error.name === 'TimeoutError' ? '연결이 지연되고 있습니다. 잠시 후 다시 불러와 주세요.' : error.message;

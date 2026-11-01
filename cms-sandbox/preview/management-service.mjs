@@ -36,7 +36,8 @@ export function createManagementService({ reader, publicationEnabled = false, co
     }))));
     const source = { sha256: createHash('sha256').update(csv).digest('hex'), rows: parseCsv(csv.toString('utf8')) };
     const review = buildReview({ source, files, baseTree, draftTree, ...refs, baseCsv: csv.toString('utf8') });
-    const snapshot = { ...compileSnapshot({ source, files, tree: draftTree, commit: refs.draftCommit }), delivery: 'local-server' };
+    const snapshot = { ...compileSnapshot({ source, files, tree: draftTree, commit: refs.draftCommit }),
+      changedRecordIds: review.entries.filter(entry => entry.status !== 'unchanged').map(entry => entry.recordId), delivery: 'local-server' };
     assertCurrent(refs, await reader.refs());
     snapshots.set(snapshot.commit, snapshot);
     while (snapshots.size > 20) snapshots.delete(snapshots.keys().next().value);

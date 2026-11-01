@@ -19,7 +19,7 @@ const validMedia = (path, bytes) => /\.pdf$/i.test(path) ? bytes.subarray(0,5).t
 export function prepareContentPlan({ kind, form, sourceCsv, baseTree, draftTree, baseCommit, draftCommit }) {
   const sourceRows = parseContentCsv(sourceCsv.toString('utf8'), kind);
   const snapshot = compileContent({kind, form, sourceRows, sourceHash:hash(sourceCsv), commit:draftCommit, baseCommit, tree:draftTree});
-  if (!snapshot.changes.length) throw fail('사본에 반영할 변경이 없습니다.');
+  if (!snapshot.changes.length) throw fail('게시 전 확인할 수정 내용이 없습니다.');
   const rows = structuredClone(snapshot.rows), mapping = [], operations = [], used = new Set(sourceRows.map(r => r.date?.slice(0,4)+'-'+r.slug));
   for (const row of rows) if (row.slug) used.add(row.date.slice(0,4)+'-'+row.slug);
   const baseFiles = new Map(baseTree.filter(f => f.type==='blob').map(f => [f.path,f]));
@@ -40,7 +40,7 @@ export function prepareContentPlan({ kind, form, sourceCsv, baseTree, draftTree,
     if (!operations.some(op=>op.path===target)) operations.push({path:target,sourcePath,sha:file.sha,size:file.size,action:collision?'reuse':'add'});
     row.materials=target;
   });
-  if (operations.length>100 || operations.reduce((n,o)=>n+o.size,0)>80*1024*1024) throw fail('이번 사본 시험의 첨부 자료 크기를 줄여 주세요.');
+  if (operations.length>100 || operations.reduce((n,o)=>n+o.size,0)>80*1024*1024) throw fail('이번에 확인할 첨부 자료의 크기를 줄여 주세요.');
   const csv=contentCsv(kind,rows);
   return {schema:1,copyOnly:true,productionPublished:false,kind,baseCommit,draftCommit,csv,rows,mapping,changes:snapshot.changes,operations};
 }
@@ -61,7 +61,7 @@ export class ContentPublicationCopy {
     if (hash(JSON.stringify(plan))!==digest) throw fail('확인한 변경 내용과 요청이 다릅니다.');
     const journalPath=join(this.store.directory,'content-publication-result.json'); let report;
     try { report=JSON.parse(await readFile(journalPath,'utf8')); } catch(error) { if(error.code!=='ENOENT')throw error; }
-    if (report && report.digest!==digest) throw fail('다른 반영에 사용한 사본입니다.');
+    if (report && report.digest!==digest) throw fail('다른 내용으로 진행한 반영 준비입니다.');
     const current=this.current();
     if (report && current.baseCommit===report.publicCommit && current.draftCommit===report.cmsCommit) { await this.check(report); return {...report,repeated:true}; }
     assertCurrent(plan,current);
@@ -96,24 +96,24 @@ export class ContentPublicationCopy {
     }
     await this.check(report); await fault('before-transaction',this,report);
     try {this.store.git(['update-ref','--stdin'],{input:`start\nupdate refs/heads/site-copy ${report.publicCommit} ${plan.baseCommit}\nupdate refs/heads/cms-copy ${report.cmsCommit} ${plan.draftCommit}\nprepare\ncommit\n`});}
-    catch {throw fail('검토 뒤 사본이 바뀌어 양쪽 반영을 중단했습니다.','STALE_REVIEW');}
+    catch {throw fail('확인 뒤 자료가 바뀌어 반영 준비를 중단했습니다.','STALE_REVIEW');}
     await fault('after-transaction',this,report);
     return {...report,repeated:false};
   }
   async check(report) {
-    if(report.schema!==1||report.copyOnly!==true||report.productionPublished!==false||!Object.hasOwn(contentTypes,report.kind)||!/^[0-9a-f]{64}$/.test(report.digest||'')||![report.publicCommit,report.cmsCommit,report.previousPublicCommit,report.previousCmsCommit].every(s=>/^[0-9a-f]{40}$/.test(s||'')))throw fail('사본 반영 기록을 확인해 주세요.');
-    for(const [child,parent]of [[report.publicCommit,report.previousPublicCommit],[report.cmsCommit,report.previousCmsCommit]])if(this.store.git(['rev-parse',`${child}^`],{encoding:'utf8'}).trim()!==parent)throw fail('사본 변경 이력이 다릅니다.');
-    if(hash(this.store.bytes(report.publicCommit,`data/${report.kind}.csv`))!==report.source_sha256)throw fail('사본의 게시 자료가 다릅니다.');
+    if(report.schema!==1||report.copyOnly!==true||report.productionPublished!==false||!Object.hasOwn(contentTypes,report.kind)||!/^[0-9a-f]{64}$/.test(report.digest||'')||![report.publicCommit,report.cmsCommit,report.previousPublicCommit,report.previousCmsCommit].every(s=>/^[0-9a-f]{40}$/.test(s||'')))throw fail('반영 준비 기록을 확인해 주세요.');
+    for(const [child,parent]of [[report.publicCommit,report.previousPublicCommit],[report.cmsCommit,report.previousCmsCommit]])if(this.store.git(['rev-parse',`${child}^`],{encoding:'utf8'}).trim()!==parent)throw fail('확인용 자료의 변경 이력이 다릅니다.');
+    if(hash(this.store.bytes(report.publicCommit,`data/${report.kind}.csv`))!==report.source_sha256)throw fail('게시 전 확인 자료가 다릅니다.');
     const ledger=JSON.parse(this.store.bytes(report.cmsCommit,`cms-sandbox/content-publications/${report.digest}.json`));
-    if(ledger.digest!==report.digest||ledger.publicCommit!==report.publicCommit)throw fail('사본 동기화 기록이 다릅니다.');
+    if(ledger.digest!==report.digest||ledger.publicCommit!==report.publicCommit)throw fail('반영 준비의 저장 연결 기록이 다릅니다.');
     const after=this.snapshot(report.kind,{baseCommit:report.publicCommit,draftCommit:report.cmsCommit});
-    if(after.changes.length)throw fail('사본 기준 갱신이 완료되지 않았습니다.');
+    if(after.changes.length)throw fail('반영 후 저장 연결 확인이 완료되지 않았습니다.');
   }
 }
 
 export function createContentCopyService({reader,sourceRepository,artifactRoot}) {
   const plans=new Map(),active=new Set(),ttl=30*60*1000;
-  const directory=id=>{if(!uuid.test(id||''))throw fail('사본 결과 주소를 확인해 주세요.');return join(artifactRoot,'content-copy',id);};
+  const directory=id=>{if(!uuid.test(id||''))throw fail('게시 전 화면 주소를 확인해 주세요.');return join(artifactRoot,'content-copy',id);};
   const find=async id=>{
     const folder=directory(id),report=JSON.parse(await readFile(join(folder,'result.json'),'utf8'));
     const copy=new ContentPublicationCopy(new LocalPublicationCopy(join(folder,'publication.git')));
@@ -128,14 +128,14 @@ export function createContentCopyService({reader,sourceRepository,artifactRoot})
       if(bytes.length>1024*1024)throw fail('자료 목록의 크기를 확인해 주세요.');
       const plan=prepareContentPlan({kind,sourceCsv,form:JSON.parse(bytes.toString('utf8')),baseTree,draftTree,...refs});assertCurrent(refs,await reader.refs());
       for(const[id,item]of plans)if(Date.now()-item.created>ttl)plans.delete(id);
-      if(plans.size>=100)throw fail('사본 확인 창을 정리한 뒤 다시 진행해 주세요.');
+      if(plans.size>=100)throw fail('사용하지 않는 반영 준비 창을 정리한 뒤 다시 진행해 주세요.');
       const id=randomUUID(),digest=hash(JSON.stringify(plan));plans.set(id,{plan,digest,created:Date.now()});
       return {id,digest,kind,copyOnly:true,productionPublished:false,changes:plan.changes,mapping:plan.mapping,records:plan.rows.length,operations:[{path:`data/${kind}.csv`,action:'update'},...plan.operations.map(({path,action,size})=>({path,action,size}))]};
     },
     async apply(id,digest) {
       const item=plans.get(id);
       if(!item||Date.now()-item.created>ttl||item.digest!==digest)throw fail('검토 화면을 새로 불러온 뒤 다시 진행해 주세요.','EXPIRED_REVIEW');
-      if(active.has(id))throw fail('같은 사본을 처리하고 있습니다. 잠시 기다려 주세요.');
+      if(active.has(id))throw fail('같은 반영 준비를 처리하고 있습니다. 잠시 기다려 주세요.');
       assertCurrent(item.plan,await reader.refs());active.add(id);
       try {
         const folder=directory(id);await mkdir(folder,{recursive:true});let store;
@@ -150,16 +150,16 @@ export function createContentCopyService({reader,sourceRepository,artifactRoot})
       const {copy,report}=await find(id);
       const plan=prepareContentPlan(copy.read(report.kind,{baseCommit:report.previousPublicCommit,draftCommit:report.previousCmsCommit}));
       const digest=hash(JSON.stringify(plan));
-      if(digest!==report.digest)throw fail('사본에서 확인한 변경 내용과 다릅니다.');
+      if(digest!==report.digest)throw fail('반영 준비에서 확인한 내용과 다릅니다.');
       assertCurrent(plan,await reader.refs());
       return {id,plan,digest,proof:{directory:copy.store.directory,report}};
     },
     async snapshot(id) {const{copy,report}=await find(id);return {...copy.snapshot(report.kind,{baseCommit:report.publicCommit,draftCommit:report.cmsCommit}),copyId:id};},
     async media(id,kind,commit,path) {
       const{copy,report}=await find(id),snapshot=copy.snapshot(report.kind,{baseCommit:report.publicCommit,draftCommit:report.cmsCommit});
-      if(kind!==report.kind||commit!==report.cmsCommit||!Object.hasOwn(snapshot.resources,path))throw fail('사본 미리보기에서 자료를 다시 열어 주세요.','ENOENT');
+      if(kind!==report.kind||commit!==report.cmsCommit||!Object.hasOwn(snapshot.resources,path))throw fail('게시 전 화면에서 자료를 다시 열어 주세요.','ENOENT');
       const bytes=copy.store.bytes(commit,path),resource=snapshot.resources[path];
-      if(bytes.length!==resource.bytes||!validMedia(path,bytes))throw fail('사본 첨부 자료를 확인해 주세요.');
+      if(bytes.length!==resource.bytes||!validMedia(path,bytes))throw fail('게시 전 첨부 자료를 확인해 주세요.');
       return {bytes,mime:resource.mime};
     },
   };

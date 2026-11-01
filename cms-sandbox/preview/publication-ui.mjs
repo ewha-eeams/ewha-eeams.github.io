@@ -9,6 +9,7 @@ export function publicationControls({load,canPrepare,prepare,apply,status,showRe
  const $=byId;let busy=false,candidate=null,finished=false,uncertain=false;
  let publicationId=new URLSearchParams(location.search).get('publication');uncertain=!!publicationId;
  function controls(){
+  $('publication-intro').hidden=finished;
   $('prepare').disabled=busy||uncertain||finished||!canPrepare();$('reload').disabled=busy||uncertain;
   $('confirm').disabled=busy||uncertain||!candidate;$('publish').disabled=busy||uncertain||!candidate||!$('confirm').checked;
   $('check-status').disabled=busy;lockInputs(busy||uncertain||finished);
