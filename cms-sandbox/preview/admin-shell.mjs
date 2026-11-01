@@ -5,13 +5,12 @@ const icon = name => {
 };
 if(document.body.classList.contains('admin-page')&&!document.querySelector('.admin-sidebar')){
  const side=document.createElement('aside');side.className='admin-sidebar';
- side.innerHTML=`<a class="admin-brand" href="manage.html" aria-label="EEAMS 자료 관리 시작"><strong>EEAMS</strong><span>자료 관리</span></a><nav aria-label="관리 메뉴"><a class="sidebar-item" data-section="content" href="manage.html">${icon('content')}<span>콘텐츠 관리</span></a><div class="sidebar-contents" aria-label="콘텐츠 종류"><a data-content="concerts" href="manage.html#concerts">공연 아카이브</a><a data-content="people" href="manage.html#people">참여자</a><a data-content="education" href="manage.html#education">특강·워크숍</a><a data-content="research" href="manage.html#research">연구 프로젝트</a></div><span class="sidebar-item sidebar-unavailable" aria-disabled="true">${icon('activity')}<span>이용 현황</span><small>준비 중</small></span><a class="sidebar-item" data-section="guide" href="guide.html">${icon('guide')}<span>사용 안내</span></a></nav><div class="sidebar-footer"><a href="https://ewha-eeams.github.io/" target="_blank" rel="noopener noreferrer">${icon('home')}<span>공개 홈페이지 ↗</span></a><p>이 Mac의 관리 도구</p></div>`;
+ side.innerHTML=`<a class="admin-brand" href="manage.html" aria-label="EEAMS 자료 관리 시작"><strong>EEAMS</strong><span>자료 관리</span></a><nav aria-label="관리 메뉴"><a class="sidebar-item" data-section="content" href="manage.html">${icon('content')}<span>콘텐츠 관리</span></a><span class="sidebar-item sidebar-unavailable" aria-disabled="true">${icon('activity')}<span>이용 현황</span><small>준비 중</small></span><a class="sidebar-item" data-section="guide" href="guide.html">${icon('guide')}<span>사용 안내</span></a></nav><div class="sidebar-footer"><a href="https://ewha-eeams.github.io/" target="_blank" rel="noopener noreferrer">${icon('home')}<span>공개 홈페이지 ↗</span></a><p>이 Mac의 관리 도구</p></div>`;
  const skip=document.createElement('a');skip.href='#admin-main';skip.className='admin-skip';skip.textContent='본문으로 바로가기';document.querySelector('main').id||='admin-main';document.body.prepend(side);document.body.prepend(skip);document.body.classList.add('has-admin-shell');
  function current(){
   const file=location.pathname.split('/').pop(),section=file==='guide.html'?'guide':'content';
   for(const link of side.querySelectorAll('[data-section]')){const active=link.dataset.section===section;link.classList.toggle('is-active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
-  const kind=section==='guide'?'':file==='index.html'||file==='review.html'?'concerts':file==='content.html'?document.getElementById('kind')?.value||new URLSearchParams(location.search).get('kind'):file==='content-review.html'?new URLSearchParams(location.search).get('kind'):location.hash.slice(1);
-  for(const link of side.querySelectorAll('[data-content]')){const active=link.dataset.content===kind;link.classList.toggle('is-current',active);if(active)link.setAttribute('aria-current','location');else link.removeAttribute('aria-current');}
+
  }
- current();window.addEventListener('hashchange',current);document.getElementById('kind')?.addEventListener('change',current);
+ current();
 }
