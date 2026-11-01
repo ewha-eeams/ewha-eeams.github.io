@@ -111,7 +111,7 @@
         },
         {
           "name": "works",
-          "label": "작품 목록",
+          "label": "작품 목록 · 끌어서 순서 변경",
           "type": "object",
           "list": {
             "min": 1,
@@ -166,8 +166,7 @@
                 "message": "http:// 또는 https://로 시작하는 링크를 입력해 주세요."
               }
             }
-          ],
-          "description": "작품을 펼쳐 수정하고, 순서는 끌어서 바꿀 수 있습니다."
+          ]
         },
         {
           "name": "poster",
@@ -328,7 +327,7 @@
         },
         {
           "name": "works",
-          "label": "작품 목록",
+          "label": "작품 목록 · 끌어서 순서 변경",
           "type": "object",
           "list": {
             "min": 1,
@@ -383,8 +382,7 @@
                 "message": "http:// 또는 https://로 시작하는 링크를 입력해 주세요."
               }
             }
-          ],
-          "description": "작품을 펼쳐 수정하고, 순서는 끌어서 바꿀 수 있습니다."
+          ]
         },
         {
           "name": "poster",
