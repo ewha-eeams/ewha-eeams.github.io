@@ -1,96 +1,67 @@
 {
-  "cms_id": "71d00a69-20d1-4b21-a81d-7dd2743cbc34",
-  "origin_id": "2025-concert1",
-  "source_sha256": "851ecd06d8ad9ceb695944aca9450bf63406e970efcf433aa5d6cc6c762c1e63",
-  "date": "2025-05-28",
-  "slug": "concert1",
   "title": "Soundscape 2025-1",
+  "date": "2025-05-28",
+  "venue": "이화여자대학교 음악관 국악연주홀 · 전체 흐름 점검",
   "title_en": "Soundscape 2025-1",
-  "venue": "이화여자대학교 음악관 국악연주홀",
   "venue_en": "Korean Music Recital Hall, Music Building, Ewha Womans University",
   "works": [
     {
       "composer": "서연우",
-      "composer_en": "",
       "work_title": "Wunderkammer",
-      "work_title_en": "",
-      "format": "4-ch Tape",
-      "media_url": ""
+      "format": "4-ch Tape"
     },
     {
       "composer": "김수미",
-      "composer_en": "",
       "work_title": "Bi",
-      "work_title_en": "",
-      "format": "Image and 2-ch Tape",
-      "media_url": ""
+      "format": "Image and 2-ch Tape"
     },
     {
       "composer": "신혜린",
-      "composer_en": "",
       "work_title": "상실(喪失)",
-      "work_title_en": "",
-      "format": "2-ch Tape",
-      "media_url": ""
+      "format": "2-ch Tape"
     },
     {
       "composer": "김청은",
-      "composer_en": "",
       "work_title": "Toys’ Dream",
-      "work_title_en": "",
-      "format": "2-ch Tape",
-      "media_url": ""
+      "format": "2-ch Tape"
     },
     {
       "composer": "조서연",
-      "composer_en": "",
       "work_title": "Osaka Dream",
-      "work_title_en": "",
-      "format": "Video and 4-ch Tape",
-      "media_url": ""
+      "format": "Video and 4-ch Tape"
     },
     {
       "composer": "김지현",
-      "composer_en": "",
       "work_title": "\"track\"- reconstructable memory",
-      "work_title_en": "",
-      "format": "2-ch Tape",
-      "media_url": ""
+      "format": "2-ch Tape"
     },
     {
       "composer": "전현석",
-      "composer_en": "Hyunsuk Jun",
       "work_title": "aus dem dunkel",
-      "work_title_en": "",
       "format": "2-ch Tape",
-      "media_url": ""
+      "composer_en": "Hyunsuk Jun"
     },
     {
       "composer": "조희원",
-      "composer_en": "",
       "work_title": "래다밤",
-      "work_title_en": "",
-      "format": "Audiovisual and 2-ch Tape",
-      "media_url": ""
+      "format": "Audiovisual and 2-ch Tape"
     },
     {
       "composer": "강사라",
-      "composer_en": "",
       "work_title": "의미와 무의미",
-      "work_title_en": "",
-      "format": "4-ch Tape",
-      "media_url": ""
+      "format": "4-ch Tape"
     },
     {
       "composer": "도하나",
-      "composer_en": "Hana Do",
       "work_title": "20211015",
-      "work_title_en": "",
       "format": "Audiovisual and 4-ch Tape",
-      "media_url": ""
+      "composer_en": "Hana Do"
     }
   ],
   "poster": "/cms-sandbox/media/concerts/2025/2025-concert1-poster.jpg",
   "program_book": "/cms-sandbox/media/concerts/2025/2025-concert1-program-book.pdf",
-  "photos": []
+  "cms_id": "71d00a69-20d1-4b21-a81d-7dd2743cbc34",
+  "origin_id": "2025-concert1",
+  "slug": "concert1",
+  "source_sha256": "851ecd06d8ad9ceb695944aca9450bf63406e970efcf433aa5d6cc6c762c1e63"
 }
