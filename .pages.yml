@@ -469,7 +469,7 @@
       "fields": [
         {
           "name": "records",
-          "label": "참여자 목록",
+          "label": "참여자 목록 · 이름을 눌러 편집",
           "type": "object",
           "list": {
             "min": 0,
@@ -484,7 +484,7 @@
               "name": "name",
               "label": "이름 (분류 안내만 입력할 때는 생략)",
               "type": "string",
-              "description": "이름이 없는 항목은 분류 안내로 사용합니다."
+              "description": "이름이 없는 항목은 분류 안내로 사용합니다. 수정한 뒤 위쪽 Save(저장)를 누르고 자료 관리 탭으로 돌아오세요. 저장만으로 홈페이지가 바뀌지는 않습니다."
             },
             {
               "name": "role",
@@ -622,8 +622,7 @@
               "hidden": true,
               "readonly": true
             }
-          ],
-          "description": "항목 이름을 눌러 펼친 뒤 수정하세요. 위쪽 Save(저장)를 누르고 자료 관리 탭으로 돌아오면 됩니다. 저장만으로 홈페이지가 바뀌지는 않습니다."
+          ]
         },
         {
           "name": "source_sha256",
@@ -642,7 +641,7 @@
       "fields": [
         {
           "name": "records",
-          "label": "특강·워크숍 목록",
+          "label": "특강·워크숍 목록 · 제목을 눌러 편집",
           "type": "object",
           "list": {
             "min": 0,
@@ -661,7 +660,8 @@
               "pattern": {
                 "regex": "\\S",
                 "message": "공백이 아닌 내용을 입력해 주세요."
-              }
+              },
+              "description": "수정한 뒤 위쪽 Save(저장)를 누르고 자료 관리 탭으로 돌아오세요. 저장만으로 홈페이지가 바뀌지는 않습니다."
             },
             {
               "name": "date",
@@ -746,8 +746,7 @@
               "hidden": true,
               "readonly": true
             }
-          ],
-          "description": "항목 이름을 눌러 펼친 뒤 수정하세요. 위쪽 Save(저장)를 누르고 자료 관리 탭으로 돌아오면 됩니다. 저장만으로 홈페이지가 바뀌지는 않습니다."
+          ]
         },
         {
           "name": "source_sha256",
@@ -766,7 +765,7 @@
       "fields": [
         {
           "name": "records",
-          "label": "연구 프로젝트 목록",
+          "label": "연구 프로젝트 목록 · 제목을 눌러 편집",
           "type": "object",
           "list": {
             "min": 0,
@@ -785,7 +784,8 @@
               "pattern": {
                 "regex": "\\S",
                 "message": "공백이 아닌 내용을 입력해 주세요."
-              }
+              },
+              "description": "수정한 뒤 위쪽 Save(저장)를 누르고 자료 관리 탭으로 돌아오세요. 저장만으로 홈페이지가 바뀌지는 않습니다."
             },
             {
               "name": "project_group",
@@ -847,8 +847,7 @@
               "hidden": true,
               "readonly": true
             }
-          ],
-          "description": "항목 이름을 눌러 펼친 뒤 수정하세요. 위쪽 Save(저장)를 누르고 자료 관리 탭으로 돌아오면 됩니다. 저장만으로 홈페이지가 바뀌지는 않습니다."
+          ]
         },
         {
           "name": "source_sha256",
