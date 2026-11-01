@@ -1,6 +1,6 @@
 export const contentTypes = {
-  people: { label: '참여자', headers: ['section','section_en','category','category_en','order','person_order','name','name_en','role','role_en','start_year','end_year','project','project_en','profile_url','note','note_en','status','public'] },
-  education: { label: '특강·워크숍', headers: ['date','slug','type','type_en','title','title_en','speaker','speaker_en','description','description_en','materials'] },
+  people: { label: 'EEAMS의 구성과 참여', headers: ['section','section_en','category','category_en','order','person_order','name','name_en','role','role_en','start_year','end_year','project','project_en','profile_url','note','note_en','status','public'] },
+  education: { label: '특강과 워크숍', headers: ['date','slug','type','type_en','title','title_en','speaker','speaker_en','description','description_en','materials'] },
   research: { label: '연구 프로젝트', headers: ['project_group','project_group_en','title','title_en','status','description','description_en','url','order'] },
 };
 export const contentLabels = { section:'구분',section_en:'구분 · 영문',category:'분류',category_en:'분류 · 영문',order:'표시 순서',person_order:'분류 안의 순서',name:'이름',name_en:'이름 · 영문',role:'역할',role_en:'역할 · 영문',start_year:'참여 시작 연도',end_year:'참여 종료 연도',project:'참여 내용',project_en:'참여 내용 · 영문',profile_url:'프로필 링크',note:'분류 안내',note_en:'분류 안내 · 영문',public:'공개 여부',date:'날짜',slug:'기존 주소',type:'유형',type_en:'유형 · 영문',title:'제목',title_en:'제목 · 영문',speaker:'강연자·진행자',speaker_en:'강연자·진행자 · 영문',description:'소개',description_en:'소개 · 영문',materials:'첨부 자료',project_group:'프로젝트 묶음',project_group_en:'프로젝트 묶음 · 영문',status:'진행 상태',url:'연결 주소' };
