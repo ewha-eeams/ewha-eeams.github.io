@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "copyOnly": false,
+  "publicationType": "paired-content-publication",
+  "kind": "education",
+  "digest": "cf7bf1aa22b2bda59f7d536908b3dcbd2ae8e0b7d49a3cd2225e2571ec4df3b7",
+  "previousPublicCommit": "33ba9c376093790d1eccf438be29f03b95bc748f",
+  "previousCmsCommit": "94e675757ce69f4ae47f9d80bed42dd2339f08e9",
+  "publicCommit": "feca114512ef1c6074b85b7d535cd01e2d46aa90",
+  "source_sha256": "14107f57950f22d7aee244e53e70e72e1cceb44eabe273b95cd7481ea17f32ea",
+  "mapping": [
+    {
+      "label": "EEAMS Summer Workshop 2026",
+      "publicId": "2026-workshop1",
+      "added": false
+    },
+    {
+      "label": "뇌 데이터를 활용한 듣는 음악에서 경험하는 음악으로",
+      "publicId": "2026-lecture1",
+      "added": false
+    },
+    {
+      "label": "AI-assisted Music Producing",
+      "publicId": "2025-workshop1",
+      "added": false
+    },
+    {
+      "label": "Annesley Black 초청 세미나: Permeable Boundaries",
+      "publicId": "2025-lecture8",
+      "added": false
+    },
+    {
+      "label": "작곡가와 AI: 그만두거나 살아남거나",
+      "publicId": "2025-lecture7",
+      "added": false
+    },
+    {
+      "label": "예술, 살아서 꿈틀거리기: 질서에서 몸으로, 그리고 존재로",
+      "publicId": "2025-lecture6",
+      "added": false
+    },
+    {
+      "label": "음악으로 탐색하는 직업 이야기: feat. 게임 음악 하는 사람들",
+      "publicId": "2025-lecture5",
+      "added": false
+    },
+    {
+      "label": "곡은 어떻게 시작되는가: 생각이 음악이 되기까지",
+      "publicId": "2025-lecture4",
+      "added": false
+    },
+    {
+      "label": "소리로 세상을 전달하다: 사운드·공간·융합예술의 세계",
+      "publicId": "2025-lecture3",
+      "added": false
+    },
+    {
+      "label": "영화음악 제작과정: 장·단편영화 그리고 다큐를 중심으로",
+      "publicId": "2025-lecture2",
+      "added": false
+    },
+    {
+      "label": "장준호의 Audio-Visualization 그리고 작곡가로서의 삶",
+      "publicId": "2025-lecture1",
+      "added": false
+    }
+  ]
+}
