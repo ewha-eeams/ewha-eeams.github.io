@@ -16,7 +16,7 @@
       "title": "Timbre Curve Lab",
       "project_group": "Curve Lab",
       "status": "Prototype",
-      "description": "필터와 딜레이 계열 이펙트를 통해 음색의 변화를 시간 축 위에서 곡선으로 설계하는 모듈",
+      "description": "필터와 딜레이 계열 이펙트로 음색의 변화를 시간 축 위에서 곡선으로 설계하는 모듈",
       "url": "https://hyunsukjun.github.io/timbre-curve-lab/",
       "order": "2",
       "title_en": "Timbre Curve Lab",
