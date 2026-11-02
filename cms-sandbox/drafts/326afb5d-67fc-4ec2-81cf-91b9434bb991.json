@@ -10,12 +10,12 @@
   "venue_en": "",
   "works": [
     {
-      "composer": "TEST",
-      "work_title": "TEST",
-      "format": "TEST",
+      "composer": ".",
+      "work_title": ".",
+      "format": ".",
       "media_url": "",
-      "composer_en": "TEST",
-      "work_title_en": "TEST"
+      "composer_en": ".",
+      "work_title_en": "."
     }
   ],
   "poster": "",
