@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "kind": "paired-publication",
+  "copyOnly": false,
+  "digest": "dab72de0058e893edcda378b4206e92e61cf1ddc9b9ef7b360f5a9fcdf2ca682",
+  "previousPublicCommit": "1d0916de6d4f98c3e71567ec7b68c7cde5434c4a",
+  "previousCmsCommit": "853a7de7aeddb4540ad7da8a1c3d3024f9db94a6",
+  "publicCommit": "107f4dc906f3b027fca82f53867754ddc741855b",
+  "source_sha256": "9c84dc315c1cd83210b940755c959880f3e0e970b539f93e23b3ba8a0c74766f",
+  "mapping": [
+    {
+      "cms_id": "71d00a69-20d1-4b21-a81d-7dd2743cbc34",
+      "publicId": "2025-concert1",
+      "title": "Soundscape 2025-1",
+      "existing": true
+    }
+  ]
+}
