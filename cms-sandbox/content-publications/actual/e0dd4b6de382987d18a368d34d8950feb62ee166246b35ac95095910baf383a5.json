@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "copyOnly": false,
+  "publicationType": "paired-content-publication",
+  "kind": "people",
+  "digest": "e0dd4b6de382987d18a368d34d8950feb62ee166246b35ac95095910baf383a5",
+  "previousPublicCommit": "feca114512ef1c6074b85b7d535cd01e2d46aa90",
+  "previousCmsCommit": "51460419ab8952e79133e2b250b920f554530a1a",
+  "publicCommit": "44162e22b98ea0d93a370b269ee03e6806ac84e1",
+  "source_sha256": "aa30b5a2d28e16d926b77e05fc47ebb78b525bbbeaae755c4d6876788b7debe6",
+  "mapping": []
+}
