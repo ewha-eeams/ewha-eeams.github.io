@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "kind": "paired-publication",
+  "copyOnly": false,
+  "digest": "a050b85d1eb73045b2154f5e5abf99a5b5c703bd14809fd57cd6588dbcb2232a",
+  "previousPublicCommit": "44162e22b98ea0d93a370b269ee03e6806ac84e1",
+  "previousCmsCommit": "6dbfe37c793f6584282f12889a296b52b4e7e7ab",
+  "publicCommit": "13c0cce96d70d66ff548aafb7a0d30c39d5b4253",
+  "source_sha256": "ed92914a1d7f03bb74ccfa4d8bac1cde3dbc2b1cfe8f22291972e12dc5f83fa7",
+  "mapping": [
+    {
+      "cms_id": "326afb5d-67fc-4ec2-81cf-91b9434bb991",
+      "publicId": "2026-concert2",
+      "title": "Soundscape 2026-Crossings",
+      "existing": false
+    }
+  ]
+}

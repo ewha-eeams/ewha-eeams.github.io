@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "sha256": "9c84dc315c1cd83210b940755c959880f3e0e970b539f93e23b3ba8a0c74766f",
+  "sha256": "ed92914a1d7f03bb74ccfa4d8bac1cde3dbc2b1cfe8f22291972e12dc5f83fa7",
   "rows": [
     {
       "date": "2026-05-20",
@@ -405,6 +405,21 @@
       "work_title": "20211015",
       "work_title_en": "",
       "format": "Audiovisual and 4-ch Tape",
+      "media_url": ""
+    },
+    {
+      "date": "2026-12-08",
+      "slug": "concert2",
+      "title": "Soundscape 2026-Crossings",
+      "title_en": "",
+      "venue": "이화여자대학교 음악관 212호 EEAMS",
+      "venue_en": "",
+      "composer": ".",
+      "composer_en": ".",
+      "work_order": "1",
+      "work_title": ".",
+      "work_title_en": ".",
+      "format": ".",
       "media_url": ""
     }
   ]
