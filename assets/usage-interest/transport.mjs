@@ -14,7 +14,11 @@ export async function deliver(batch,{post,receipt,wait=async()=>{},attempts=2}={
 }
 export function browserTransport(endpoint,document,fetcher=fetch){
  return{
-  post:body=>fetcher(endpoint,{method:'POST',mode:'no-cors',credentials:'omit',referrerPolicy:'no-referrer',headers:{'Content-Type':'text/plain;charset=UTF-8'},body,keepalive:true,signal:AbortSignal.timeout(10000)}),
+  post:async body=>{
+   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);
+   try{return await fetcher(endpoint,{method:'POST',mode:'no-cors',credentials:'omit',referrerPolicy:'no-referrer',headers:{'Content-Type':'text/plain;charset=UTF-8'},body,keepalive:true,signal:controller.signal});}
+   finally{clearTimeout(timer);}
+  },
   receipt:batch=>new Promise((resolve,reject)=>{
    const callback='eeamsReceipt_'+batch.batchId,script=document.createElement('script'),url=new URL(endpoint),view=document.defaultView;
    url.searchParams.set('batchId',batch.batchId);url.searchParams.set('month',new Date(Date.parse(batch.createdAt)+9*3600000).toISOString().slice(0,7));url.searchParams.set('callback',callback);
