@@ -1,0 +1,1 @@
+export const config=Object.freeze({"enabled":true,"siteId":"eeams-interest-live-v1","endpoint":"https://script.google.com/macros/s/AKfycbxVv1_rjAXFlemRWEQcC3Col_cWTWxQ8-IiztXTaZkvJ7gzjuN8fiisVYc2Y43OntgwJQ/exec","startedAt":"2026-11-04T08:37:55.820Z","allowedOrigins":["https://ewha-eeams.github.io"],"maxPendingEvents":400});
