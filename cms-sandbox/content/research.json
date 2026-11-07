@@ -71,6 +71,17 @@
       "project_group_en": "Curve Lab",
       "description_en": "A module for designing base frequency, oscillator deviation, and spectral slope across time with curves.",
       "origin_key": "research-0006"
+    },
+    {
+      "origin_key": "",
+      "title": "Curve Lab Hub",
+      "project_group": "Curve Lab",
+      "status": "Prototype",
+      "description": "6개의 Curve Lab를 하나의 프로그램으로 작동",
+      "url": "https://hyunsukjun.github.io/curvelab-hub/",
+      "title_en": "",
+      "description_en": "",
+      "order": "7"
     }
   ],
   "source_sha256": "57bac51fb5a9f2be96d07b5cb19cce5f516df9e8e49709249b99d3bfa84f0c38"
