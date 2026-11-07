@@ -73,7 +73,7 @@
       "origin_key": "research-0006"
     },
     {
-      "origin_key": "",
+      "origin_key": "research-0007",
       "title": "Curve Lab Hub",
       "project_group": "Curve Lab",
       "status": "Prototype",
@@ -84,5 +84,5 @@
       "order": "7"
     }
   ],
-  "source_sha256": "57bac51fb5a9f2be96d07b5cb19cce5f516df9e8e49709249b99d3bfa84f0c38"
+  "source_sha256": "e710362c07837bc82d3518c65b6587c9d036a2ab41429f29132e2c603d6ca7de"
 }

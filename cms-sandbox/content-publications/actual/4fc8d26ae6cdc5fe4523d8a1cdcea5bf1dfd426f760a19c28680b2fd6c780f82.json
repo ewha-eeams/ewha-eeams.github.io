@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "copyOnly": false,
+  "publicationType": "paired-content-publication",
+  "kind": "research",
+  "digest": "4fc8d26ae6cdc5fe4523d8a1cdcea5bf1dfd426f760a19c28680b2fd6c780f82",
+  "previousPublicCommit": "a256766c09cab6f56f9df96129e5fafbb3c1f954",
+  "previousCmsCommit": "5c3b459c79465f64873ac6371edde1e3b7535752",
+  "publicCommit": "09e07af326ccdae3960868ebe27b21c7c5411a01",
+  "source_sha256": "e710362c07837bc82d3518c65b6587c9d036a2ab41429f29132e2c603d6ca7de",
+  "mapping": []
+}
