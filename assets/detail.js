@@ -656,6 +656,29 @@ function groupPeople(rows) {
   return [...groups.values()];
 }
 
+function crewRole(person) {
+  const role = String(person.roleEn || person.role || "").trim().toLowerCase();
+  return ["captain", "캡틴", "회장"].includes(role) ? "captain" : ["crew", "크루", "회원"].includes(role) ? "crew" : "";
+}
+
+function isCrewGroup(group) {
+  return group.people.length > 0 && group.people.every((person) => crewRole(person));
+}
+
+function renderCrewPeople(group, headingTag) {
+  return [["captain", isEnglish ? "Captain" : "회장", isEnglish ? "" : "Captain"], ["crew", isEnglish ? "Crew" : "회원", isEnglish ? "" : "Crew"]]
+    .map(([role, label, labelEn]) => {
+      const members = group.people.filter((person) => crewRole(person) === role);
+      if (!members.length) return "";
+      return `<section class="crew-role-group" aria-label="${label}">
+        <${headingTag} class="crew-role-title">${bilingualHtml(label, labelEn)}</${headingTag}>
+        <ul class="person-list crew-member-list ${role === "captain" ? "crew-captain-list" : ""}">
+          ${members.map((person) => `<li><strong>${bilingualHtml(person.name, person.nameEn)}</strong></li>`).join("")}
+        </ul>
+      </section>`;
+    }).join("");
+}
+
 function renderPeople(rows) {
   const groups = groupPeople(rows);
   if (!groups.length) {
@@ -669,13 +692,15 @@ function renderPeople(rows) {
         group.section.includes("Student Composers");
 
       return `
-        <article class="detail-card people-detail-card">
+        <article class="detail-card people-detail-card ${isCrewGroup(group) ? "crew-card" : ""}">
           <div class="detail-card-head">
             <span>${bilingualHtml(group.section, group.sectionEn)}</span>
           </div>
           <h2>${bilingualHtml(group.category, group.categoryEn)}</h2>
           ${
-            group.people.length
+            isCrewGroup(group)
+              ? renderCrewPeople(group, "h3")
+              : group.people.length
               ? `<ul class="person-list detail-person-list">
                   ${group.people
                     .map((person) => {
