@@ -650,7 +650,7 @@ function groupPeople(rows) {
 
 function crewRole(person) {
   const role = String(person.roleEn || person.role || "").trim().toLowerCase();
-  return ["captain", "캡틴", "회장"].includes(role) ? "captain" : ["officers", "chief officer", "임원진"].includes(role) ? "officer" : ["crew members", "crew", "크루", "회원"].includes(role) ? "crew" : "";
+  return ["captain", "캡틴", "회장"].includes(role) ? "captain" : ["deputy captains", "부회장", "officers", "chief officer", "임원진"].includes(role) ? "officer" : ["crew members", "crew", "크루", "회원"].includes(role) ? "crew" : "";
 }
 
 function isCrewGroup(group) {
@@ -658,7 +658,7 @@ function isCrewGroup(group) {
 }
 
 function renderCrewPeople(group, headingTag) {
-  return [["captain", isEnglish ? "Captain" : "회장", isEnglish ? "" : "Captain"], ["officer", isEnglish ? "Officers" : "임원진", isEnglish ? "" : "Officers"], ["crew", isEnglish ? "Crew Members" : "회원", isEnglish ? "" : "Crew Members"]]
+  return [["captain", isEnglish ? "Captain" : "회장", isEnglish ? "" : "Captain"], ["officer", isEnglish ? "Deputy Captains" : "부회장", isEnglish ? "" : "Deputy Captains"], ["crew", isEnglish ? "Crew Members" : "회원", isEnglish ? "" : "Crew Members"]]
     .map(([role, label, labelEn]) => {
       const members = group.people.filter((person) => crewRole(person) === role);
       if (!members.length) return "";

@@ -119,8 +119,8 @@
       "person_order": "2",
       "name": "고도현",
       "name_en": "",
-      "role": "임원진",
-      "role_en": "Officers",
+      "role": "부회장",
+      "role_en": "Deputy Captains",
       "start_year": "",
       "end_year": "",
       "project": "",
@@ -207,8 +207,8 @@
       "person_order": "6",
       "name": "유하은",
       "name_en": "",
-      "role": "임원진",
-      "role_en": "Officers",
+      "role": "부회장",
+      "role_en": "Deputy Captains",
       "start_year": "",
       "end_year": "",
       "project": "",
@@ -251,8 +251,8 @@
       "person_order": "8",
       "name": "조윤희",
       "name_en": "",
-      "role": "임원진",
-      "role_en": "Officers",
+      "role": "부회장",
+      "role_en": "Deputy Captains",
       "start_year": "",
       "end_year": "",
       "project": "",
@@ -529,5 +529,5 @@
       "origin_key": "people-0024"
     }
   ],
-  "source_sha256": "b1376f20805a44acfcbb513a930a10d7e771d2f6bc7e2bac57ad309ab1c51478"
+  "source_sha256": "f13ac71689a16d77f4bfea439204664eaeae62cd54a0736cad2dc6a745290585"
 }
