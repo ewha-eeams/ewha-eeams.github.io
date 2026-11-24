@@ -119,8 +119,8 @@
       "person_order": "2",
       "name": "고도현",
       "name_en": "",
-      "role": "회원",
-      "role_en": "Crew",
+      "role": "임원진",
+      "role_en": "Chief Officer",
       "start_year": "",
       "end_year": "",
       "project": "",
@@ -207,8 +207,8 @@
       "person_order": "6",
       "name": "유하은",
       "name_en": "",
-      "role": "회원",
-      "role_en": "Crew",
+      "role": "임원진",
+      "role_en": "Chief Officer",
       "start_year": "",
       "end_year": "",
       "project": "",
@@ -251,8 +251,8 @@
       "person_order": "8",
       "name": "조윤희",
       "name_en": "",
-      "role": "회원",
-      "role_en": "Crew",
+      "role": "임원진",
+      "role_en": "Chief Officer",
       "start_year": "",
       "end_year": "",
       "project": "",
@@ -529,5 +529,5 @@
       "origin_key": "people-0024"
     }
   ],
-  "source_sha256": "817f735a7e6d777f946ad215bd9722192758fa72fe0c590166bb0943a3d04a73"
+  "source_sha256": "337f60634c2756cca92cd4782b9b5d953bb071d9fd88b019a9aa0307a6e03d35"
 }
